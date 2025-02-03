@@ -1,0 +1,70 @@
+name: barreled_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.6.1
+
+workspace:
+  - packages/barreled_annotation
+  - packages/barreled_generator
+  - tools/lints
+
+dev_dependencies:
+  melos: ^7.0.0-dev.7
+
+melos:
+  repository: https://github.com/jnnkmsr/barreled
+  sdkPath: auto
+  ide:
+    intellij:
+      enable: true
+      moduleNamePrefix: ''
+
+  command:
+    version:
+      branch: develop
+      includeScopes: false
+      workspaceChangelog: false
+      message: |
+        chore: automated versioning
+        
+        {new_package_versions}
+
+    bootstrap:
+      runPubGetInParallel: true
+      runPutGetOffline: false
+      enforceLockfile: false
+
+      environment:
+        sdk: ^3.6.1
+      dependencies:
+      dev_dependencies:
+        very_good_analysis: ^7.0.0
+
+  # Semantic prefixes and icons:
+  #   📦 build - Tasks related to compiling and building artifacts.
+  #   🧹 clean - Removing generated files, caches, and resetting the workspace.
+  #   🚀 deploy - CI/CD and publishing-related tasks.
+  #   🎨 format - Formatting code, enforcing style rules, and static analysis.
+  #   🏗️ generate - Code generation and boilerplate creation.
+  #   🏷️ release - Managing versions, releases, and changelogs.
+  #   📊 report - Generating reports and coverage metrics.
+  #   ⚙️ setup - Setup, initialization, and configuration.
+  #   🧪 test - Running unit, integration, and UI tests.
+  #   🛠️ tools - Other utility scripts not fitting elsewhere.
+  scripts:
+    clean:build_runner_cache:
+      description: |
+        🧹 Clean the `build_runner` cache for a selected package.
+      exec: |
+        dart run build_runner clean
+      packageFilters:
+        dependsOn: build_runner
+
+    generate:build_runner:
+      description: |
+        🏗️ Run `build_runner` for a selected package.
+      exec: |
+        dart run build_runner build -d
+      packageFilters:
+        dependsOn: build_runner
