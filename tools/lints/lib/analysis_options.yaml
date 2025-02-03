@@ -1,0 +1,27 @@
+# Shared static-analysis configuration for all barreled packages.
+#
+# Bases on the rules provided by the `very_good_analysis` package with some
+# custom changes.
+#
+# See:
+#  - https://dart.dev/tools/analysis
+#  - https://pub.dev/packages/very_good_analysis
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  errors:
+    document_ignores: ignore
+    lines_longer_than_80_chars: ignore
+    strict_raw_type: ignore
+
+  exclude:
+    - '**.g.dart'
+    - '**.freezed.dart'
+
+linter:
+  rules:
+    always_put_required_named_parameters_first: false
+    always_use_package_imports: true
+    flutter_style_todos: false
+    prefer_relative_imports: false
+    public_member_api_docs: false

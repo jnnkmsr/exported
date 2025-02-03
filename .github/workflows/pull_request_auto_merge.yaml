@@ -1,0 +1,44 @@
+name: >
+  🤖 Auto-merge pull request
+run-name: >
+  🤖 Auto-merge pull request #${{ github.event.pull_request.number }}
+
+# TODO: Approve pull request before merging.
+
+on:
+  pull_request:
+    types: [opened]
+    branches: [develop]
+
+jobs:
+  # Merges any automated pull request to `develop` opened by a CI bot.
+  merge:
+    name: Merge pull request
+    if: ${{ contains(fromJson(vars.BOT_ACTORS), github.actor) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: .
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          flutter: false
+          bot: true
+          bot-id: ${{ secrets.BOT_APP_ID }}
+          bot-name: ${{ secrets.BOT_APP_NAME }}
+          bot-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge pull request
+        uses: ./.github/actions/merge_pull_request
+        with:
+          pull-request-url: ${{ github.event.pull_request.html_url }}
+          repository: ${{ github.repository }}
+          github-token: ${{ env.GITHUB_TOKEN }}

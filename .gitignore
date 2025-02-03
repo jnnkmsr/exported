@@ -1,0 +1,119 @@
+### FLUTTER/DART RELATED ###
+# Flutter & Dart Tools
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/doc/api/  # Dart documentation output
+
+# Pubspec lock (for libraries, not apps)
+pubspec.lock
+pubspec_overrides.yaml
+
+# Generated Packages
+**/.packages.generated
+
+# Failures, Coverage and Test Reports
+**/failures/
+**/coverage/
+/.reports/coverage/
+/.reports/test/
+
+
+### PLATFORM-SPECIFIC BUILD FILES ###
+# General Build Outputs (applies to all apps and modules)
+**/build/
+!**/src/**/build
+
+# Android-specific (including multi-module apps)
+**/android/.gradle/
+**/android/captures/
+**/android/local.properties
+android/app/debug
+android/app/profile
+android/app/release
+
+# iOS/macOS-specific
+**/macos/**/Flutter/ephemeral/
+**/macos/**/Pods/
+**/macos/**/dgph
+**/macos/**/xcuserdata/
+**/ios/Flutter/.last_build_id
+
+# Windows-specific
+**/windows/flutter/ephemeral/
+**/windows/.vs/
+
+
+### IDE-SPECIFIC FILES ###
+# IntelliJ/Android Studio
+**/*.iml
+**/*.ipr
+**/*.iws
+**/.idea/
+**/.idea/libraries/
+**/.idea/runConfigurations/
+**/.idea/shelf/
+!**/.idea/copyright/
+!**/.idea/scopes/
+
+# Visual Studio
+**/*.suo
+**/*.user
+**/*.userosscache
+**/*.sln.docstates
+**/x64/
+**/x86/
+
+# VSCode
+**/.vscode/
+**/.settings/
+**/.classpath
+**/.project
+**/*.[Cc]ache
+!**/*.[Cc]ache/
+
+
+### OS-SPECIFIC FILES ###
+# macOS
+**/.DS_Store
+**/.AppleDouble
+**/.LSOverride
+**/__MACOSX/
+**/Icon\r
+
+# Windows
+**/Thumbs.db
+**/ehthumbs.db
+**/Desktop.ini
+**/$RECYCLE.BIN/
+
+
+### MISCELLANEOUS ###
+# Symbolication & Obfuscation
+app.*.symbols
+app.*.map.json
+
+# Environment & Secrets
+**/.env
+**/env.g.dart
+**/*.pem
+
+# Swap/temporary files
+**/*.swp
+**/*.log
+**/*.tmp
+**/*.class
+**/*.pyc
+
+# Version control leftovers
+**/.atom/
+**/.buildlog/
+**/.history
+**/.svn/
+**/migrate_working_dir/
+
+# Keep .gitkeep files
+!.gitkeep

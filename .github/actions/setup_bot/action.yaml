@@ -1,0 +1,49 @@
+name: >
+  Authenticate GitHub bot app
+description: >
+  Authenticates a GitHub bot app by creating an access token, exporting it as 
+  `GITHUB_TOKEN`, re-checking out the repository, and setting up credentials 
+  for bot-based commits.
+
+inputs:
+  app-id:
+    description: App ID of the GitHub bot app.
+    required: true
+  app-name:
+    description: Name of the GitHub bot app.
+    required: true
+  private-key:
+    description: Private key of the GitHub bot app.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Creates a GitHub App token for authenticating as the bot.
+    - name: Create GitHub app token
+      uses: actions/create-github-app-token@v1
+      id: create-token
+      with:
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.private-key }}
+
+    # Overwrites the `GITHUB_TOKEN` environment variable with the bot app token.
+    - name: Export GitHub app token
+      run: |
+        echo "GITHUB_TOKEN=${{ steps.create-token.outputs.token }}" >> $GITHUB_ENV
+      shell: bash
+
+    # Re-checks out the repository with the new token for bot authentication.
+    - name: Re-checkout repository
+      uses: actions/checkout@v4
+      with:
+        path: .
+        token: ${{ env.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    # Configures Git user details for commits made by the bot.
+    - name: Configure Git user
+      run: |
+        git config --global user.name "${{ inputs.app-name }}[bot]"
+        git config --global user.email "${{ inputs.app-name }}[bot]@users.noreply.github.com"
+      shell: bash

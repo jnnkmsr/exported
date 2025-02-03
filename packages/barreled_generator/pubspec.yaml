@@ -1,0 +1,14 @@
+name: barreled_generator
+description: Code generator for Dart-package barrel files.
+version: 0.1.0
+publish_to: none
+
+resolution: workspace
+
+environment:
+  sdk: ^3.6.1
+
+dependencies:
+
+dev_dependencies:
+  barreled_lints:

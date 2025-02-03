@@ -1,0 +1,56 @@
+name: >
+  Set up workflow environment
+description: >
+  Configures the environment for a GitHub Action workflow, setting up tokens,
+  GitHub bot authentication, and an optional Flutter environment.
+
+inputs:
+  flutter:
+    description: Whether to set up a Flutter environment.
+    required: false
+    default: false
+  bot:
+    description: Whether to authenticate as a GitHub bot app.
+    required: false
+    default: false
+  bot-id:
+    description: App ID of the GitHub bot app.
+    required: false
+    default: 
+  bot-name:
+    description: Name of the GitHub bot app for Git commits.
+    required: false
+    default: 
+  bot-key:
+    description: Private key of the GitHub bot app.
+    required: false
+    default:
+  github-token:
+    description: Default GitHub access token.
+    required: true
+    
+runs:
+  using: composite
+  steps:
+    # Sets up default tokens, which may be overwritten by bot authentication if
+    # enabled.
+    - name: Set up default environment variables
+      run: |
+        echo "GITHUB_TOKEN=${{ inputs.github-token }}" >> $GITHUB_ENV
+      shell: bash
+
+    # Configures GitHub Actions bot authentication if enabled, overwriting
+    # `env.GITHUB_TOKEN`.
+    - name: Authenticate the timeo-ci GitHub bot app
+      if: ${{ inputs.bot == 'true' }}
+      uses: ./.github/actions/setup_bot
+      with:
+        app-id: ${{ inputs.bot-id }}
+        app-name: ${{ inputs.bot-name }}
+        private-key: ${{ inputs.bot-key }}
+
+    # Initializes the Flutter environment if specified.
+    - name: Set up a Flutter environment
+      if: ${{ inputs.flutter == 'true' }}
+      uses: ./.github/actions/setup_flutter
+  
