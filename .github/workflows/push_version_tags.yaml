@@ -1,0 +1,42 @@
+name: >
+  🏷️ Push version tags
+run-name: >
+  🏷️ Push tags after automated versioning
+
+# TODO: Conditionally run for version-related PRs only.
+# TODO: Automatic GitHub release for `timeo` tags:
+#   https://github.com/softprops/action-gh-release
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  # Pushes version tags to the repository after an automated pull request has
+  # been auto-merged to `develop` by a CI bot.
+  push-tags:
+    name: Create and push version tags
+    if: ${{ contains(fromJson(vars.BOT_ACTORS), github.actor) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: .
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          flutter: true
+          bot: true
+          bot-id: ${{ secrets.BOT_APP_ID }}
+          bot-name: ${{ secrets.BOT_APP_NAME }}
+          bot-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push tags to the repository
+        uses: ./.github/actions/push_tags

@@ -1,0 +1,30 @@
+name: >
+  Set up a Flutter environment
+description: >
+  Sets up a Flutter environment for use in GitHub Actions, including setup of
+  `melos`.
+
+runs:
+  using: composite
+  steps:
+    # Installs the Flutter SDK, using the version specified in `pubspec.yaml`.
+    - name: Install Flutter SDK
+      uses: subosito/flutter-action@v2
+      with:
+        channel: stable
+        flutter-version-file: apps/timeo/pubspec.yaml
+        cache: true
+
+    # Adds the Dart CLI tools directory to `PATH` for global access.
+    - name: Add Dart pub-cache to path
+      run: |
+        echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+      shell: bash
+
+    # Activates the `melos` CLI and bootstraps project dependencies across all
+    # packages in the workspace.
+    - name: Set up Melos CLI
+      run: |
+        dart pub global activate melos
+        melos bootstrap
+      shell: bash

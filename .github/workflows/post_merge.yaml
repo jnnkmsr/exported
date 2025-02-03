@@ -1,0 +1,41 @@
+name: >
+  📦 Post-merge checks & versioning
+run-name: >
+  📦 Post-merge into `develop`
+description: >
+  Workflow triggered by a push to `develop`. Runs automated versioning of all
+  packages in the workspace and creates a PR with the new versions.
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  # Runs Melos versioning and creates a pull request with the new versions.
+  # Runs only if the workflow is not triggered by a CI bot.
+  version:
+    name: Automated versioning
+    if: ${{ !contains(fromJson(vars.BOT_ACTORS), github.actor) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: .
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          flutter: true
+          bot: true
+          bot-id: ${{ secrets.BOT_APP_ID }}
+          bot-name: ${{ secrets.BOT_APP_NAME }}
+          bot-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create automated-versioning PR
+        uses: ./.github/actions/version
