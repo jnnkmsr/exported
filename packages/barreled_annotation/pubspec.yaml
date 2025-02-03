@@ -9,6 +9,7 @@ environment:
   sdk: ^3.6.1
 
 dependencies:
+  meta: ^1.15.0
 
 dev_dependencies:
   barreled_lints:
