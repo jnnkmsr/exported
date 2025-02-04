@@ -1,4 +1,4 @@
-name: barreled_generator
+name: barreled
 description: Code generator for Dart-package barrel files.
 version: 0.1.0
 publish_to: none

@@ -5,8 +5,8 @@ environment:
   sdk: ^3.6.1
 
 workspace:
+  - packages/barreled
   - packages/barreled_annotation
-  - packages/barreled_generator
   - tools/lints
 
 dev_dependencies:

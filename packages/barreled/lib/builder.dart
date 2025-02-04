@@ -1,5 +1,5 @@
-import 'package:barreled_generator/src/builder/barreled_builder.dart';
-import 'package:barreled_generator/src/builder/barreled_exports_builder.dart';
+import 'package:barreled/src/builder/barreled_builder.dart';
+import 'package:barreled/src/builder/barreled_exports_builder.dart';
 import 'package:build/build.dart';
 
 /// Generates Dart barrel files from package elements and specified build

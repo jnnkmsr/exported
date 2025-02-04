@@ -14,14 +14,14 @@ targets:
 
 builders:
   barreled:
-    import: package:barreled_generator/builder.dart
+    import: package:barreled/builder.dart
     builder_factories: [ barreledBuilder ]
     build_extensions: { $package$: [ barreled.stub ] }
     auto_apply: dependents
     build_to: source
 
   barreled_exports:
-    import: package:barreled_generator/builder.dart
+    import: package:barreled/builder.dart
     builder_factories: [ barreledExportsBuilder ]
     build_extensions: { .dart: [ .barreled.json ] }
     auto_apply: dependents
