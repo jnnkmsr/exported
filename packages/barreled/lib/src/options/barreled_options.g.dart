@@ -7,10 +7,10 @@ part of 'barreled_options.dart';
 // **************************************************************************
 
 BarreledOptions _$BarreledOptionsFromJson(Map json) => BarreledOptions(
-      files: (json['barrel_files'] as List<dynamic>?)
+      files: (json['files'] as List<dynamic>?)
           ?.map((e) => BarrelFileOption.fromJson(e as Map))
           .toList(),
-      packageExports: (json['package_exports'] as List<dynamic>?)
-          ?.map((e) => PackageExportOption.fromJson(e as Map))
+      exports: (json['exports'] as List<dynamic>?)
+          ?.map((e) => ExportOption.fromJson(e as Map))
           .toList(),
     );

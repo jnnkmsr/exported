@@ -13,7 +13,7 @@ void main() {
         test('Treats null as the default file', () {
           sut = BarreledOptions.fromJson(const {});
           expect(sut.files, hasLength(1));
-          expect(sut.files.first.name, defaultFile.name);
+          expect(sut.files.first.file, defaultFile.file);
           expect(sut.files.first.dir, defaultFile.dir);
           expect(sut.files.first.tags, defaultFile.tags);
         });
@@ -21,7 +21,7 @@ void main() {
         test('Treats an empty list as the default file', () {
           sut = BarreledOptions.fromJson(const {BarreledOptions.filesKey: <Map>[]});
           expect(sut.files, hasLength(1));
-          expect(sut.files.first.name, defaultFile.name);
+          expect(sut.files.first.file, defaultFile.file);
           expect(sut.files.first.dir, defaultFile.dir);
           expect(sut.files.first.tags, defaultFile.tags);
         });
@@ -29,8 +29,8 @@ void main() {
         test('Parses a list of files', () {
           sut = BarreledOptions.fromJson(const {
             BarreledOptions.filesKey: [
-              {BarrelFileOption.nameKey: 'barrel_file1.dart'},
-              {BarrelFileOption.nameKey: 'barrel_file2.dart'},
+              {BarrelFileOption.fileKey: 'barrel_file1.dart'},
+              {BarrelFileOption.fileKey: 'barrel_file2.dart'},
             ],
           });
           expect(sut.files, hasLength(2));
@@ -39,8 +39,8 @@ void main() {
         test('Accepts equal file names with different paths', () {
           sut = BarreledOptions.fromJson(const {
             BarreledOptions.filesKey: [
-              {BarrelFileOption.nameKey: 'barrel_file.dart'},
-              {BarrelFileOption.nameKey: 'barrel_file.dart', 'dir': 'lib/folder'},
+              {BarrelFileOption.fileKey: 'barrel_file.dart'},
+              {BarrelFileOption.fileKey: 'barrel_file.dart', 'dir': 'lib/folder'},
             ],
           });
           expect(sut.files, hasLength(2));
@@ -52,8 +52,8 @@ void main() {
           expect(
             () => BarreledOptions.fromJson(const {
               BarreledOptions.filesKey: [
-                {BarrelFileOption.nameKey: 'barrel_file.dart'},
-                {BarrelFileOption.nameKey: 'barrel_file.dart'},
+                {BarrelFileOption.fileKey: 'barrel_file.dart'},
+                {BarrelFileOption.fileKey: 'barrel_file.dart'},
               ],
             }),
             throwsArgumentError,
@@ -64,7 +64,7 @@ void main() {
           expect(
             () => BarreledOptions.fromJson(const {
               BarreledOptions.filesKey: [
-                {BarrelFileOption.nameKey: 'lib/'},
+                {BarrelFileOption.fileKey: 'lib/'},
               ],
             }),
             throwsArgumentError,

@@ -1,6 +1,6 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
-import 'package:barreled/src/options/package_export_option.dart';
+import 'package:barreled/src/options/export_option.dart';
 import 'package:barreled_annotation/barreled_annotation.dart';
 import 'package:build/build.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -56,10 +56,10 @@ class BarrelExport implements Comparable<BarrelExport> {
     );
   }
 
-  /// Creates a [BarrelExport] from a [PackageExportOption].
-  factory BarrelExport.fromPackageExportOption(PackageExportOption option) {
+  /// Creates a [BarrelExport] from a [ExportOption].
+  factory BarrelExport.fromPackageExportOption(ExportOption option) {
     return BarrelExport(
-      uri: option.package,
+      uri: option.uri,
       show: option.show,
       hide: option.hide,
       tags: option.tags,

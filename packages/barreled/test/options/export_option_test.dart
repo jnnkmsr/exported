@@ -1,11 +1,11 @@
-import 'package:barreled/src/options/package_export_option.dart';
+import 'package:barreled/src/options/export_option.dart';
 import 'package:barreled/src/validation/export_uri_sanitizer.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('$PackageExportOption', () {
-    late PackageExportOption sut;
+  group('$ExportOption', () {
+    late ExportOption sut;
     late MockExportUriSanitizer mockUriSanitizer;
 
     setUp(() {
@@ -13,33 +13,33 @@ void main() {
       when(() => mockUriSanitizer.sanitize(any()))
           .thenAnswer((i) => i.positionalArguments.first as String);
 
-      PackageExportOption.packageSanitizer = mockUriSanitizer;
+      ExportOption.uriSanitizer = mockUriSanitizer;
     });
 
-    group('PackageExportOption()', () {
+    group('$ExportOption()', () {
       test('Sanitizes the uri', () {
-        sut = PackageExportOption(package: 'foo_bar');
+        sut = ExportOption(uri: 'foo_bar');
         verify(() => mockUriSanitizer.sanitize('foo_bar')).called(1);
       });
     });
 
-    group('PackageExportOption.fromJson()', () {
-      test('Creates a PackageExportOption from JSON', () {
-        sut = PackageExportOption.fromJson(const {
-          PackageExportOption.packageKey: 'foo_bar',
-          PackageExportOption.showKey: ['foo', 'bar'],
-          PackageExportOption.hideKey: ['baz', 'qux'],
-          PackageExportOption.tagsKey: ['tag1', 'tag2'],
+    group('$ExportOption.fromJson()', () {
+      test('Creates a $ExportOption from JSON', () {
+        sut = ExportOption.fromJson(const {
+          ExportOption.uriKey: 'foo_bar',
+          ExportOption.showKey: ['foo', 'bar'],
+          ExportOption.hideKey: ['baz', 'qux'],
+          ExportOption.tagsKey: ['tag1', 'tag2'],
         });
-        expect(sut.package, 'foo_bar');
+        expect(sut.uri, 'foo_bar');
         expect(sut.show, {'foo', 'bar'});
         expect(sut.hide, {'baz', 'qux'});
         expect(sut.tags, {'tag1', 'tag2'});
       });
 
       test('Sanitizes the uri', () {
-        sut = PackageExportOption.fromJson(const {
-          PackageExportOption.packageKey: 'foo_bar',
+        sut = ExportOption.fromJson(const {
+          ExportOption.uriKey: 'foo_bar',
         });
         verify(() => mockUriSanitizer.sanitize('foo_bar')).called(1);
       });

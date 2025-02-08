@@ -1,7 +1,7 @@
 import 'package:barreled/src/model/barrel_export.dart';
 import 'package:barreled/src/options/barrel_file_option.dart';
 import 'package:barreled/src/options/barreled_options.dart';
-import 'package:barreled/src/options/package_export_option.dart';
+import 'package:barreled/src/options/export_option.dart';
 import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
 
@@ -20,17 +20,17 @@ class BarrelFile {
   /// Initializes a set of [BarrelFile]s from the given [options].
   ///
   /// Converts each [BarrelFileOption] to a [BarrelFile] and adds a
-  /// [BarrelExport] for each [PackageExportOption] to all files that match the
+  /// [BarrelExport] for each [ExportOption] to all files that match the
   /// export's tags.
   static Set<BarrelFile> fromOptions(
     BarreledOptions options, {
     required String Function() defaultName,
   }) {
-    final packageExports = options.packageExports.map(BarrelExport.fromPackageExportOption);
+    final packageExports = options.exports.map(BarrelExport.fromPackageExportOption);
     return {
       for (final option in options.files)
         BarrelFile(
-          name: option.name ?? defaultName(),
+          name: option.file ?? defaultName(),
           dir: option.dir,
           tags: option.tags,
         )..addExports(packageExports),

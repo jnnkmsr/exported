@@ -9,49 +9,49 @@ void main() {
       group('Valid input', () {
         test('Accepts null', () {
           sut = BarrelFileOption.fromJson(const {});
-          expect(sut.name, isNull);
+          expect(sut.file, isNull);
         });
 
         test('Interprets an empty string as null', () {
           sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.nameKey: '',
+            BarrelFileOption.fileKey: '',
           });
-          expect(sut.name, isNull);
+          expect(sut.file, isNull);
         });
 
         test('Interprets whitespace only as null', () {
           sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.nameKey: '   ',
+            BarrelFileOption.fileKey: '   ',
           });
-          expect(sut.name, isNull);
+          expect(sut.file, isNull);
         });
 
         test('Takes a dart file name as specified', () {
           sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.nameKey: 'barrel_file.dart',
+            BarrelFileOption.fileKey: 'barrel_file.dart',
           });
-          expect(sut.name, 'barrel_file.dart');
+          expect(sut.file, 'barrel_file.dart');
         });
 
         test('Adds a .dart extension if not specified', () {
           sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.nameKey: 'barrel_file',
+            BarrelFileOption.fileKey: 'barrel_file',
           });
-          expect(sut.name, 'barrel_file.dart');
+          expect(sut.file, 'barrel_file.dart');
         });
 
         test('Trims leading and trailing whitespace', () {
           sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.nameKey: '  barrel_file  ',
+            BarrelFileOption.fileKey: '  barrel_file  ',
           });
-          expect(sut.name, 'barrel_file.dart');
+          expect(sut.file, 'barrel_file.dart');
         });
 
         test('Accepts a leading relative path', () {
           sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.nameKey: 'lib/barrel_file',
+            BarrelFileOption.fileKey: 'lib/barrel_file',
           });
-          expect(sut.name, 'barrel_file.dart');
+          expect(sut.file, 'barrel_file.dart');
         });
       });
 
@@ -59,7 +59,7 @@ void main() {
         test('Throws an ArgumentError if the extension is not .dart', () {
           expect(
             () => BarrelFileOption.fromJson(const {
-              BarrelFileOption.nameKey: 'barrel_file.txt',
+              BarrelFileOption.fileKey: 'barrel_file.txt',
             }),
             throwsArgumentError,
           );
@@ -68,7 +68,7 @@ void main() {
         test('Throws an ArgumentError if the input is only an extension', () {
           expect(
             () => BarrelFileOption.fromJson(
-              const {BarrelFileOption.nameKey: '.dart'},
+              const {BarrelFileOption.fileKey: '.dart'},
             ),
             throwsArgumentError,
           );
@@ -77,7 +77,7 @@ void main() {
         test('Throws an ArgumentError if the input is a directory', () {
           expect(
             () => BarrelFileOption.fromJson(
-              const {BarrelFileOption.nameKey: 'lib/barrel_file/'},
+              const {BarrelFileOption.fileKey: 'lib/barrel_file/'},
             ),
             throwsArgumentError,
           );
@@ -86,7 +86,7 @@ void main() {
         test('Throws an ArgumentError if the input is an absolute path', () {
           expect(
             () => BarrelFileOption.fromJson(
-              const {BarrelFileOption.nameKey: '/lib/barrel_file'},
+              const {BarrelFileOption.fileKey: '/lib/barrel_file'},
             ),
             throwsArgumentError,
           );
@@ -138,14 +138,14 @@ void main() {
 
         test('Takes any path from the name input if dir is not specified', () {
           sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.nameKey: 'lib/folder/barrel_file',
+            BarrelFileOption.fileKey: 'lib/folder/barrel_file',
           });
           expect(sut.dir, 'lib/folder');
         });
 
         test('Appends any path from the name input and normalizes the result', () {
           sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.nameKey: 'subfolder//barrel_file',
+            BarrelFileOption.fileKey: 'subfolder//barrel_file',
             BarrelFileOption.dirKey: 'lib/folder',
           });
           expect(sut.dir, 'lib/folder/subfolder');

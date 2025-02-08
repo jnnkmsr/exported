@@ -7,7 +7,7 @@ part of 'barrel_file_option.dart';
 // **************************************************************************
 
 BarrelFileOption _$BarrelFileOptionFromJson(Map json) => BarrelFileOption(
-      name: json['name'] as String?,
+      file: json['file'] as String?,
       dir: json['dir'] as String?,
       tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toSet(),
     );

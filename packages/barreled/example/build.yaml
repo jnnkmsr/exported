@@ -3,5 +3,5 @@ targets:
     builders:
       barreled:
         options:
-          package_exports:
-            - package: meta
+          exports:
+            - uri: meta

@@ -14,12 +14,12 @@ class BarrelFileOption {
   /// Internal constructor called by [BarrelFileOption.fromJson],
   @protected
   BarrelFileOption({
-    String? name,
+    String? file,
     String? dir,
     Set<String>? tags,
   }) {
-    final (sanitizedDir, sanitizedName) = _sanitizePath(dir, name);
-    this.name = sanitizedName;
+    final (sanitizedDir, sanitizedName) = _sanitizePath(dir, file);
+    this.file = sanitizedName;
     this.dir = sanitizedDir;
     this.tags = _sanitizeTags(tags);
   }
@@ -41,16 +41,16 @@ class BarrelFileOption {
   /// - the name is not a valid file name,
   /// - a file extension other than `.dart` is specified,
   /// - the name is an absolute path.
-  @JsonKey(name: nameKey)
-  late final String? name;
-  static const nameKey = 'name';
+  @JsonKey(name: fileKey)
+  late final String? file;
+  static const fileKey = 'file';
 
   /// The relative path to the directory within the package where the barrel
   /// file should be created.
   ///
   /// Input will be sanitized based on the following rules:
   /// - Leading and trailing whitespace will be trimmed.
-  /// - Any directory path in the [name] input will be appended.
+  /// - Any directory path in the [file] input will be appended.
   /// - The resulting path will be normalized.
   /// - If no directory is specified, the default directory `lib` will be used.
   ///

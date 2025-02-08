@@ -13,12 +13,12 @@ void main() {
         final options = BarreledOptions(
           files: [
             BarrelFileOption(
-              name: 'barrel_file1.dart',
+              file: 'barrel_file1.dart',
               dir: 'dir1',
               tags: const {'tag1'},
             ),
             BarrelFileOption(
-              name: 'barrel_file2.dart',
+              file: 'barrel_file2.dart',
               dir: 'dir2',
               tags: const {'tag2'},
             ),
