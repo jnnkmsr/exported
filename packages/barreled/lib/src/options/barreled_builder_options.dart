@@ -1,4 +1,4 @@
-import 'package:barreled/src/model/barrel_file_option.dart';
+import 'package:barreled/src/options//barrel_file_option.dart';
 import 'package:build/build.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
@@ -9,6 +9,7 @@ part 'barreled_builder_options.g.dart';
 /// Builder options for generating Dart barrel files.
 @JsonSerializable(createToJson: false)
 class BarreledBuilderOptions {
+  /// Internal constructor called by [BarreledBuilderOptions.fromJson],
   @protected
   BarreledBuilderOptions({
     List<BarrelFileOption>? files,
@@ -29,15 +30,16 @@ class BarreledBuilderOptions {
   /// The list of Dart barrel files to generate, specified in the `barrel_files`
   /// field of the builder options.
   ///
-  /// Empty lists are treated as `null`. Throws an [ArgumentError] if there are
-  /// duplicate file names.
+  /// Empty lists or null-input are replaced with the default barrel file.
+  ///
+  /// Throws an [ArgumentError] if there are duplicate file names.
   @JsonKey(name: 'barrel_files')
-  late final List<BarrelFileOption>? files;
+  late final List<BarrelFileOption> files;
 
   /// Sanitizes the input [files], treating empty input as `null` and validating
   /// that all file names are unique.
-  static List<BarrelFileOption>? _sanitizeFiles(List<BarrelFileOption>? files) {
-    if (files == null || files.isEmpty) return null;
+  static List<BarrelFileOption> _sanitizeFiles(List<BarrelFileOption>? files) {
+    if (files == null || files.isEmpty) return [BarrelFileOption()];
 
     final paths = <String>{};
     for (final file in files) {
@@ -46,7 +48,6 @@ class BarreledBuilderOptions {
         throw ArgumentError.value(files, 'files', 'Duplicate barrel file: $path');
       }
     }
-
     return files;
   }
 }

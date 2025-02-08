@@ -1,4 +1,4 @@
-import 'package:barreled/src/model/barrel_file_option.dart';
+import 'package:barreled/src/options/barrel_file_option.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -8,7 +8,7 @@ void main() {
     group('.name', () {
       group('Valid input', () {
         test('Accepts null', () {
-          sut = BarrelFileOption.fromJson({});
+          sut = BarrelFileOption.fromJson(const {});
           expect(sut.name, isNull);
         });
 
@@ -175,7 +175,7 @@ void main() {
 
     group('.tags', () {
       test('Accepts null', () {
-        sut = BarrelFileOption.fromJson({});
+        sut = BarrelFileOption.fromJson(const {});
         expect(sut.tags, isNull);
       });
 
@@ -186,28 +186,28 @@ void main() {
 
       test('Interprets a list of tags as a set', () {
         sut = BarrelFileOption.fromJson(const {
-          'tags': ['tag1', 'tag2']
+          'tags': ['tag1', 'tag2'],
         });
         expect(sut.tags, {'tag1', 'tag2'});
       });
 
       test('Trims leading and trailing whitespace', () {
         sut = BarrelFileOption.fromJson(const {
-          'tags': ['  tag1  ', '  tag2  ']
+          'tags': ['  tag1  ', '  tag2  '],
         });
         expect(sut.tags, {'tag1', 'tag2'});
       });
 
       test('Deduplicates trimmed tags', () {
         sut = BarrelFileOption.fromJson(const {
-          'tags': ['tag1', '  tag1  ']
+          'tags': ['tag1', '  tag1  '],
         });
         expect(sut.tags, {'tag1'});
       });
 
       test('Removes empty or blank tags', () {
         sut = BarrelFileOption.fromJson(const {
-          'tags': ['tag1', '', '  ']
+          'tags': ['tag1', '', '  '],
         });
         expect(sut.tags, {'tag1'});
       });

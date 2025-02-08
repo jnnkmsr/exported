@@ -1,5 +1,5 @@
-import 'package:barreled/src/model/barrel_file_option.dart';
-import 'package:barreled/src/model/barreled_builder_options.dart';
+import 'package:barreled/src/options/barrel_file_option.dart';
+import 'package:barreled/src/options/barreled_builder_options.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -8,27 +8,32 @@ void main() {
 
     group('.files', () {
       group('Valid input', () {
-        test('Accepts null', () {
+        final defaultFile = BarrelFileOption();
+
+        test('Treats null as the default file', () {
           sut = BarreledBuilderOptions.fromJson({});
-          expect(sut.files, isNull);
+          expect(sut.files, hasLength(1));
+          expect(sut.files.first.name, defaultFile.name);
+          expect(sut.files.first.dir, defaultFile.dir);
+          expect(sut.files.first.tags, defaultFile.tags);
         });
 
-        test('Treats an empty list as null', () {
+        test('Treats an empty list as the default file', () {
           sut = BarreledBuilderOptions.fromJson({'barrel_files': <Map>[]});
-          expect(sut.files, isNull);
+          expect(sut.files, hasLength(1));
+          expect(sut.files.first.name, defaultFile.name);
+          expect(sut.files.first.dir, defaultFile.dir);
+          expect(sut.files.first.tags, defaultFile.tags);
         });
 
-        test('Parses a set of files', () {
+        test('Parses a list of files', () {
           sut = BarreledBuilderOptions.fromJson({
             'barrel_files': [
               {'name': 'barrel_file1.dart'},
               {'name': 'barrel_file2.dart'},
             ],
           });
-          expect(sut.files, [
-            BarrelFileOption(name: 'barrel_file1.dart', dir: 'lib'),
-            BarrelFileOption(name: 'barrel_file2.dart', dir: 'lib'),
-          ]);
+          expect(sut.files, hasLength(2));
         });
 
         test('Accepts equal file names with different paths', () {
@@ -38,10 +43,7 @@ void main() {
               {'name': 'barrel_file.dart', 'dir': 'lib/folder'},
             ],
           });
-          expect(sut.files, [
-            BarrelFileOption(name: 'barrel_file.dart', dir: 'lib'),
-            BarrelFileOption(name: 'barrel_file.dart', dir: 'lib/folder'),
-          ]);
+          expect(sut.files, hasLength(2));
         });
       });
 
@@ -52,6 +54,17 @@ void main() {
               'barrel_files': [
                 {'name': 'barrel_file.dart'},
                 {'name': 'barrel_file.dart'},
+              ],
+            }),
+            throwsArgumentError,
+          );
+        });
+
+        test('Throws an ArgumentError if there is invalid input', () {
+          expect(
+            () => BarreledBuilderOptions.fromJson({
+              'barrel_files': [
+                {'name': 'lib/'},
               ],
             }),
             throwsArgumentError,

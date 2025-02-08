@@ -11,6 +11,7 @@ part 'barrel_file_option.g.dart';
 @JsonSerializable(createToJson: false)
 @immutable
 class BarrelFileOption {
+  /// Internal constructor called by [BarrelFileOption.fromJson],
   @protected
   BarrelFileOption({
     String? name,
@@ -128,15 +129,4 @@ class BarrelFileOption {
 
     return sanitizedTags.toSet();
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is BarrelFileOption &&
-          runtimeType == other.runtimeType &&
-          name == other.name &&
-          dir == other.dir;
-
-  @override
-  int get hashCode => name.hashCode ^ dir.hashCode;
 }
