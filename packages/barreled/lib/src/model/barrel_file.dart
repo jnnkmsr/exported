@@ -63,7 +63,7 @@ class BarrelFile {
   void addExport(BarrelExport export) {
     if (!_shouldAddExport(export)) return;
     _exportsByLibrary.update(
-      export.library,
+      export.uri,
       (existing) => existing.merge(export),
       ifAbsent: () {
         _exports.add(export);

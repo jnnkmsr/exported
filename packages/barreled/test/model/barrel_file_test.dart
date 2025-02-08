@@ -48,7 +48,7 @@ void main() {
           tags: {'tag1'},
         );
         const export = BarrelExport(
-          library: 'library',
+          uri: 'library',
           tags: {'tag1', 'tag2'},
         );
 
@@ -64,7 +64,7 @@ void main() {
           tags: {'tag1'},
         );
         const export = BarrelExport(
-          library: 'library',
+          uri: 'library',
           tags: {'tag2'},
         );
 
@@ -79,7 +79,7 @@ void main() {
           dir: 'lib',
         );
         const export = BarrelExport(
-          library: 'library',
+          uri: 'library',
           tags: {'tag1'},
         );
 
@@ -94,12 +94,12 @@ void main() {
           dir: 'lib',
         );
         const export1 = BarrelExport(
-          library: 'library',
+          uri: 'library',
           show: {'show1'},
           hide: {'hide1'},
         );
         const export2 = BarrelExport(
-          library: 'library',
+          uri: 'library',
           show: {'show2'},
           hide: {'hide2'},
         );
@@ -110,7 +110,7 @@ void main() {
           ..addExport(export2);
 
         expect(sut.exports, hasLength(1));
-        expect(sut.exports.first.library, mergedExport.library);
+        expect(sut.exports.first.uri, mergedExport.uri);
         expect(sut.exports.first.show, mergedExport.show);
         expect(sut.exports.first.hide, mergedExport.hide);
       });

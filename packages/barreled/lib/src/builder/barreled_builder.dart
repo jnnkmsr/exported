@@ -71,7 +71,7 @@ class BarreledBuilder extends Builder {
 
 extension on DartWriter {
   void addExport(BarrelExport export) {
-    addLine("export '${export.library}'");
+    addLine("export '${export.uri}'");
     if (export.show.isNotEmpty) {
       addLine('show ${export.show.sorted().join(',')}');
     }

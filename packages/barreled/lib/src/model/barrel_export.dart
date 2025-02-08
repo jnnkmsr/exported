@@ -15,17 +15,17 @@ part 'barrel_export.g.dart';
 @JsonSerializable()
 @immutable
 class BarrelExport implements Comparable<BarrelExport> {
-  /// Creates a [BarrelExport] with the given [library], [show], [hide] and
+  /// Creates a [BarrelExport] with the given [uri], [show], [hide] and
   /// [tags].
   const BarrelExport({
-    required this.library,
+    required this.uri,
     this.show = const {},
     this.hide = const {},
     this.tags = const {},
   });
 
   /// Creates a [BarrelExport] from an annotated [element] with
-  /// - the [library] given by the URI of the current [buildStep]'s input,
+  /// - the [uri] given by the URI of the current [buildStep]'s input,
   /// - the [show] filter containing the [element]'s name, and
   /// - [tags] read from the [Barreled.tags] annotation input.
   ///
@@ -46,7 +46,7 @@ class BarrelExport implements Comparable<BarrelExport> {
     final tagReader = annotation.read('tags');
 
     return BarrelExport(
-      library: buildStep.inputId.uri.toString(),
+      uri: buildStep.inputId.uri.toString(),
       show: {shownName},
       tags: (tagReader.isSet ? tagReader.setValue : <DartObject>{})
           .map((tag) => tag.toStringValue()!)
@@ -60,33 +60,41 @@ class BarrelExport implements Comparable<BarrelExport> {
   /// The URI of the library being exported.
   ///
   /// Must be a valid `export` directive URI.
-  final String library;
+  @JsonKey(name: uriKey)
+  final String uri;
+  static const uriKey = 'library';
 
   /// The set of element names in the `show` statement of the `export`.
   ///
   /// If empty, no `show` filter is applied.
+  @JsonKey(name: showKey)
   final Set<String> show;
+  static const showKey = 'show';
 
   /// The set of element names in the `hide` statement of the `export`.
   ///
   /// If empty, no `hide` filter is applied.
+  @JsonKey(name: hideKey)
   final Set<String> hide;
+  static const hideKey = 'hide';
 
   /// The set of tags for selectively including this export in barrel files.
   ///
   /// If empty, this export is included in all barrel files.
+  @JsonKey(name: tagsKey)
   final Set<String> tags;
+  static const tagsKey = 'tags';
 
   /// Merges this [BarrelExport] with [other] by combining their `show` and
   /// `hide` filters.
   BarrelExport merge(BarrelExport other) {
-    if (library != other.library) {
+    if (uri != other.uri) {
       throw ArgumentError(
-        'Cannot merge exports of different libraries: $library and ${other.library}',
+        'Cannot merge exports of different libraries: $uri and ${other.uri}',
       );
     }
     return BarrelExport(
-      library: library,
+      uri: uri,
       show: show.union(other.show),
       hide: hide.union(other.hide),
       tags: tags,
@@ -97,5 +105,5 @@ class BarrelExport implements Comparable<BarrelExport> {
   Map<String, dynamic> toJson() => _$BarrelExportToJson(this);
 
   @override
-  int compareTo(BarrelExport other) => library.compareTo(other.library);
+  int compareTo(BarrelExport other) => uri.compareTo(other.uri);
 }
