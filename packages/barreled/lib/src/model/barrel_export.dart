@@ -1,6 +1,13 @@
+import 'package:analyzer/dart/constant/value.dart';
+import 'package:analyzer/dart/element/element.dart';
+import 'package:barreled_annotation/barreled_annotation.dart';
+import 'package:build/build.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:source_gen/source_gen.dart';
 
 part 'barrel_export.g.dart';
+
+// TODO: Unit test `BarrelExport.fromAnnotatedElement`.
 
 /// Represents an `export` directive within a Dart barrel file.
 @JsonSerializable()
@@ -13,6 +20,36 @@ class BarrelExport {
     this.hide = const {},
     this.tags = const {},
   });
+
+  /// Creates a [BarrelExport] from an annotated [element] with
+  /// - the [library] given by the URI of the current [buildStep]'s input,
+  /// - the [show] filter containing the [element]'s name, and
+  /// - [tags] read from the [Barreled.tags] annotation input.
+  ///
+  /// Throws an [InvalidGenerationSourceError] if the annotated [element] is
+  /// an invalidly annotated unnamed element.
+  factory BarrelExport.fromAnnotatedElement(
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) {
+    final shownName = element.name;
+    if (shownName == null || shownName.isEmpty) {
+      throw InvalidGenerationSourceError(
+        '`@$barreled` is used on an unnamed element',
+        element: element,
+      );
+    }
+    final tagReader = annotation.read('tags');
+
+    return BarrelExport(
+      library: buildStep.inputId.uri.toString(),
+      show: {shownName},
+      tags: (tagReader.isSet ? tagReader.setValue : <DartObject>{})
+          .map((tag) => tag.toStringValue()!)
+          .toSet(),
+    );
+  }
 
   /// Creates a [BarrelExport] from a JSON (or YAML) map.
   factory BarrelExport.fromJson(Map json) => _$BarrelExportFromJson(json);
