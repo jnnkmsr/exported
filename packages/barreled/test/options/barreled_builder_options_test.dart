@@ -11,7 +11,7 @@ void main() {
         final defaultFile = BarrelFileOption();
 
         test('Treats null as the default file', () {
-          sut = BarreledOptions.fromJson({});
+          sut = BarreledOptions.fromJson(const {});
           expect(sut.files, hasLength(1));
           expect(sut.files.first.name, defaultFile.name);
           expect(sut.files.first.dir, defaultFile.dir);
@@ -19,7 +19,7 @@ void main() {
         });
 
         test('Treats an empty list as the default file', () {
-          sut = BarreledOptions.fromJson({'barrel_files': <Map>[]});
+          sut = BarreledOptions.fromJson(const {BarreledOptions.filesKey: <Map>[]});
           expect(sut.files, hasLength(1));
           expect(sut.files.first.name, defaultFile.name);
           expect(sut.files.first.dir, defaultFile.dir);
@@ -27,20 +27,20 @@ void main() {
         });
 
         test('Parses a list of files', () {
-          sut = BarreledOptions.fromJson({
-            'barrel_files': [
-              {'name': 'barrel_file1.dart'},
-              {'name': 'barrel_file2.dart'},
+          sut = BarreledOptions.fromJson(const {
+            BarreledOptions.filesKey: [
+              {BarrelFileOption.nameKey: 'barrel_file1.dart'},
+              {BarrelFileOption.nameKey: 'barrel_file2.dart'},
             ],
           });
           expect(sut.files, hasLength(2));
         });
 
         test('Accepts equal file names with different paths', () {
-          sut = BarreledOptions.fromJson({
-            'barrel_files': [
-              {'name': 'barrel_file.dart'},
-              {'name': 'barrel_file.dart', 'dir': 'lib/folder'},
+          sut = BarreledOptions.fromJson(const {
+            BarreledOptions.filesKey: [
+              {BarrelFileOption.nameKey: 'barrel_file.dart'},
+              {BarrelFileOption.nameKey: 'barrel_file.dart', 'dir': 'lib/folder'},
             ],
           });
           expect(sut.files, hasLength(2));
@@ -50,10 +50,10 @@ void main() {
       group('Invalid input', () {
         test('Throws an ArgumentError if there are duplicate file paths', () {
           expect(
-            () => BarreledOptions.fromJson({
-              'barrel_files': [
-                {'name': 'barrel_file.dart'},
-                {'name': 'barrel_file.dart'},
+            () => BarreledOptions.fromJson(const {
+              BarreledOptions.filesKey: [
+                {BarrelFileOption.nameKey: 'barrel_file.dart'},
+                {BarrelFileOption.nameKey: 'barrel_file.dart'},
               ],
             }),
             throwsArgumentError,
@@ -62,9 +62,9 @@ void main() {
 
         test('Throws an ArgumentError if there is invalid input', () {
           expect(
-            () => BarreledOptions.fromJson({
-              'barrel_files': [
-                {'name': 'lib/'},
+            () => BarreledOptions.fromJson(const {
+              BarreledOptions.filesKey: [
+                {BarrelFileOption.nameKey: 'lib/'},
               ],
             }),
             throwsArgumentError,

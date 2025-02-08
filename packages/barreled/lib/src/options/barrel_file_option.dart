@@ -41,7 +41,9 @@ class BarrelFileOption {
   /// - the name is not a valid file name,
   /// - a file extension other than `.dart` is specified,
   /// - the name is an absolute path.
+  @JsonKey(name: nameKey)
   late final String? name;
+  static const nameKey = 'name';
 
   /// The relative path to the directory within the package where the barrel
   /// file should be created.
@@ -55,7 +57,9 @@ class BarrelFileOption {
   /// Throws an [ArgumentError] if
   /// - the directory path is not relative,
   /// - the path points to a file instead of a directory.
+  @JsonKey(name: dirKey)
   late final String dir;
+  static const dirKey = 'dir';
 
   /// The set of tags for selectively including exports in this barrel file.
   ///
@@ -64,7 +68,9 @@ class BarrelFileOption {
   /// - Empty or blank tags will be removed.
   /// - Duplicate tags will be removed.
   /// - If the resulting set is empty, it will be treated as `null`.
+  @JsonKey(name: tagsKey)
   late final Set<String>? tags;
+  static const tagsKey = 'tags';
 
   /// The default [dir] if no directory is specified.
   static const _defaultDir = 'lib';

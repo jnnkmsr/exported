@@ -34,8 +34,9 @@ class BarreledOptions {
   /// Empty lists or null-input are replaced with the default barrel file.
   ///
   /// Throws an [ArgumentError] if there are duplicate file names.
-  @JsonKey(name: 'barrel_files')
+  @JsonKey(name: filesKey)
   late final List<BarrelFileOption> files;
+  static const filesKey = 'barrel_files';
 
   /// Sanitizes the input [files], treating empty input as `null` and validating
   /// that all file names are unique.
