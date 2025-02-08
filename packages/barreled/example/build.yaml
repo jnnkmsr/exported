@@ -4,4 +4,4 @@ targets:
       barreled:
         options:
           package_exports:
-            - package: package:meta/meta.dart
+            - package: meta

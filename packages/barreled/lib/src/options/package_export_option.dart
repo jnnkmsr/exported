@@ -1,11 +1,12 @@
+import 'package:barreled/src/validation/export_uri_sanitizer.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
 part 'package_export_option.g.dart';
 
-// TODO: Sanitize package input.
 // TODO: Allow simple string lists of URIs?
-// TODO: Unit test `PackageExportOption`.
+// TODO: Sanitize [show]/[hide]/[tags].
+// TODO: Rename [PackageExportOption] to `ExportOption` and [package] input to `uri`.
 
 /// Representation of an `package_exports` option in the `barreled` builder
 /// configuration.
@@ -16,12 +17,14 @@ part 'package_export_option.g.dart';
 class PackageExportOption {
   /// Internal constructor called by [PackageExportOption.fromJson],
   @protected
-  const PackageExportOption({
-    required this.package,
+  PackageExportOption({
+    required String package,
     this.show = const {},
     this.hide = const {},
     this.tags = const {},
-  });
+  }) {
+    this.package = packageSanitizer.sanitize(package);
+  }
 
   /// Creates a [PackageExportOption] from a JSON (or YAML) map.
   ///
@@ -39,7 +42,7 @@ class PackageExportOption {
   /// Throws an [ArgumentError] if the package is not a valid package name or
   /// library URI.
   @JsonKey(name: packageKey)
-  final String package;
+  late final String package;
   static const packageKey = 'package';
 
   /// The set of element names in the `show` statement of the `export`.
@@ -62,4 +65,7 @@ class PackageExportOption {
   @JsonKey(name: tagsKey)
   final Set<String> tags;
   static const tagsKey = 'tags';
+
+  @visibleForTesting
+  static ExportUriSanitizer packageSanitizer = const ExportUriSanitizer(inputName: packageKey);
 }
