@@ -9,11 +9,12 @@ import 'package:source_gen/source_gen.dart';
 part 'barrel_export.g.dart';
 
 // TODO: Unit test `BarrelExport.fromAnnotatedElement`.
+// TODO: Unit test `BarrelExport.compareTo()`.
 
 /// Represents an `export` directive within a Dart barrel file.
 @JsonSerializable()
 @immutable
-class BarrelExport {
+class BarrelExport implements Comparable<BarrelExport> {
   /// Creates a [BarrelExport] with the given [library], [show], [hide] and
   /// [tags].
   const BarrelExport({
@@ -94,4 +95,7 @@ class BarrelExport {
 
   /// Converts this [BarrelExport] to a JSON map.
   Map<String, dynamic> toJson() => _$BarrelExportToJson(this);
+
+  @override
+  int compareTo(BarrelExport other) => library.compareTo(other.library);
 }

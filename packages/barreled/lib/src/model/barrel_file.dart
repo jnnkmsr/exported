@@ -1,7 +1,10 @@
 import 'package:barreled/src/model/barrel_export.dart';
 import 'package:barreled/src/options/barrel_file_option.dart';
 import 'package:barreled/src/options/barreled_options.dart';
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
+
+// TODO: Unit test sorting of `exports`.
 
 /// Represents a barrel file with an editable list of exports.
 class BarrelFile {
@@ -46,7 +49,8 @@ class BarrelFile {
   String get path => p.join(dir, name);
 
   /// Returns the exports in this file.
-  Set<BarrelExport> get exports => _exportsByLibrary.values.toSet();
+  List<BarrelExport> get exports => _exports.sorted();
+  late final Set<BarrelExport> _exports = {};
   late final Map<String, BarrelExport> _exportsByLibrary = {};
 
   /// Adds an [export] to this file if it matches the file's [tags].
@@ -61,7 +65,10 @@ class BarrelFile {
     _exportsByLibrary.update(
       export.library,
       (existing) => existing.merge(export),
-      ifAbsent: () => export,
+      ifAbsent: () {
+        _exports.add(export);
+        return export;
+      },
     );
   }
 
