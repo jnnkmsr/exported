@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:analyzer/dart/element/element.dart';
+import 'package:barreled/src/builder/barreled_builder.dart';
 import 'package:barreled/src/model/barrel_export.dart';
 import 'package:barreled/src/util/build_extensions.dart';
 import 'package:barreled_annotation/barreled_annotation.dart';
@@ -9,16 +10,12 @@ import 'package:build/build.dart';
 import 'package:meta/meta.dart';
 import 'package:source_gen/source_gen.dart';
 
+// TODO: Builder test for `BarreledExportsBuilder`.
+
 class BarreledExportsBuilder extends Builder {
-  BarreledExportsBuilder({
-    required String partId,
-  }) : _outputExtension = '.$partId.json';
-
-  final String _outputExtension;
-
   @override
   late final Map<String, List<String>> buildExtensions = {
-    '.dart': [_outputExtension],
+    '.dart': [BarreledBuilder.jsonAssetExtension],
   };
 
   late final _generator = _BarreledExportsGenerator();
@@ -31,7 +28,7 @@ class BarreledExportsBuilder extends Builder {
     if (output.isEmpty) return;
 
     await buildStep.writeAsString(
-      buildStep.inputId.changeExtension(_outputExtension),
+      buildStep.inputId.changeExtension(BarreledBuilder.jsonAssetExtension),
       sanitizeJson(output),
     );
   }

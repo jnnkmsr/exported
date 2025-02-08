@@ -1,9 +1,7 @@
 import 'package:barreled/src/model/barrel_export.dart';
 import 'package:barreled/src/options/barrel_file_option.dart';
-import 'package:barreled/src/options/barreled_builder_options.dart';
+import 'package:barreled/src/options/barreled_options.dart';
 import 'package:path/path.dart' as p;
-
-// TODO: Unit test `BarrelFile`.
 
 /// Represents a barrel file with an editable list of exports.
 class BarrelFile {
@@ -20,7 +18,7 @@ class BarrelFile {
   /// [BarrelExport] for each [PackageExportOption] to all files that match the
   /// export's tags.
   static Set<BarrelFile> fromOptions(
-    BarreledBuilderOptions options, {
+    BarreledOptions options, {
     required String Function() defaultName,
   }) {
     return {
@@ -81,9 +79,11 @@ extension BarrelFileIterableExtension on Iterable<BarrelFile> {
   ///
   /// The export will be added to all file that have no `tags` or have at least
   /// one tag in common with the [export]'s `tags`.
-  void addExport(BarrelExport export) {
+  void addExports(Iterable<BarrelExport> exports) {
     for (final file in this) {
-      file.addExport(export);
+      for (final export in exports) {
+        file.addExport(export);
+      }
     }
   }
 

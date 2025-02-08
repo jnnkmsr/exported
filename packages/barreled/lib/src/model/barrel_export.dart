@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:barreled_annotation/barreled_annotation.dart';
 import 'package:build/build.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:source_gen/source_gen.dart';
 
 part 'barrel_export.g.dart';
@@ -11,6 +12,7 @@ part 'barrel_export.g.dart';
 
 /// Represents an `export` directive within a Dart barrel file.
 @JsonSerializable()
+@immutable
 class BarrelExport {
   /// Creates a [BarrelExport] with the given [library], [show], [hide] and
   /// [tags].
