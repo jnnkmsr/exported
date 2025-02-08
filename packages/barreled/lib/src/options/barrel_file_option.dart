@@ -4,7 +4,7 @@ import 'package:path/path.dart' as p;
 
 part 'barrel_file_option.g.dart';
 
-/// Representation of the `barrel_file` option of the `barreled` builder
+/// Representation of a `barrel_files` option in the `barreled` builder
 /// configuration.
 ///
 /// Handles conversion from JSON and validates and sanitizes input.

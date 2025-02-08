@@ -1,10 +1,12 @@
 import 'package:barreled/src/model/barrel_export.dart';
 import 'package:barreled/src/options/barrel_file_option.dart';
 import 'package:barreled/src/options/barreled_options.dart';
+import 'package:barreled/src/options/package_export_option.dart';
 import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
 
 // TODO: Unit test sorting of `exports`.
+// TODO: Unit test extension methods.
 
 /// Represents a barrel file with an editable list of exports.
 class BarrelFile {
@@ -24,13 +26,14 @@ class BarrelFile {
     BarreledOptions options, {
     required String Function() defaultName,
   }) {
+    final packageExports = options.packageExports.map(BarrelExport.fromPackageExportOption);
     return {
       for (final option in options.files)
         BarrelFile(
           name: option.name ?? defaultName(),
           dir: option.dir,
           tags: option.tags,
-        ),
+        )..addExports(packageExports),
     };
   }
 
@@ -58,7 +61,7 @@ class BarrelFile {
   /// The export will be added if this file has no [tags] or if the export has
   /// at least on tag in common with this file's [tags].
   ///
-  /// If an export with the same library already exists, it is merged with the
+  /// If an export with the same URI already exists, it is merged with the new
   /// new [export] by combining the `show` and `hide` filters.
   void addExport(BarrelExport export) {
     if (!_shouldAddExport(export)) return;
@@ -72,25 +75,38 @@ class BarrelFile {
     );
   }
 
+  /// Adds all [exports] with matching tags to this file.
+  /// - [exports] without tags are always be added.
+  /// - [exports] with tags are added if they have at least one matching tag.
+  ///
+  /// If an export with the same URI already exists, it is merged with the new
+  /// export by combining the `show` and `hide` filters.
+  void addExports(Iterable<BarrelExport> exports) {
+    for (final export in exports) {
+      addExport(export);
+    }
+  }
+
   /// Whether this file should include the given [export] based on its tags.
   ///
   /// Returns `true` if this file has no [tags] or if the export has at least
   /// one tag in common with this file's [tags].
   bool _shouldAddExport(BarrelExport export) {
-    return tags == null || tags!.isEmpty || tags!.intersection(export.tags).isNotEmpty;
+    return tags == null ||
+        tags!.isEmpty ||
+        export.tags.isEmpty ||
+        tags!.intersection(export.tags).isNotEmpty;
   }
 }
 
 extension BarrelFileIterableExtension on Iterable<BarrelFile> {
-  /// Adds an [export] to all files that match the [export]'s tags.
-  ///
-  /// The export will be added to all file that have no `tags` or have at least
-  /// one tag in common with the [export]'s `tags`.
+  /// Adds the [exports] to all files with matching tags.
+  /// - [exports] without tags will be added to all files.
+  /// - [exports] with tags will be added to all files with at least one
+  ///   matching tag and to all files without tags.
   void addExports(Iterable<BarrelExport> exports) {
     for (final file in this) {
-      for (final export in exports) {
-        file.addExport(export);
-      }
+      file.addExports(exports);
     }
   }
 

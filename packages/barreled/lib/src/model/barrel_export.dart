@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:barreled/src/options/package_export_option.dart';
 import 'package:barreled_annotation/barreled_annotation.dart';
 import 'package:build/build.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -9,6 +10,7 @@ import 'package:source_gen/source_gen.dart';
 part 'barrel_export.g.dart';
 
 // TODO: Unit test `BarrelExport.fromAnnotatedElement`.
+// TODO: Unit test `BarrelExport.fromPackageExportOption`.
 // TODO: Unit test `BarrelExport.compareTo()`.
 
 /// Represents an `export` directive within a Dart barrel file.
@@ -51,6 +53,16 @@ class BarrelExport implements Comparable<BarrelExport> {
       tags: (tagReader.isSet ? tagReader.setValue : <DartObject>{})
           .map((tag) => tag.toStringValue()!)
           .toSet(),
+    );
+  }
+
+  /// Creates a [BarrelExport] from a [PackageExportOption].
+  factory BarrelExport.fromPackageExportOption(PackageExportOption option) {
+    return BarrelExport(
+      uri: option.package,
+      show: option.show,
+      hide: option.hide,
+      tags: option.tags,
     );
   }
 

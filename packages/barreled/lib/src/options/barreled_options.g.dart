@@ -10,4 +10,7 @@ BarreledOptions _$BarreledOptionsFromJson(Map json) => BarreledOptions(
       files: (json['barrel_files'] as List<dynamic>?)
           ?.map((e) => BarrelFileOption.fromJson(e as Map))
           .toList(),
+      packageExports: (json['package_exports'] as List<dynamic>?)
+          ?.map((e) => PackageExportOption.fromJson(e as Map))
+          .toList(),
     );

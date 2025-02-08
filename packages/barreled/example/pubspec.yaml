@@ -10,6 +10,7 @@ environment:
 
 dependencies:
   barreled_annotation:
+  meta: ^1.15.0
 
 dev_dependencies:
   barreled:

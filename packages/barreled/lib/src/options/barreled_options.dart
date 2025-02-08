@@ -1,10 +1,14 @@
 import 'package:barreled/src/options/barrel_file_option.dart';
+import 'package:barreled/src/options/package_export_option.dart';
 import 'package:build/build.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 part 'barreled_options.g.dart';
+
+// TODO: Unit test `BarreledOptions.packageExports`.
+// TODO: Check for duplicate package exports?
 
 /// Builder options for generating Dart barrel files.
 @JsonSerializable(createToJson: false)
@@ -14,7 +18,9 @@ class BarreledOptions {
   @protected
   BarreledOptions({
     List<BarrelFileOption>? files,
-  }) : files = _sanitizeFiles(files);
+    List<PackageExportOption>? packageExports,
+  })  : files = _sanitizeFiles(files),
+        packageExports = _sanitizePackageExports(packageExports);
 
   /// Creates [BarreledOptions] parsed from the given builder [options].
   ///
@@ -38,6 +44,13 @@ class BarreledOptions {
   late final List<BarrelFileOption> files;
   static const filesKey = 'barrel_files';
 
+  /// The list of package exports to include in the generated barrel files,
+  /// specified in the `package_exports` field of the builder options.
+  // TODO: Add documentation.
+  @JsonKey(name: packageExportsKey)
+  late final List<PackageExportOption> packageExports;
+  static const packageExportsKey = 'package_exports';
+
   /// Sanitizes the input [files], treating empty input as `null` and validating
   /// that all file names are unique.
   static List<BarrelFileOption> _sanitizeFiles(List<BarrelFileOption>? files) {
@@ -51,5 +64,13 @@ class BarreledOptions {
       }
     }
     return files;
+  }
+
+  /// Sanitizes the input [packageExports], treating `null` input as an empty
+  /// list.
+  static List<PackageExportOption> _sanitizePackageExports(
+    List<PackageExportOption>? packageExports,
+  ) {
+    return packageExports ?? [];
   }
 }

@@ -1,13 +1,14 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'barrel_export.dart';
+part of 'package_export_option.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-BarrelExport _$BarrelExportFromJson(Map json) => BarrelExport(
-      uri: json['library'] as String,
+PackageExportOption _$PackageExportOptionFromJson(Map json) =>
+    PackageExportOption(
+      package: json['package'] as String,
       show: (json['show'] as List<dynamic>?)?.map((e) => e as String).toSet() ??
           const {},
       hide: (json['hide'] as List<dynamic>?)?.map((e) => e as String).toSet() ??
@@ -15,11 +16,3 @@ BarrelExport _$BarrelExportFromJson(Map json) => BarrelExport(
       tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toSet() ??
           const {},
     );
-
-Map<String, dynamic> _$BarrelExportToJson(BarrelExport instance) =>
-    <String, dynamic>{
-      'library': instance.uri,
-      'show': instance.show.toList(),
-      'hide': instance.hide.toList(),
-      'tags': instance.tags.toList(),
-    };

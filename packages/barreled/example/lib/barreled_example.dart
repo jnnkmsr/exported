@@ -2,3 +2,4 @@
 
 export 'package:barreled_example/src/library1.dart' show Class1;
 export 'package:barreled_example/src/library2.dart' show Class2;
+export 'package:meta/meta.dart';

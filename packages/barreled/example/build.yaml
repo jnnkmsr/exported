@@ -1,0 +1,7 @@
+targets:
+  $default:
+    builders:
+      barreled:
+        options:
+          package_exports:
+            - package: package:meta/meta.dart
