@@ -44,7 +44,7 @@ class BarrelFileOption {
   /// - a file extension other than `.dart` is specified,
   /// - the name is an absolute path.
   @JsonKey(name: fileKey)
-  late final String? file;
+  late final String file;
   static const fileKey = 'file';
 
   /// The relative path to the directory within the package where the barrel

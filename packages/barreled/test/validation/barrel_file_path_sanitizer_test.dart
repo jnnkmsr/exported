@@ -6,10 +6,9 @@ import 'package:test/test.dart';
 void main() {
   group('$BarrelFilePathSanitizer', () {
     late BarrelFilePathSanitizer sut;
-    const packageName = 'foo_bar';
 
     setUp(() {
-      BarrelFilePathSanitizer.pubspecReader = FakePubspecReader(packageName: packageName);
+      PubspecReader.$instance = FakePubspecReader();
       sut = BarrelFilePathSanitizer(
         fileInputName: 'file',
         dirInputName: 'dir',
@@ -160,8 +159,8 @@ void main() {
 }
 
 class FakePubspecReader with Fake implements PubspecReader {
-  FakePubspecReader({required this.packageName});
-
   @override
-  final String packageName;
+  String get name => packageName;
 }
+
+const packageName = 'foo';

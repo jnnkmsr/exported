@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 /// Sanitizes a list of `files` builder options based on the following rules:
 /// - Duplicates with matching configuration are removed.
 /// - Path duplicates with conflicting configuration throw an [ArgumentError].
-/// - `null` is treated as an empty list.
+/// - If the input is `null` or empty, the default barrel file will be added.
 class BarrelFilesSanitizer with InputValidator {
   const BarrelFilesSanitizer({required this.inputName});
 
@@ -14,7 +14,7 @@ class BarrelFilesSanitizer with InputValidator {
 
   /// Validates the [input] and returns the deduplicated list of exports.
   List<BarrelFileOption> sanitize(List<BarrelFileOption>? input) {
-    if (input == null) return [];
+    if (input == null || input.isEmpty) return [BarrelFileOption()];
 
     final filesByPath = <String, BarrelFileOption>{};
     for (final export in input) {

@@ -53,7 +53,7 @@ void main() {
         });
       });
 
-      test('Creates a $ExportOption from JSON', () {
+      test('Creates an $ExportOption instance from JSON', () {
         expect(sut.uri, 'foo_bar');
         expect(sut.show, {'Baz', 'Qux'});
         expect(sut.hide, {'Quux', 'Corge'});

@@ -1,101 +1,73 @@
 import 'package:barreled/src/builder/barreled_builder.dart';
+import 'package:barreled/src/builder/dart_writer.dart';
 import 'package:barreled/src/util/pubspec_reader.dart';
 import 'package:build_test/build_test.dart';
+import 'package:dart_style/dart_style.dart';
+import 'package:meta/meta.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
-
-const packageName = 'test_library';
-final dartVersion = Version(3, 6, 1);
 
 void main() {
   group('$BarreledBuilder', () {
     late BarreledBuilder sut;
 
-    late MockPubspecReader mockPubspecReader;
-
     setUp(() {
-      mockPubspecReader = MockPubspecReader();
-      when(() => mockPubspecReader.packageName).thenReturn(packageName);
-      when(() => mockPubspecReader.dartVersion).thenReturn(dartVersion);
-
-      sut = BarreledBuilder(
-        pubspecReader: mockPubspecReader,
-      );
+      PubspecReader.$instance = FakePubspecReader();
+      sut = BarreledBuilder();
     });
 
-    group('Given no barrel_file options', () {
-      const defaultAssetPath = '$packageName|lib/$packageName.dart';
+    @isTest
+    void runTest(
+      String description, {
+      required Map<String, String> jsonAssets,
+      required Map<String, List<String>> output,
+    }) {
+      test(
+        description,
+        () async => testBuilder(
+          sut,
+          {
+            // A `pubspec.yaml` file will always be present.
+            '$packageName|pubspec.yaml': '',
+            for (final MapEntry(key: path, value: content) in jsonAssets.entries)
+              '$packageName|$path': content,
+          },
+          outputs: {
+            for (final MapEntry(key: path, value: lines) in output.entries)
+              '$packageName|$path': dartOutput(lines),
+          },
+          reader: await PackageAssetReader.currentIsolate(),
+        ),
+      );
+    }
 
-      group('And no annotations/package exports', () {
-        test('Then generates an empty file named after the package', () async {
-          await testBuilder(
-            sut,
-            {
-              '$packageName|pubspec.yaml': '',
-            },
-            reader: await PackageAssetReader.currentIsolate(),
-            outputs: {
-              defaultAssetPath: '// GENERATED CODE - DO NOT MODIFY BY HAND\n',
-            },
-          );
-        });
-
-        test('overwrites existing file', () {
-          fail('Not implemented');
-        });
-      });
-
-      group('only package exports', () {
-        test('includes all package exports, sorted by name', () {
-          fail('Not implemented');
-        });
-
-        test('ignores tags and includes all package exports', () {
-          fail('Not implemented');
-        });
-
-        test('includes show filters, sorted by name', () {
-          fail('Not implemented');
-        });
-
-        test('includes hide filters, sorted by name', () {
-          fail('Not implemented');
-        });
-
-        test('includes only show filter when both show and hide are specified', () {
-          fail('Not implemented');
-        });
-
-        // TODO: Split into multiple tests testing show/hide combinations.
-        test('merges duplicate exports', () {
-          fail('Not implemented');
-        });
-      });
-
-      group('single library with annotations', () {
-        test('generates empty barrel file when there are no annotations', () {
-          fail('Not implemented');
-        });
-
-        test('includes all annotated elements, sorted by name', () {
-          fail('Not implemented');
-        });
-      });
-
-      group('multiple libraries with annotations', () {
-        test('includes all annotated elements, sorted by name', () {
-          fail('Not implemented');
-        });
-      });
-
-      group('annotations and package exports', () {
-        test('includes first package exports and then annotated elements', () {
-          fail('Not implemented');
-        });
-      });
+    group('No annotations/export options', () {
+      runTest(
+        'Generates empty default barrel file if no options are provided',
+        jsonAssets: {},
+        output: {'lib/$packageName.dart': []},
+      );
     });
   });
 }
 
-class MockPubspecReader with Mock implements PubspecReader {}
+class FakePubspecReader with Fake implements PubspecReader {
+  @override
+  String get name => packageName;
+
+  @override
+  VersionConstraint get sdkVersion => dartVersion;
+}
+
+const packageName = 'foo';
+final dartVersion = Version(3, 6, 1);
+final dartFormatter = DartFormatter(languageVersion: dartVersion);
+
+String dartOutput(List<String> lines) {
+  final buffer = StringBuffer()..writeln(DartWriter.header);
+  for (final line in lines) {
+    buffer.writeln(line);
+  }
+  return dartFormatter.format(buffer.toString());
+}

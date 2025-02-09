@@ -37,13 +37,13 @@ void main() {
 
         group('When packageName is read', () {
           test('Then returns the package name', () {
-            expect(sut.packageName, equals(packageName));
+            expect(sut.name, equals(packageName));
           });
         });
 
         group('When dartVersion is read', () {
           test('Then returns the Dart SDK version', () {
-            expect(sut.dartVersion, equals(VersionConstraint.parse(dartVersion)));
+            expect(sut.sdkVersion, equals(VersionConstraint.parse(dartVersion)));
           });
         });
       });
@@ -53,13 +53,13 @@ void main() {
 
         group('When packageName is read', () {
           test('Then throws a FormatException', () {
-            expect(() => sut.packageName, throwsA(isA<FormatException>()));
+            expect(() => sut.name, throwsA(isA<FormatException>()));
           });
         });
 
         group('When dartVersion is read', () {
           test('Then throws a FormatException', () {
-            expect(() => sut.dartVersion, throwsA(isA<FormatException>()));
+            expect(() => sut.sdkVersion, throwsA(isA<FormatException>()));
           });
         });
       });
@@ -69,13 +69,13 @@ void main() {
 
         group('When packageName is read', () {
           test('Then throws a FormatException', () {
-            expect(() => sut.packageName, throwsA(isA<FormatException>()));
+            expect(() => sut.name, throwsA(isA<FormatException>()));
           });
         });
 
         group('When dartVersion is read', () {
           test('Then throws a FormatException', () {
-            expect(() => sut.dartVersion, throwsA(isA<FormatException>()));
+            expect(() => sut.sdkVersion, throwsA(isA<FormatException>()));
           });
         });
       });
@@ -85,13 +85,13 @@ void main() {
 
         group('When packageName is read', () {
           test('Then throws a FormatException', () {
-            expect(() => sut.packageName, throwsA(isA<FormatException>()));
+            expect(() => sut.name, throwsA(isA<FormatException>()));
           });
         });
         
         group('When dartVersion is read', () {
           test('Then throws a FormatException', () {
-            expect(() => sut.dartVersion, throwsA(isA<FormatException>()));
+            expect(() => sut.sdkVersion, throwsA(isA<FormatException>()));
           });
         });
       });
@@ -100,13 +100,13 @@ void main() {
     group('Given a pubspec.yaml file does not exist', () {
       group('When packageName is read', () {
         test('Then throws a FileSystemException', () {
-          expect(() => sut.packageName, throwsA(isA<FileSystemException>()));
+          expect(() => sut.name, throwsA(isA<FileSystemException>()));
         });
       });
       
       group('When dartVersion is read', () {
         test('Then throws a FileSystemException', () {
-          expect(() => sut.dartVersion, throwsA(isA<FileSystemException>()));
+          expect(() => sut.sdkVersion, throwsA(isA<FileSystemException>()));
         });
       });
     });

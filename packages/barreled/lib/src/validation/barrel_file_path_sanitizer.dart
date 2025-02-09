@@ -1,10 +1,7 @@
 import 'package:barreled/src/options/barrel_file_option.dart';
 import 'package:barreled/src/util/pubspec_reader.dart';
 import 'package:barreled/src/validation/validation_util.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
-
-// TODO: Unit test [BarrelFilePathSanitizer].
 
 /// Bundles sanitized [BarrelFileOption.file] and [BarrelFileOption.dir] values.
 typedef BarrelFilePath = ({String file, String dir});
@@ -33,16 +30,16 @@ class BarrelFilePathSanitizer {
   final _FileNameSanitizer _fileNameSanitizer;
   final _DirSanitizer _dirSanitizer;
 
-  /// Reads the default package name from the `pubspec.yaml`. Mutable to allow
-  /// injection of test doubles.
-  @visibleForTesting
-  static PubspecReader pubspecReader = PubspecReader.instance();
+  /// Reads the default package name from the `pubspec.yaml`.
+  ///
+  /// Set [PubspecReader.$instance] to replace it with a double in tests.
+  static final _pubspecReader = PubspecReader.instance();
 
   /// The default `lib` directory if no directory is specified.
   static const defaultDir = 'lib';
 
   /// The default `<package>.dart` file name, read from the `pubspec.yaml`.
-  static final defaultFile = '${pubspecReader.packageName}.dart';
+  static final defaultFile = '${_pubspecReader.name}.dart';
 
   /// Validates both the [fileInput] and the [dirInput] and returns the
   /// sanitized output, split into a directory and a file part.

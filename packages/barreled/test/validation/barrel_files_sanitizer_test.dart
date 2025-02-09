@@ -1,5 +1,7 @@
 import 'package:barreled/src/options/barrel_file_option.dart';
+import 'package:barreled/src/validation/barrel_file_path_sanitizer.dart';
 import 'package:barreled/src/validation/barrel_files_sanitizer.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -7,6 +9,7 @@ void main() {
     late BarrelFilesSanitizer sut;
 
     setUp(() {
+      BarrelFileOption.pathSanitizer = FakeBarrelFilePathSanitizer();
       sut = const BarrelFilesSanitizer(inputName: 'files');
     });
 
@@ -21,17 +24,17 @@ void main() {
         );
       });
 
-      test('Accepts an empty list', () {
+      test('Replaces an empty list with the default barrel file', () {
         expectSanitized(
           [],
-          [],
+          [BarrelFileOption()],
         );
       });
 
-      test('Treats null as an empty list', () {
+      test('Replaces null input with the default barrel file', () {
         expectSanitized(
           null,
-          [],
+          [BarrelFileOption()],
         );
       });
 
@@ -72,4 +75,10 @@ void main() {
       });
     });
   });
+}
+
+class FakeBarrelFilePathSanitizer with Fake implements BarrelFilePathSanitizer {
+  @override
+  BarrelFilePath sanitize({String? fileInput, String? dirInput}) =>
+      (file: fileInput ?? 'foo.dart', dir: dirInput ?? 'lib');
 }

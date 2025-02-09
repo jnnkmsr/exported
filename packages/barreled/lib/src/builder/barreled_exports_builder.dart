@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:barreled/src/builder/barreled_builder.dart';
 import 'package:barreled/src/model/barrel_export.dart';
-import 'package:barreled/src/util/build_extensions.dart';
 import 'package:barreled_annotation/barreled_annotation.dart';
 import 'package:build/build.dart';
 import 'package:meta/meta.dart';
@@ -56,4 +55,9 @@ class _BarreledExportsGenerator extends GeneratorForAnnotation<Barreled> {
       BarrelExport.fromAnnotatedElement(element, annotation, buildStep).toJson(),
     );
   }
+}
+
+extension on BuildStep {
+  /// Whether the current [inputId] represents a Dart library.
+  Future<bool> get isDartLibrary => resolver.isLibrary(inputId);
 }

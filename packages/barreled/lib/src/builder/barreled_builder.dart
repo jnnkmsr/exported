@@ -1,44 +1,38 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:barreled/src/builder/dart_writer.dart';
 import 'package:barreled/src/model/barrel_export.dart';
 import 'package:barreled/src/model/barrel_file.dart';
 import 'package:barreled/src/options/barreled_options.dart';
-import 'package:barreled/src/util/dart_writer.dart';
 import 'package:barreled/src/util/pubspec_reader.dart';
-import 'package:barreled/src/util/version_helpers.dart';
 import 'package:build/build.dart';
 import 'package:collection/collection.dart';
 import 'package:glob/glob.dart';
+import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 class BarreledBuilder extends Builder {
   BarreledBuilder({
     BarreledOptions? options,
-    PubspecReader? pubspecReader,
   }) {
-    options ??= BarreledOptions();
-    pubspecReader ??= PubspecReader();
-
-    _files = BarrelFile.fromOptions(
-      options,
-      defaultName: () => '${pubspecReader!.packageName}.dart',
-    );
-    _dartVersion = pubspecReader.dartVersion.target;
+    _files = BarrelFile.fromOptions(options ?? BarreledOptions());
+    _dartVersion = pubspecReader.sdkVersion.target;
   }
-
-  late final Set<BarrelFile> _files;
-  late final Version? _dartVersion;
-
-  static const jsonAssetExtension = '.barreled.json';
-  static final _jsonAssetGlob = Glob('**$jsonAssetExtension');
 
   @override
   late final buildExtensions = {r'$lib$': _files.names};
+  late final Set<BarrelFile> _files;
+  late final Version? _dartVersion;
+
+  @visibleForTesting
+  static PubspecReader pubspecReader = PubspecReader.instance();
+
+  static const jsonAssetExtension = '.barreled.json';
 
   Future<void> _readExportsFromAssets(BuildStep buildStep) async {
     final json = await buildStep
-        .findAssets(_jsonAssetGlob)
+        .findAssets(Glob('**$jsonAssetExtension'))
         .asyncMap(buildStep.readAsString)
         .map((content) => (jsonDecode(content) as List).cast<Map<String, dynamic>>())
         .toList();
@@ -50,7 +44,14 @@ class BarreledBuilder extends Builder {
   String _generateOutput(BarrelFile file) {
     final writer = DartWriter(languageVersion: _dartVersion);
     for (final export in file.exports) {
-      writer.addExport(export);
+      writer.addLine("export '${export.uri}'");
+      if (export.show.isNotEmpty) {
+        writer.addLine('show ${export.show.sorted().join(',')}');
+      }
+      if (export.hide.isNotEmpty) {
+        writer.addLine('hide ${export.hide.sorted().join(',')}');
+      }
+      writer.addLine(';');
     }
     return writer.write();
   }
@@ -65,19 +66,28 @@ class BarreledBuilder extends Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     await _readExportsFromAssets(buildStep);
-    await Future.wait(_files.map((file) => _write(buildStep, file)));
+    for (final file in _files) {
+      await _write(buildStep, file);
+    }
+    // await Future.wait(_files.map((file) => _write(buildStep, file)));
   }
 }
 
-extension on DartWriter {
-  void addExport(BarrelExport export) {
-    addLine("export '${export.uri}'");
-    if (export.show.isNotEmpty) {
-      addLine('show ${export.show.sorted().join(',')}');
+extension on VersionConstraint {
+  Version? get target => switch (this) {
+        final Version version => version,
+        final VersionRange range => range.min ?? range.max,
+        _ => null,
+      };
+}
+
+/// Convenience accessors for [BarrelFile] iterables.
+extension on Iterable<BarrelFile> {
+  void addExports(Iterable<BarrelExport> exports) {
+    for (final file in this) {
+      file.addExports(exports);
     }
-    if (export.hide.isNotEmpty) {
-      addLine('hide ${export.hide.sorted().join(',')}');
-    }
-    addLine(';');
   }
+
+  List<String> get names => [for (final file in this) file.name];
 }
