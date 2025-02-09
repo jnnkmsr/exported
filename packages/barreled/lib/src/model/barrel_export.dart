@@ -38,8 +38,8 @@ class BarrelExport implements Comparable<BarrelExport> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    final shownName = element.name;
-    if (shownName == null || shownName.isEmpty) {
+    final show = element.name;
+    if (show == null || show.isEmpty) {
       throw InvalidGenerationSourceError(
         '`@$barreled` is used on an unnamed element',
         element: element,
@@ -49,7 +49,7 @@ class BarrelExport implements Comparable<BarrelExport> {
 
     return BarrelExport(
       uri: buildStep.inputId.uri.toString(),
-      show: {shownName},
+      show: {show},
       tags: (tagReader.isSet ? tagReader.setValue : <DartObject>{})
           .map((tag) => tag.toStringValue()!)
           .toSet(),

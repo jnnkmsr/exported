@@ -8,6 +8,10 @@ class PubspecReader {
     FileSystem? fileSystem,
   }) : _fileSystem = fileSystem ?? const LocalFileSystem();
 
+  /// Singleton instance of [PubspecReader] using the default [LocalFileSystem].
+  factory PubspecReader.instance() => _instance;
+  static final _instance = PubspecReader();
+
   final FileSystem _fileSystem;
 
   late final String packageName = _read(

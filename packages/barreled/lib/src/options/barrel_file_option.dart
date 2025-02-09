@@ -1,6 +1,8 @@
+import 'package:barreled/src/validation/barrel_file_path_sanitizer.dart';
+import 'package:barreled/src/validation/tags_sanitizer.dart';
+import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as p;
 
 part 'barrel_file_option.g.dart';
 
@@ -18,10 +20,10 @@ class BarrelFileOption {
     String? dir,
     Set<String>? tags,
   }) {
-    final (sanitizedDir, sanitizedName) = _sanitizePath(dir, file);
-    this.file = sanitizedName;
-    this.dir = sanitizedDir;
-    this.tags = _sanitizeTags(tags);
+    final path = pathSanitizer.sanitize(fileInput: file, dirInput: dir);
+    this.file = path.file;
+    this.dir = path.dir;
+    this.tags = tagsSanitizer.sanitize(tags);
   }
 
   /// Creates a [BarrelFileOption] from a JSON (or YAML) map.
@@ -69,70 +71,31 @@ class BarrelFileOption {
   /// - Duplicate tags will be removed.
   /// - If the resulting set is empty, it will be treated as `null`.
   @JsonKey(name: tagsKey)
-  late final Set<String>? tags;
+  late final Set<String> tags;
   static const tagsKey = 'tags';
 
-  /// The default [dir] if no directory is specified.
-  static const _defaultDir = 'lib';
+  /// Sanitizer for the [file] and [dir] inputs. Exchangeable by test doubles.
+  @visibleForTesting
+  static BarrelFilePathSanitizer pathSanitizer = BarrelFilePathSanitizer(
+    fileInputName: fileKey,
+    dirInputName: dirKey,
+  );
 
-  /// Sanitizes the [dir] and [file] inputs, separating file and directory
-  /// components, normalizing paths and validating the input.
-  ///
-  /// Returns a tuple of the sanitized directory and file paths.
-  static (String, String?) _sanitizePath(String? dir, String? file) {
-    var sanitizedDir = dir?.trim();
+  /// Sanitizer for the [tags] input. Exchangeable by test doubles.
+  @visibleForTesting
+  static TagsSanitizer tagsSanitizer = const TagsSanitizer();
 
-    if (sanitizedDir == null || sanitizedDir.isEmpty) {
-      sanitizedDir = null;
-    } else {
-      sanitizedDir = p.normalize(sanitizedDir);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BarrelFileOption &&
+          runtimeType == other.runtimeType &&
+          file == other.file &&
+          dir == other.dir &&
+          _setEquality.equals(tags, other.tags);
 
-      if (!p.isRelative(sanitizedDir)) {
-        throw ArgumentError.value(dir, 'dir', 'Directory path must be relative');
-      }
-      if (p.extension(sanitizedDir).isNotEmpty) {
-        throw ArgumentError.value(dir, 'dir', 'Directory path cannot be a file');
-      }
-    }
+  @override
+  int get hashCode => file.hashCode ^ dir.hashCode ^ _setEquality.hash(tags);
 
-    var sanitizedFile = file?.trim();
-
-    if (sanitizedFile == null || sanitizedFile.isEmpty) {
-      sanitizedFile = null;
-    } else {
-      final extension = p.extension(sanitizedFile);
-      final dir = p.dirname(p.normalize(sanitizedFile));
-      sanitizedFile = p.basename(p.setExtension(sanitizedFile, '.dart'));
-
-      if (extension.isNotEmpty && extension != '.dart') {
-        throw ArgumentError.value(file, 'file', 'Invalid file extension: $extension');
-      }
-
-      if (dir != '.' && dir.isNotEmpty) {
-        if (!p.isRelative(dir)) {
-          throw ArgumentError.value(file, 'file', 'Directory path must be relative');
-        }
-        sanitizedDir = sanitizedDir != null ? p.normalize(p.join(sanitizedDir, dir)) : dir;
-      }
-
-      final validFilePattern = RegExp(r'^[^.][a-zA-Z0-9._\-/]*[^.]$');
-      if (!validFilePattern.hasMatch(sanitizedFile)) {
-        throw ArgumentError.value(file, 'name', 'Invalid barrel-file name');
-      }
-    }
-
-    return (sanitizedDir ?? _defaultDir, sanitizedFile);
-  }
-
-  /// Sanitizes the [tags] input, removing any empty, blank or duplicate tags.
-  ///
-  /// Returns the sanitized set of tags or `null` if the remaining set is empty.
-  static Set<String>? _sanitizeTags(Set<String>? tags) {
-    if (tags == null) return null;
-
-    final sanitizedTags = tags.map((tag) => tag.trim()).where((tag) => tag.isNotEmpty);
-    if (sanitizedTags.isEmpty) return null;
-
-    return sanitizedTags.toSet();
-  }
+  static const _setEquality = SetEquality<String>();
 }

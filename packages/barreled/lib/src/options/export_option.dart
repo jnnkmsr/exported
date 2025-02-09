@@ -1,11 +1,11 @@
 import 'package:barreled/src/validation/export_uri_sanitizer.dart';
+import 'package:barreled/src/validation/show_hide_sanitizer.dart';
+import 'package:barreled/src/validation/tags_sanitizer.dart';
+import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
 part 'export_option.g.dart';
-
-// TODO: Allow simple string lists of URIs?
-// TODO: Sanitize [show]/[hide]/[tags].
 
 /// Represents an entry in the `exports` section of the builder options.
 ///
@@ -17,12 +17,13 @@ class ExportOption {
   @protected
   ExportOption({
     required String uri,
-    this.show = const {},
-    this.hide = const {},
-    this.tags = const {},
-  }) {
-    this.uri = uriSanitizer.sanitize(uri);
-  }
+    Set<String>? show,
+    Set<String>? hide,
+    Set<String>? tags,
+  })  : uri = uriSanitizer.sanitize(uri),
+        show = showSanitizer.sanitize(show),
+        hide = hideSanitizer.sanitize(hide),
+        tags = tagsSanitizer.sanitize(tags);
 
   /// Creates a [ExportOption] from a JSON (or YAML) map.
   ///
@@ -58,23 +59,52 @@ class ExportOption {
   ///
   /// If empty, no `show` filter is applied.
   @JsonKey(name: showKey)
-  final Set<String> show;
+  late final Set<String> show;
   static const showKey = 'show';
 
   /// The set of element names in the `hide` statement of the `export`.
   ///
   /// If empty, no `hide` filter is applied.
   @JsonKey(name: hideKey)
-  final Set<String> hide;
+  late final Set<String> hide;
   static const hideKey = 'hide';
 
   /// The set of tags for selectively including this export in barrel files.
   ///
   /// If empty, this export is treated as untagged.
   @JsonKey(name: tagsKey)
-  final Set<String> tags;
+  late final Set<String> tags;
   static const tagsKey = 'tags';
 
+  /// Sanitizer for the [uri] input. Exchangeable by test doubles.
   @visibleForTesting
   static ExportUriSanitizer uriSanitizer = const ExportUriSanitizer(inputName: uriKey);
+
+  /// Sanitizer for the [show] input. Exchangeable by test doubles.
+  @visibleForTesting
+  static ShowHideSanitizer showSanitizer = const ShowHideSanitizer(inputName: showKey);
+
+  /// Sanitizer for the [hide] input. Exchangeable by test doubles.
+  @visibleForTesting
+  static ShowHideSanitizer hideSanitizer = const ShowHideSanitizer(inputName: hideKey);
+
+  /// Sanitizer for the [tags] input. Exchangeable by test doubles.
+  @visibleForTesting
+  static TagsSanitizer tagsSanitizer = const TagsSanitizer();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ExportOption &&
+          runtimeType == other.runtimeType &&
+          uri == other.uri &&
+          _setEquality.equals(show, other.show) &&
+          _setEquality.equals(hide, other.hide) &&
+          _setEquality.equals(tags, other.tags);
+
+  @override
+  int get hashCode =>
+      uri.hashCode ^ _setEquality.hash(show) ^ _setEquality.hash(hide) ^ _setEquality.hash(tags);
+
+  static const _setEquality = SetEquality<String>();
 }

@@ -1,216 +1,132 @@
 import 'package:barreled/src/options/barrel_file_option.dart';
+import 'package:barreled/src/validation/barrel_file_path_sanitizer.dart';
+import 'package:barreled/src/validation/tags_sanitizer.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('$BarrelFileOption', () {
     late BarrelFileOption sut;
 
-    group('.name', () {
-      group('Valid input', () {
-        test('Accepts null', () {
-          sut = BarrelFileOption.fromJson(const {});
-          expect(sut.file, isNull);
-        });
+    late MockBarrelFilePathSanitizer mockPathSanitizer;
+    late MockTagsSanitizer mockTagsSanitizer;
 
-        test('Interprets an empty string as null', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.fileKey: '',
-          });
-          expect(sut.file, isNull);
-        });
+    setUp(() {
+      mockPathSanitizer = MockBarrelFilePathSanitizer();
+      mockTagsSanitizer = MockTagsSanitizer();
+      BarrelFileOption.pathSanitizer = mockPathSanitizer;
+      BarrelFileOption.tagsSanitizer = mockTagsSanitizer;
+    });
 
-        test('Interprets whitespace only as null', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.fileKey: '   ',
-          });
-          expect(sut.file, isNull);
-        });
-
-        test('Takes a dart file name as specified', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.fileKey: 'barrel_file.dart',
-          });
-          expect(sut.file, 'barrel_file.dart');
-        });
-
-        test('Adds a .dart extension if not specified', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.fileKey: 'barrel_file',
-          });
-          expect(sut.file, 'barrel_file.dart');
-        });
-
-        test('Trims leading and trailing whitespace', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.fileKey: '  barrel_file  ',
-          });
-          expect(sut.file, 'barrel_file.dart');
-        });
-
-        test('Accepts a leading relative path', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.fileKey: 'lib/barrel_file',
-          });
-          expect(sut.file, 'barrel_file.dart');
-        });
-      });
-
-      group('Invalid input', () {
-        test('Throws an ArgumentError if the extension is not .dart', () {
-          expect(
-            () => BarrelFileOption.fromJson(const {
-              BarrelFileOption.fileKey: 'barrel_file.txt',
-            }),
-            throwsArgumentError,
-          );
-        });
-
-        test('Throws an ArgumentError if the input is only an extension', () {
-          expect(
-            () => BarrelFileOption.fromJson(
-              const {BarrelFileOption.fileKey: '.dart'},
-            ),
-            throwsArgumentError,
-          );
-        });
-
-        test('Throws an ArgumentError if the input is a directory', () {
-          expect(
-            () => BarrelFileOption.fromJson(
-              const {BarrelFileOption.fileKey: 'lib/barrel_file/'},
-            ),
-            throwsArgumentError,
-          );
-        });
-
-        test('Throws an ArgumentError if the input is an absolute path', () {
-          expect(
-            () => BarrelFileOption.fromJson(
-              const {BarrelFileOption.fileKey: '/lib/barrel_file'},
-            ),
-            throwsArgumentError,
-          );
-        });
+    group('.()', () {
+      test('Sanitizes inputs', () {
+        sut = BarrelFileOption(
+          file: 'foo_bar.dart',
+          dir: 'lib/baz',
+          tags: const {'foo', 'bar'},
+        );
+        verify(
+          () => mockPathSanitizer.sanitize(
+            fileInput: 'foo_bar.dart',
+            dirInput: 'lib/baz',
+          ),
+        ).called(1);
+        verify(
+          () => mockTagsSanitizer.sanitize({'foo', 'bar'}),
+        ).called(1);
       });
     });
 
-    group('.dir', () {
-      group('Valid input', () {
-        test('Treats null as the default path', () {
-          sut = BarrelFileOption.fromJson(const {});
-          expect(sut.dir, 'lib');
+    group('.fromJson()', () {
+      test('Creates a $BarrelFileOption from JSON', () {
+        sut = BarrelFileOption.fromJson(const {
+          BarrelFileOption.fileKey: 'foo_bar.dart',
+          BarrelFileOption.dirKey: 'lib/baz',
+          BarrelFileOption.tagsKey: ['foo', 'bar'],
         });
-
-        test('Treats an empty string as the default path', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.dirKey: '',
-          });
-          expect(sut.dir, 'lib');
-        });
-
-        test('Interprets whitespace only as the default path', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.dirKey: '   ',
-          });
-          expect(sut.dir, 'lib');
-        });
-
-        test('Takes a relative directory path as specified', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.dirKey: 'lib/folder',
-          });
-          expect(sut.dir, 'lib/folder');
-        });
-
-        test('Trims leading and trailing whitespace', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.dirKey: '  lib/folder  ',
-          });
-          expect(sut.dir, 'lib/folder');
-        });
-
-        test('Normalizes the directory path', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.dirKey: 'lib/../lib/folder/',
-          });
-          expect(sut.dir, 'lib/folder');
-        });
-
-        test('Takes any path from the name input if dir is not specified', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.fileKey: 'lib/folder/barrel_file',
-          });
-          expect(sut.dir, 'lib/folder');
-        });
-
-        test('Appends any path from the name input and normalizes the result', () {
-          sut = BarrelFileOption.fromJson(const {
-            BarrelFileOption.fileKey: 'subfolder//barrel_file',
-            BarrelFileOption.dirKey: 'lib/folder',
-          });
-          expect(sut.dir, 'lib/folder/subfolder');
-        });
+        expect(sut.file, 'foo_bar.dart');
+        expect(sut.dir, 'lib/baz');
+        expect(sut.tags, {'foo', 'bar'});
       });
 
-      group('Invalid input', () {
-        test('Throws an ArgumentError if the input is an absolute path', () {
-          expect(
-            () => BarrelFileOption.fromJson(const {
-              BarrelFileOption.dirKey: '/lib/folder',
-            }),
-            throwsArgumentError,
-          );
+      test('Sanitizes inputs', () {
+        sut = BarrelFileOption.fromJson(const {
+          BarrelFileOption.fileKey: 'foo_bar.dart',
+          BarrelFileOption.dirKey: 'lib/baz',
+          BarrelFileOption.tagsKey: ['foo', 'bar'],
         });
-
-        test('Throws an ArgumentError if the input is a file name', () {
-          expect(
-            () => BarrelFileOption.fromJson(const {
-              BarrelFileOption.dirKey: 'lib/barrel_file.dart',
-            }),
-            throwsArgumentError,
-          );
-        });
+        verify(
+          () => mockPathSanitizer.sanitize(
+            fileInput: 'foo_bar.dart',
+            dirInput: 'lib/baz',
+          ),
+        ).called(1);
+        verify(
+          () => mockTagsSanitizer.sanitize({'foo', 'bar'}),
+        ).called(1);
       });
     });
 
-    group('.tags', () {
-      test('Accepts null', () {
-        sut = BarrelFileOption.fromJson(const {});
-        expect(sut.tags, isNull);
+    group('.==()', () {
+      test('Compares two $BarrelFileOption instances by file', () {
+        final a = BarrelFileOption(file: 'foo');
+        final b = BarrelFileOption(file: 'foo');
+        final c = BarrelFileOption(file: 'bar');
+
+        expect(a, equals(b));
+        expect(a, isNot(equals(c)));
+
+        expect(a.hashCode, b.hashCode);
+        expect(a.hashCode, isNot(c.hashCode));
       });
 
-      test('Interprets an empty list as null', () {
-        sut = BarrelFileOption.fromJson(const {BarrelFileOption.tagsKey: <String>[]});
-        expect(sut.tags, isNull);
+      test('Compares two $BarrelFileOption instances by dir', () {
+        final a = BarrelFileOption(dir: 'foo');
+        final b = BarrelFileOption(dir: 'foo');
+        final c = BarrelFileOption(dir: 'bar');
+
+        expect(a, equals(b));
+        expect(a, isNot(equals(c)));
+
+        expect(a.hashCode, b.hashCode);
+        expect(a.hashCode, isNot(c.hashCode));
       });
 
-      test('Interprets a list of tags as a set', () {
-        sut = BarrelFileOption.fromJson(const {
-          BarrelFileOption.tagsKey: ['tag1', 'tag2'],
-        });
-        expect(sut.tags, {'tag1', 'tag2'});
-      });
+      test('Compares two $BarrelFileOption instances by tags, ignoring order', () {
+        final a = BarrelFileOption(tags: const {'foo', 'bar'});
+        final b = BarrelFileOption(tags: const {'bar', 'foo'});
+        final c = BarrelFileOption(tags: const {'foo', 'bar', 'baz'});
 
-      test('Trims leading and trailing whitespace', () {
-        sut = BarrelFileOption.fromJson(const {
-          BarrelFileOption.tagsKey: ['  tag1  ', '  tag2  '],
-        });
-        expect(sut.tags, {'tag1', 'tag2'});
-      });
+        expect(a, equals(b));
+        expect(a, isNot(equals(c)));
 
-      test('Deduplicates trimmed tags', () {
-        sut = BarrelFileOption.fromJson(const {
-          BarrelFileOption.tagsKey: ['tag1', '  tag1  '],
-        });
-        expect(sut.tags, {'tag1'});
-      });
-
-      test('Removes empty or blank tags', () {
-        sut = BarrelFileOption.fromJson(const {
-          BarrelFileOption.tagsKey: ['tag1', '', '  '],
-        });
-        expect(sut.tags, {'tag1'});
+        expect(a.hashCode, b.hashCode);
+        expect(a.hashCode, isNot(c.hashCode));
       });
     });
   });
+}
+
+class MockBarrelFilePathSanitizer with Mock implements BarrelFilePathSanitizer {
+  MockBarrelFilePathSanitizer() {
+    when(
+      () => sanitize(
+        fileInput: any(named: 'fileInput'),
+        dirInput: any(named: 'dirInput'),
+      ),
+    ).thenAnswer(
+      (i) => (
+        file: i.namedArguments[#fileInput] as String? ?? '',
+        dir: i.namedArguments[#dirInput] as String? ?? '',
+      ),
+    );
+  }
+}
+
+class MockTagsSanitizer with Mock implements TagsSanitizer {
+  MockTagsSanitizer() {
+    when(() => sanitize(any())).thenAnswer(
+      (i) => i.positionalArguments.first as Set<String>? ?? {},
+    );
+  }
 }
