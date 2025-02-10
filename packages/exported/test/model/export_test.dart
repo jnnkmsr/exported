@@ -1,3 +1,4 @@
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
 import 'package:test/test.dart';
 
@@ -8,10 +9,10 @@ void main() {
     group('.fromJson()', () {
       test('Creates an $Export instance from a JSON map', () {
         const json = {
-          Export.uriKey: 'library.dart',
-          Export.showKey: ['Shown1', 'Shown2'],
-          Export.hideKey: ['Hidden1', 'Hidden2'],
-          Export.tagsKey: ['Tag1', 'Tag2'],
+          keys.uri: 'library.dart',
+          keys.show: ['Shown1', 'Shown2'],
+          keys.hide: ['Hidden1', 'Hidden2'],
+          keys.tags: ['Tag1', 'Tag2'],
         };
 
         sut = Export.fromJson(json);
@@ -24,7 +25,7 @@ void main() {
 
       test('Defaults show, hide, and tags to empty sets', () {
         const json = {
-          Export.uriKey: 'library.dart',
+          keys.uri: 'library.dart',
         };
 
         sut = Export.fromJson(json);
@@ -48,10 +49,10 @@ void main() {
         final json = sut.toJson();
 
         expect(json, {
-          Export.uriKey: 'library.dart',
-          Export.showKey: ['Shown1', 'Shown2'],
-          Export.hideKey: ['Hidden1', 'Hidden2'],
-          Export.tagsKey: ['Tag1', 'Tag2'],
+          keys.uri: 'library.dart',
+          keys.show: ['Shown1', 'Shown2'],
+          keys.hide: ['Hidden1', 'Hidden2'],
+          keys.tags: ['Tag1', 'Tag2'],
         });
       });
 
@@ -61,10 +62,10 @@ void main() {
         final json = sut.toJson();
 
         expect(json, {
-          Export.uriKey: 'library.dart',
-          Export.showKey: <String>[],
-          Export.hideKey: <String>[],
-          Export.tagsKey: <String>[],
+          keys.uri: 'library.dart',
+          keys.show: <String>[],
+          keys.hide: <String>[],
+          keys.tags: <String>[],
         });
       });
     });

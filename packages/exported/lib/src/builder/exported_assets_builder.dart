@@ -52,7 +52,7 @@ class _BarreledExportsGenerator extends GeneratorForAnnotation<Exported> {
     BuildStep buildStep,
   ) {
     return _jsonEncoder.convert(
-      Export.fromAnnotatedElement(element, annotation, buildStep).toJson(),
+      Export.fromAnnotatedElement(buildStep.inputId, element, annotation).toJson(),
     );
   }
 }

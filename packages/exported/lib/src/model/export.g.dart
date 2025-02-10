@@ -6,18 +6,25 @@ part of 'export.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Export _$ExportFromJson(Map json) => Export(
-      uri: json['library'] as String,
-      show: (json['show'] as List<dynamic>?)?.map((e) => e as String).toSet() ??
-          const {},
-      hide: (json['hide'] as List<dynamic>?)?.map((e) => e as String).toSet() ??
-          const {},
-      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toSet() ??
-          const {},
+Export _$ExportFromJson(Map json) => $checkedCreate(
+      'Export',
+      json,
+      ($checkedConvert) {
+        final val = Export._sanitized(
+          uri: $checkedConvert('uri', (v) => v as String),
+          show: $checkedConvert('show',
+              (v) => (v as List<dynamic>?)?.map((e) => e as String).toSet()),
+          hide: $checkedConvert('hide',
+              (v) => (v as List<dynamic>?)?.map((e) => e as String).toSet()),
+          tags: $checkedConvert('tags',
+              (v) => (v as List<dynamic>?)?.map((e) => e as String).toSet()),
+        );
+        return val;
+      },
     );
 
 Map<String, dynamic> _$ExportToJson(Export instance) => <String, dynamic>{
-      'library': instance.uri,
+      'uri': instance.uri,
       'show': instance.show.toList(),
       'hide': instance.hide.toList(),
       'tags': instance.tags.toList(),

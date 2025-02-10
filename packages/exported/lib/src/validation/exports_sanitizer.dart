@@ -1,4 +1,4 @@
-import 'package:exported/src/options/export_option.dart';
+import 'package:exported/src/model/export.dart';
 import 'package:exported/src/validation/validation_util.dart';
 
 /// Sanitizes a list of `exports` builder options based on the following rules:
@@ -12,10 +12,10 @@ class ExportsSanitizer with InputValidator {
   final String inputName;
 
   /// Validates the [input] and returns the deduplicated list of exports.
-  List<ExportOption> sanitize(List<ExportOption>? input) {
+  List<Export> sanitize(List<Export>? input) {
     if (input == null) return [];
 
-    final exportsByUri = <String, ExportOption>{};
+    final exportsByUri = <String, Export>{};
     for (final export in input) {
       final uri = export.uri;
       final existing = exportsByUri[uri];

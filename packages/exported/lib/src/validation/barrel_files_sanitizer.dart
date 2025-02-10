@@ -1,4 +1,4 @@
-import 'package:exported/src/options/barrel_file_option.dart';
+import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/validation/validation_util.dart';
 
 /// Sanitizes a list of `files` builder options based on the following rules:
@@ -12,10 +12,10 @@ class BarrelFilesSanitizer with InputValidator {
   final String inputName;
 
   /// Validates the [input] and returns the deduplicated list of exports.
-  List<BarrelFileOption> sanitize(List<BarrelFileOption>? input) {
-    if (input == null || input.isEmpty) return [BarrelFileOption()];
+  List<BarrelFile> sanitize(List<BarrelFile>? input) {
+    if (input == null || input.isEmpty) return [BarrelFile.packageNamed()];
 
-    final filesByPath = <String, BarrelFileOption>{};
+    final filesByPath = <String, BarrelFile>{};
     for (final file in input) {
       final existing = filesByPath[file.path];
       if (existing != null && existing != file) {

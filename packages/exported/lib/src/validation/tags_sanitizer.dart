@@ -1,3 +1,5 @@
+// TODO: Test and document lower-case conversion.
+
 /// Sanitizes barrel-file or export tag input based on the following rules:
 /// - `null` is treated as an empty set.
 /// - Leading and trailing whitespace will be trimmed from all tags.
@@ -8,5 +10,5 @@ class TagsSanitizer {
 
   /// Validates the [input] and returns the sanitized set of tags.
   Set<String> sanitize(Set<String>? input) =>
-      input?.map((tag) => tag.trim()).where((tag) => tag.isNotEmpty).toSet() ?? {};
+      input?.map((tag) => tag.trim().toLowerCase()).where((tag) => tag.isNotEmpty).toSet() ?? {};
 }

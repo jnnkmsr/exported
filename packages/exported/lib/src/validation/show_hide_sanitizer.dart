@@ -1,5 +1,8 @@
 import 'package:exported/src/validation/validation_util.dart';
 
+// TODO: Test show/hide conflict resolution.
+// TODO: Document show/hide conflict resolution.
+
 /// Sanitizes `show`/`hide` filter input based on the following rules:
 /// - `null` is treated as an empty set.
 /// - Leading and trailing whitespace will be trimmed from all elements.
@@ -16,8 +19,8 @@ class ShowHideSanitizer with InputValidator {
   final String inputName;
 
   /// Validates the [input] and returns the sanitized set of identifiers.
-  Set<String> sanitize(Set<String>? input) =>
-      input?.map((tag) => tag.trim()).where((tag) {
+  Set<String> sanitize(Set<String>? input, [Set<String>? other]) {
+    final output = input?.map((tag) => tag.trim()).where((tag) {
         if (tag.isEmpty) return false;
         if (!isPublicDartIdentifier(tag)) {
           throwArgumentError(tag, 'Invalid $inputName element: $tag');
@@ -25,4 +28,10 @@ class ShowHideSanitizer with InputValidator {
         return true;
       }).toSet() ??
       {};
+    if (output.isNotEmpty && (other?.isNotEmpty ?? false)) {
+      throwArgumentError(inputName, 'Cannot have both `show` and `hide` filters');
+    }
+
+    return output;
+  }
 }

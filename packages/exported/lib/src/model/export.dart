@@ -1,7 +1,12 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:exported/src/options/export_option.dart';
+import 'package:collection/collection.dart';
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/util/equals_util.dart';
+import 'package:exported/src/validation/show_hide_sanitizer.dart';
+import 'package:exported/src/validation/tags_sanitizer.dart';
+import 'package:exported/src/validation/uri_sanitizer.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
@@ -9,16 +14,18 @@ import 'package:source_gen/source_gen.dart';
 
 part 'export.g.dart';
 
-// TODO: Unit test `Export.fromAnnotatedElement`.
-// TODO: Unit test `Export.fromPackageExportOption`.
-// TODO: Unit test `Export.compareTo()`.
-
-/// Represents an `export` directive within a Dart barrel file.
-@JsonSerializable()
+/// Represents a Dart `export` directive with a [uri] and an optional [show] or
+/// [hide] filter.
+///
+/// The [tags] field is used to selectively include this export in barrel files.
+///
+/// [Export]s are collected both from elements annotated with `@exported` and
+/// parsed from the `exports` section of the builder options.
+@JsonSerializable(constructor: '_sanitized')
 @immutable
 class Export implements Comparable<Export> {
-  /// Creates a [Export] with the given [uri], [show], [hide] and
-  /// [tags].
+  /// Internal constructor assigning sanitized values.
+  @visibleForTesting
   const Export({
     required this.uri,
     this.show = const {},
@@ -26,17 +33,21 @@ class Export implements Comparable<Export> {
     this.tags = const {},
   });
 
-  /// Creates a [Export] from an annotated [element] with
-  /// - the [uri] given by the URI of the current [buildStep]'s input,
+  /// Creates an [Export] from an [element] annotated with `@exported`, with:
+  /// - the [uri] of the [library] containing the [element],
   /// - the [show] filter containing the [element]'s name, and
-  /// - [tags] read from the [Exported.tags] annotation input.
+  /// - [tags] read from the [annotation] input.
   ///
-  /// Throws an [InvalidGenerationSourceError] if the annotated [element] is
-  /// an invalidly annotated unnamed element.
+  /// Sanitizes [tags]:
+  /// - Trims whitespace and converts to lowercase.
+  /// - Removes empty/blank tags and duplicates.
+  ///
+  /// Throws an [InvalidGenerationSourceError] if the [element] is an invalidly
+  /// annotated (unnamed) element.
   factory Export.fromAnnotatedElement(
+      AssetId library,
     Element element,
     ConstantReader annotation,
-    BuildStep buildStep,
   ) {
     final show = element.name;
     if (show == null || show.isEmpty) {
@@ -45,66 +56,105 @@ class Export implements Comparable<Export> {
         element: element,
       );
     }
-    final tagReader = annotation.read('tags');
+
+    final tagReader = annotation.read(keys.tags);
+    final tags = (tagReader.isSet ? tagReader.setValue : <DartObject>{})
+        .map((tag) => tag.toStringValue()!)
+        .toSet();
 
     return Export(
-      uri: buildStep.inputId.uri.toString(),
+      uri: library.uri.toString(),
       show: {show},
-      tags: (tagReader.isSet ? tagReader.setValue : <DartObject>{})
-          .map((tag) => tag.toStringValue()!)
-          .toSet(),
+      tags: tagsSanitizer.sanitize(tags),
     );
   }
 
-  /// Creates a [Export] from a [ExportOption].
-  factory Export.fromPackageExportOption(ExportOption option) {
-    return Export(
-      uri: option.uri,
-      show: option.show,
-      hide: option.hide,
-      tags: option.tags,
-    );
-  }
-
-  /// Creates a [Export] from a JSON (or YAML) map.
-  factory Export.fromJson(Map json) => _$ExportFromJson(json);
-
-  /// The URI of the library being exported.
+  /// Creates an [Export] from JSON/YAML input, validating and sanitizing
+  /// inputs.
   ///
-  /// Must be a valid `export` directive URI.
-  @JsonKey(name: uriKey)
-  final String uri;
-  static const uriKey = 'library';
-
-  /// The set of element names in the `show` statement of the `export`.
+  /// **[uri]:**
+  /// - Trims leading/trailing whitespace.
+  /// - Normalizes the URI, ensuring a valid Dart `package:` URI:
+  ///   - Normalizes the path, ensures snake-case, and adds a leading `package:`
+  ///     prefix if missing.
+  ///   - Ensures the file extension is `.dart` or adds it if missing.
+  ///   - Converts a single package or library name to a URI of the form
+  ///     `'package:$package/$package.dart'`.
   ///
-  /// If empty, no `show` filter is applied.
-  @JsonKey(name: showKey)
-  final Set<String> show;
-  static const showKey = 'show';
-
-  /// The set of element names in the `hide` statement of the `export`.
+  /// **[show]/[hide]:**
+  /// - Trims whitespace and removes duplicate elements.
+  /// - Ensures all elements are valid Dart identifiers.
+  /// - Ensures only one of `show` or `hide` is present.
   ///
-  /// If empty, no `hide` filter is applied.
-  @JsonKey(name: hideKey)
-  final Set<String> hide;
-  static const hideKey = 'hide';
-
-  /// The set of tags for selectively including this export in barrel files.
+  /// **[tags]:**
+  /// - Trims whitespace and converts to lowercase.
+  /// - Removes empty/blank tags and duplicates.
   ///
-  /// If empty, this export is included in all barrel files.
-  @JsonKey(name: tagsKey)
-  final Set<String> tags;
-  static const tagsKey = 'tags';
-
-  /// Merges this [Export] with [other] by combining their `show` and
-  /// `hide` filters.
-  Export merge(Export other) {
-    if (uri != other.uri) {
-      throw ArgumentError(
-        'Cannot merge exports of different libraries: $uri and ${other.uri}',
-      );
+  /// Throws an [ArgumentError] for invalid JSON input or inputs that cannot be
+  /// sanitized.
+  factory Export.fromJson(Map json) {
+    try {
+      return _$ExportFromJson(json);
+    } on CheckedFromJsonException catch (_) {
+      const name = keys.exports;
+      throw ArgumentError.value(json, name, 'Invalid $name options');
     }
+  }
+
+  /// Private constructor called by [Export.fromJson], validating and
+  /// sanitizing inputs.
+  @protected
+  factory Export._sanitized({
+    required String uri,
+    Set<String>? show,
+    Set<String>? hide,
+    Set<String>? tags,
+  }) {
+    final sanitizedShow = showSanitizer.sanitize(show);
+    return Export(
+      uri: uriSanitizer.sanitize(uri),
+      show: sanitizedShow,
+      hide: hideSanitizer.sanitize(hide, sanitizedShow),
+      tags: tagsSanitizer.sanitize(tags),
+    );
+  }
+
+  /// The URI of the `export` directive, sanitized to a Dart `package:` URI.
+  @JsonKey(name: keys.uri)
+  final String uri;
+
+  /// The element names in the `show` statement of the `export` directive.
+  @JsonKey(name: keys.show)
+  final Set<String> show;
+
+  /// The element names in the `hide` statement of the `export` directive.
+  @JsonKey(name: keys.hide)
+  final Set<String> hide;
+
+  /// Tags for selectively including this export in barrel files.
+  @JsonKey(name: keys.tags)
+  final Set<String> tags;
+
+  /// Sanitizer for [uri] inputs.
+  @visibleForTesting
+  static UriSanitizer uriSanitizer = const UriSanitizer(inputName: keys.uri);
+
+  /// Sanitizer for [show] inputs.
+  @visibleForTesting
+  static ShowHideSanitizer showSanitizer = const ShowHideSanitizer(inputName: keys.show);
+
+  /// Sanitizer for [hide] inputs.
+  @visibleForTesting
+  static ShowHideSanitizer hideSanitizer = const ShowHideSanitizer(inputName: keys.hide);
+
+  /// Sanitizer for [tags] inputs.
+  @visibleForTesting
+  static TagsSanitizer tagsSanitizer = const TagsSanitizer();
+
+  /// Copies this instance, combining [show] and [hide] filters with the ones
+  /// from [other] if the [uri]s match.
+  Export merge(Export other) {
+    if (uri != other.uri) return this;
     return Export(
       uri: uri,
       show: show.union(other.show),
@@ -113,9 +163,34 @@ class Export implements Comparable<Export> {
     );
   }
 
-  /// Converts this [Export] to a JSON map.
+  /// Converts this [Export] to a JSON-serializable map.
   Map<String, dynamic> toJson() => _$ExportToJson(this);
+
+  /// Converts this [Export] to a single-line Dart `export` directive.
+  String toDart() {
+    final buffer = StringBuffer()..write("export '$uri'");
+    if (show.isNotEmpty) buffer.write(' show ${show.sorted().join(',')}');
+    if (hide.isNotEmpty) buffer.write(' hide ${hide.sorted().join(',')}');
+    buffer.write(';');
+    return buffer.toString();
+  }
 
   @override
   int compareTo(Export other) => uri.compareTo(other.uri);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Export &&
+          runtimeType == other.runtimeType &&
+          uri == other.uri &&
+          setEquals(show, other.show) &&
+          setEquals(hide, other.hide) &&
+          setEquals(tags, other.tags);
+
+  @override
+  int get hashCode => uri.hashCode ^ setHash(show) ^ setHash(hide) ^ setHash(tags);
+
+  @override
+  String toString() => '$Export{uri: $uri, show: $show, hide: $hide, tags: $tags}';
 }

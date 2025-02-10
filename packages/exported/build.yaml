@@ -12,6 +12,7 @@ targets:
         options:
           any_map: true
           explicit_to_json: true
+          checked: true
 
 builders:
   exported:

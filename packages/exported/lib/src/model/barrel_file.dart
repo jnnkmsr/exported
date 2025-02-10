@@ -1,71 +1,108 @@
-import 'package:collection/collection.dart';
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/options/barrel_file_option.dart';
-import 'package:exported/src/options/export_option.dart';
-import 'package:exported/src/options/exported_options.dart';
+import 'package:exported/src/util/equals_util.dart';
+import 'package:exported/src/validation/file_path_sanitizer.dart';
+import 'package:exported/src/validation/tags_sanitizer.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
-/// Represents a barrel file with an editable list of exports.
+part 'barrel_file.g.dart';
+
+/// Represents a barrel file as defined in the `barrel_files` section of the
+/// `exported` builder options. Parses and validates `build.yaml` input and
+/// models the file during the build process.
+///
+/// The [path] determines the file’s relative location in the package’s `lib`
+/// folder (normalized, snake-case, and ending with `.dart`), while [tags]
+/// allow selective inclusion of exports.
+@JsonSerializable(
+  constructor: '_sanitized',
+  createToJson: false,
+)
+@immutable
 class BarrelFile {
-  /// Creates a [BarrelFile] with the given [path]and [tags].
-  BarrelFile({
+  /// Internal constructor assigning sanitized values.
+  @visibleForTesting
+  const BarrelFile({
     required this.path,
-    Set<String>? tags,
-  }) : tags = tags ?? const {};
+    this.tags = const {},
+  });
 
-  /// Initializes a set of [BarrelFile]s from the given [options].
+  /// Creates the default [BarrelFile] for the targeted package.
   ///
-  /// Converts each [BarrelFileOption] to a [BarrelFile] and adds a
-  /// [Export] for each [ExportOption] to all files that match the
-  /// export's tags.
-  static Set<BarrelFile> fromOptions(ExportedOptions options) {
-    final packageExports = options.exports.map(Export.fromPackageExportOption);
-    return {
-      for (final option in options.files)
-        BarrelFile(
-          path: option.path,
-          tags: option.tags,
-        )..addExports(packageExports),
-    };
-  }
+  /// The [path] defaults to `<package>.dart` (using the package name from
+  /// `pubspec.yaml`), and [tags] are empty.
+  factory BarrelFile.packageNamed() = BarrelFile._sanitized;
 
-  /// The relative path within the `lib` directory of the target package.
-  final String path;
-
-  /// The set of tags for selectively including exports in this barrel file.
+  /// Creates a [BarrelFile] from JSON/YAML input, validating and sanitizing
+  /// inputs.
   ///
-  /// If empty, all exports are included.
-  final Set<String> tags;
-
-  /// Returns the exports in this file.
-  List<Export> get exports => _exports.sorted();
-  late final Set<Export> _exports = {};
-  late final Map<String, Export> _exportsByLibrary = {};
-
-  /// Adds all [exports] with matching tags to this file.
-  /// - [exports] without tags are always be added.
-  /// - [exports] with tags are added if they have at least one matching tag.
+  /// The following rules apply:
   ///
-  /// If an export with the same URI already exists, it is merged with the new
-  /// export by combining the `show` and `hide` filters.
-  void addExports(Iterable<Export> exports) {
-    for (final export in exports) {
-      if (!_shouldAddExport(export)) continue;
-      final updated =_exportsByLibrary.update(
-        export.uri,
-        (existing) {
-          _exports.remove(existing);
-          return existing.merge(export);
-        },
-        ifAbsent: () => export,
-      );
-      _exports.add(updated);
+  /// **[path]:**
+  /// - Trims leading/trailing whitespace.
+  /// - Normalizes the path, ensures it is relative and snake-case, and removes
+  ///   any leading `lib/`.
+  /// - Ensures the file extension is `.dart` or adds it if missing.
+  /// - If the path is empty, blank, or ends with `/`, the file name is set to
+  ///   `$package.dart`, using the package name from `pubspec.yaml`.
+  ///
+  /// **[tags]:**
+  /// - Trims whitespace and converts to lowercase.
+  /// - Removes empty/blank tags and duplicates.
+  ///
+  /// Throws an [ArgumentError] for invalid inputs.
+  factory BarrelFile.fromJson(Map json) {
+    try {
+      return _$BarrelFileFromJson(json);
+    } on CheckedFromJsonException catch (e) {
+      const name = keys.barrelFiles;
+      throw ArgumentError.value(json, name, 'Invalid $name options: ${e.message}');
     }
   }
 
-  /// Whether this file should include the given [export] based on its tags.
+  /// Private constructor called by [BarrelFile.fromJson], validating and
+  /// sanitizing inputs.
+  BarrelFile._sanitized({
+    String? path,
+    Set<String>? tags,
+  })  : path = pathSanitizer.sanitize(path),
+        tags = tagsSanitizer.sanitize(tags);
+
+  /// The relative path within the target package’s `lib` directory.
+  @JsonKey(name: keys.path)
+  final String path;
+
+  /// Tags for selectively including exports.
+  @JsonKey(name: keys.tags)
+  final Set<String> tags;
+
+  /// Sanitizer for [path] inputs.
+  @visibleForTesting
+  static FilePathSanitizer pathSanitizer = FilePathSanitizer(inputName: keys.path);
+
+  /// Sanitizer for [tags] inputs.
+  @visibleForTesting
+  static TagsSanitizer tagsSanitizer = const TagsSanitizer();
+
+  /// Whether the given [export] should be included in this barrel file.
   ///
-  /// Returns `true` if this file has no [tags] or if the export has at least
-  /// one tag in common with this file's [tags].
-  bool _shouldAddExport(Export export) =>
+  /// Returns `true` if this file or the [export] are untagged, or if there is
+  /// at least one matching tag.
+  bool shouldInclude(Export export) =>
       tags.isEmpty || export.tags.isEmpty || tags.intersection(export.tags).isNotEmpty;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BarrelFile &&
+          runtimeType == other.runtimeType &&
+          path == other.path &&
+          setEquals(tags, other.tags);
+
+  @override
+  int get hashCode => path.hashCode ^ setHash(tags);
+
+  @override
+  String toString() => '$BarrelFile{path: $path, tags: $tags}';
 }

@@ -1,4 +1,4 @@
-import 'package:exported/src/options/barrel_file_option.dart';
+import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/validation/barrel_files_sanitizer.dart';
 import 'package:exported/src/validation/file_path_sanitizer.dart';
 import 'package:mocktail/mocktail.dart';
@@ -9,55 +9,55 @@ void main() {
     late BarrelFilesSanitizer sut;
 
     setUp(() {
-      BarrelFileOption.pathSanitizer = FakeBarrelFilePathSanitizer();
+      BarrelFile.pathSanitizer = FakeBarrelFilePathSanitizer();
       sut = const BarrelFilesSanitizer(inputName: 'files');
     });
 
     group('Valid inputs', () {
-      void expectSanitized(List<BarrelFileOption>? input, List<BarrelFileOption> expected) =>
+      void expectSanitized(List<BarrelFile>? input, List<BarrelFile> expected) =>
           expect(sut.sanitize(input), expected);
 
       test('Leaves a list without duplicates as is', () {
         expectSanitized(
-          [BarrelFileOption(path: 'foo'), BarrelFileOption(path: 'bar')],
-          [BarrelFileOption(path: 'foo'), BarrelFileOption(path: 'bar')],
+          const [BarrelFile(path: 'foo'), BarrelFile(path: 'bar')],
+          const [BarrelFile(path: 'foo'), BarrelFile(path: 'bar')],
         );
       });
 
       test('Replaces an empty list with the default barrel file', () {
         expectSanitized(
           [],
-          [BarrelFileOption()],
+          [BarrelFile.packageNamed()],
         );
       });
 
       test('Replaces null input with the default barrel file', () {
         expectSanitized(
           null,
-          [BarrelFileOption()],
+          [BarrelFile.packageNamed()],
         );
       });
 
       test('Removes duplicates by path', () {
         expectSanitized(
-          [
-            BarrelFileOption(path: 'foo'),
-            BarrelFileOption(path: 'foo'),
+          const [
+            BarrelFile(path: 'foo'),
+            BarrelFile(path: 'foo'),
           ],
-          [BarrelFileOption(path: 'foo')],
+          const [BarrelFile(path: 'foo')],
         );
       });
     });
 
     group('Invalid inputs', () {
-      void expectArgumentError(List<BarrelFileOption> input) {
+      void expectArgumentError(List<BarrelFile> input) {
         expect(() => sut.sanitize(input), throwsArgumentError);
       }
 
       test('Throws an ArgumentError if there are duplicates with conflicting configurations', () {
-        expectArgumentError([
-          BarrelFileOption(path: 'foo', tags: const {'bar'}),
-          BarrelFileOption(path: 'foo', tags: const {'baz'}),
+        expectArgumentError(const [
+          BarrelFile(path: 'foo', tags: {'bar'}),
+          BarrelFile(path: 'foo', tags: {'baz'}),
         ]);
       });
     });

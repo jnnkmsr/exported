@@ -1,5 +1,5 @@
-import 'package:exported/src/options/export_option.dart';
-import 'package:exported/src/options/exported_option_keys.dart' as keys;
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/export.dart';
 import 'package:exported/src/validation/show_hide_sanitizer.dart';
 import 'package:exported/src/validation/tags_sanitizer.dart';
 import 'package:exported/src/validation/uri_sanitizer.dart';
@@ -7,8 +7,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('$ExportOption', () {
-    late ExportOption sut;
+  group('$Export', () {
+    late Export sut;
 
     late MockExportUriSanitizer mockUriSanitizer;
     late MockShowHideSanitizer mockShowSanitizer;
@@ -20,19 +20,19 @@ void main() {
       mockShowSanitizer = MockShowHideSanitizer();
       mockHideSanitizer = MockShowHideSanitizer();
       mockTagsSanitizer = MockTagsSanitizer();
-      ExportOption.uriSanitizer = mockUriSanitizer;
-      ExportOption.showSanitizer = mockShowSanitizer;
-      ExportOption.hideSanitizer = mockHideSanitizer;
-      ExportOption.tagsSanitizer = mockTagsSanitizer;
+      Export.uriSanitizer = mockUriSanitizer;
+      Export.showSanitizer = mockShowSanitizer;
+      Export.hideSanitizer = mockHideSanitizer;
+      Export.tagsSanitizer = mockTagsSanitizer;
     });
 
     group('.()', () {
       setUp(() {
-        sut = ExportOption(
+        sut = const Export(
           uri: 'foo_bar',
-          show: const {'Baz', 'Qux'},
-          hide: const {'Quux', 'Corge'},
-          tags: const {'grault', 'garply'},
+          show: {'Baz', 'Qux'},
+          hide: {'Quux', 'Corge'},
+          tags: {'grault', 'garply'},
         );
       });
 
@@ -46,7 +46,7 @@ void main() {
 
     group('.fromJson()', () {
       setUp(() {
-        sut = ExportOption.fromJson(const {
+        sut = Export.fromJson(const {
           keys.uri: 'foo_bar',
           keys.show: ['Baz', 'Qux'],
           keys.hide: ['Quux', 'Corge'],
@@ -54,7 +54,7 @@ void main() {
         });
       });
 
-      test('Creates an $ExportOption instance from JSON', () {
+      test('Creates an $Export instance from JSON', () {
         expect(sut.uri, 'foo_bar');
         expect(sut.show, {'Baz', 'Qux'});
         expect(sut.hide, {'Quux', 'Corge'});
@@ -70,10 +70,10 @@ void main() {
     });
 
     group('.==()', () {
-      test('Compares two $ExportOption instances by URI', () {
-        final a = ExportOption(uri: 'foo');
-        final b = ExportOption(uri: 'foo');
-        final c = ExportOption(uri: 'bar');
+      test('Compares two $Export instances by URI', () {
+        const a = Export(uri: 'foo');
+        const b = Export(uri: 'foo');
+        const c = Export(uri: 'bar');
 
         expect(a, equals(b));
         expect(a, isNot(equals(c)));
@@ -82,10 +82,10 @@ void main() {
         expect(a.hashCode, isNot(c.hashCode));
       });
 
-      test('Compares two $ExportOption instances by show, ignoring order', () {
-        final a = ExportOption(uri: 'foo', show: const {'bar', 'baz'});
-        final b = ExportOption(uri: 'foo', show: const {'baz', 'bar'});
-        final c = ExportOption(uri: 'foo', show: const {'bar', 'baz', 'qux'});
+      test('Compares two $Export instances by show, ignoring order', () {
+        const a = Export(uri: 'foo', show: {'bar', 'baz'});
+        const b = Export(uri: 'foo', show: {'baz', 'bar'});
+        const c = Export(uri: 'foo', show: {'bar', 'baz', 'qux'});
 
         expect(a, equals(b));
         expect(a, isNot(equals(c)));
@@ -94,10 +94,10 @@ void main() {
         expect(a.hashCode, isNot(c.hashCode));
       });
 
-      test('Compares two $ExportOption instances by hide, ignoring order', () {
-        final a = ExportOption(uri: 'foo', hide: const {'bar', 'baz'});
-        final b = ExportOption(uri: 'foo', hide: const {'baz', 'bar'});
-        final c = ExportOption(uri: 'foo', hide: const {'bar', 'baz', 'qux'});
+      test('Compares two $Export instances by hide, ignoring order', () {
+        const a = Export(uri: 'foo', hide: {'bar', 'baz'});
+        const b = Export(uri: 'foo', hide: {'baz', 'bar'});
+        const c = Export(uri: 'foo', hide: {'bar', 'baz', 'qux'});
 
         expect(a, equals(b));
         expect(a, isNot(equals(c)));
@@ -106,10 +106,10 @@ void main() {
         expect(a.hashCode, isNot(c.hashCode));
       });
 
-      test('Compares two $ExportOption instances by tags, ignoring order', () {
-        final a = ExportOption(uri: 'foo', tags: const {'bar', 'baz'});
-        final b = ExportOption(uri: 'foo', tags: const {'baz', 'bar'});
-        final c = ExportOption(uri: 'foo', tags: const {'bar', 'baz', 'qux'});
+      test('Compares two $Export instances by tags, ignoring order', () {
+        const a = Export(uri: 'foo', tags: {'bar', 'baz'});
+        const b = Export(uri: 'foo', tags: {'baz', 'bar'});
+        const c = Export(uri: 'foo', tags: {'bar', 'baz', 'qux'});
 
         expect(a, equals(b));
         expect(a, isNot(equals(c)));

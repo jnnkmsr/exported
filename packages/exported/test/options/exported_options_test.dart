@@ -1,6 +1,6 @@
-import 'package:exported/src/options/barrel_file_option.dart';
-import 'package:exported/src/options/export_option.dart';
-import 'package:exported/src/options/exported_option_keys.dart' as keys;
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/barrel_file.dart';
+import 'package:exported/src/model/export.dart';
 import 'package:exported/src/options/exported_options.dart';
 import 'package:exported/src/validation/barrel_files_sanitizer.dart';
 import 'package:exported/src/validation/exports_sanitizer.dart';
@@ -15,8 +15,8 @@ void main() {
     late MockExportsSanitizer mockExportsSanitizer;
 
     setUpAll(() {
-      registerFallbackValue(BarrelFileOption());
-      registerFallbackValue(ExportOption(uri: 'foo'));
+      registerFallbackValue(const BarrelFile(path: 'foo'));
+      registerFallbackValue(const Export(uri: 'foo'));
     });
 
     setUp(() {
@@ -27,8 +27,8 @@ void main() {
     });
 
     group('.()', () {
-      final files = [BarrelFileOption(path: 'foo_bar.dart')];
-      final exports = [ExportOption(uri: 'foo')];
+      final files = [const BarrelFile(path: 'foo_bar.dart')];
+      final exports = [const Export(uri: 'foo')];
 
       setUp(() {
         sut = ExportedOptions(files: files, exports: exports);
@@ -47,12 +47,12 @@ void main() {
       final exportJson2 = {keys.uri: 'bar'};
 
       final files = [
-        BarrelFileOption.fromJson(fileJson1),
-        BarrelFileOption.fromJson(fileJson2),
+        BarrelFile.fromJson(fileJson1),
+        BarrelFile.fromJson(fileJson2),
       ];
       final exports = [
-        ExportOption.fromJson(exportJson1),
-        ExportOption.fromJson(exportJson2),
+        Export.fromJson(exportJson1),
+        Export.fromJson(exportJson2),
       ];
 
       setUp(() {
@@ -78,7 +78,7 @@ void main() {
 class MockBarrelFilesSanitizer with Mock implements BarrelFilesSanitizer {
   MockBarrelFilesSanitizer() {
     when(() => sanitize(any())).thenAnswer(
-      (i) => i.positionalArguments.first as List<BarrelFileOption>,
+      (i) => i.positionalArguments.first as List<BarrelFile>,
     );
   }
 }
@@ -86,7 +86,7 @@ class MockBarrelFilesSanitizer with Mock implements BarrelFilesSanitizer {
 class MockExportsSanitizer with Mock implements ExportsSanitizer {
   MockExportsSanitizer() {
     when(() => sanitize(any())).thenAnswer(
-      (i) => i.positionalArguments.first as List<ExportOption>,
+      (i) => i.positionalArguments.first as List<Export>,
     );
   }
 }

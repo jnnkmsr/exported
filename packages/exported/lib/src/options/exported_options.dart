@@ -1,7 +1,7 @@
 import 'package:build/build.dart';
-import 'package:exported/src/options/barrel_file_option.dart';
-import 'package:exported/src/options/export_option.dart';
-import 'package:exported/src/options/exported_option_keys.dart' as keys;
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/barrel_file.dart';
+import 'package:exported/src/model/export.dart';
 import 'package:exported/src/validation/barrel_files_sanitizer.dart';
 import 'package:exported/src/validation/exports_sanitizer.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -18,8 +18,8 @@ class ExportedOptions {
   /// Internal constructor called by [ExportedOptions.fromJson],
   @protected
   ExportedOptions({
-    List<BarrelFileOption>? files,
-    List<ExportOption>? exports,
+    List<BarrelFile>? files,
+    List<Export>? exports,
   })  : files = filesSanitizer.sanitize(files),
         exports = exportsSanitizer.sanitize(exports);
 
@@ -43,7 +43,7 @@ class ExportedOptions {
   /// - Path duplicates with conflicting configuration throw an [ArgumentError].
   /// - `null` is treated as an empty list.
   @JsonKey(name: keys.barrelFiles)
-  late final List<BarrelFileOption> files;
+  late final List<BarrelFile> files;
 
   /// A list of exports to include in the generated barrel files in addition to
   /// the annotated elements in the source files. Set through the `exports`
@@ -54,7 +54,7 @@ class ExportedOptions {
   /// - URI duplicates with conflicting configuration throw an [ArgumentError].
   /// - `null` is treated as an empty list.
   @JsonKey(name: keys.exports)
-  late final List<ExportOption> exports;
+  late final List<Export> exports;
 
   /// Sanitizer for the [exports] input. Exchangeable by test doubles.
   @visibleForTesting

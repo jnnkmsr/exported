@@ -1,35 +1,39 @@
+import 'package:exported/src/builder/barrel_file_generator.dart';
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/options/barrel_file_option.dart';
 import 'package:exported/src/options/exported_options.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('$BarrelFile', () {
-    late BarrelFile sut;
+  group('$BarrelFileGenerator', () {
+    late BarrelFileGenerator sut;
 
     group('.fromOptions()', () {
-      test('Creates a $BarrelFile for each $BarrelFileOption', () {
-        final options = ExportedOptions(
-          files: [
-            BarrelFileOption(path: 'foo.dart', tags: const {'Foo'}),
-            BarrelFileOption(path: 'bar.dart', tags: const {'Bar'}),
-          ],
-        );
+      test('Creates a BarrelFileGenerator instance for each configured BarrelFile', () {
+        const files = [
+          BarrelFile(path: 'foo.dart'),
+          BarrelFile(path: 'bar.dart'),
+        ];
+        final options = ExportedOptions(files: files);
 
-        final files = BarrelFile.fromOptions(options).toList();
+        final result = BarrelFileGenerator.fromOptions(ExportedOptions(files: files)).toList();
 
-        expect(files, hasLength(2));
+        expect(result, hasLength(2));
         for (var i = 0; i < files.length; i++) {
-          expect(files[i].path, options.files[i].path);
-          expect(files[i].tags, options.files[i].tags);
+          expect(result[i].file, options.files[i]);
         }
+      });
+
+      test('Adds all configured Exports', () {
+        fail('Missing test');
       });
     });
 
     group('.exports', () {
       test('Returns all exports sorted by URI', () {
-        sut = BarrelFile(path: 'foo.dart');
+        sut = BarrelFileGenerator(
+          file: const BarrelFile(path: 'foo.dart'),
+        );
 
         const a = Export(uri: 'package:a/a.dart');
         const b = Export(uri: 'package:b/b.dart');
@@ -43,7 +47,12 @@ void main() {
 
     group('.addExports()', () {
       test("Adds only export if it matches the file's tags", () {
-        sut = BarrelFile(path: 'foo_bar.dart', tags: {'Foo', 'Bar'});
+        sut = BarrelFileGenerator(
+          file: const BarrelFile(
+            path: 'foo.dart',
+            tags: {'Foo', 'Bar'},
+          ),
+        );
 
         const a = Export(uri: 'package:a/a.dart', tags: {'Foo'});
         const b = Export(uri: 'package:b/b.dart', tags: {'Foo', 'Bar'});
@@ -55,7 +64,9 @@ void main() {
       });
 
       test("Always adds an export if the file doesn't have tags", () {
-        sut = BarrelFile(path: 'foo.dart');
+        sut = BarrelFileGenerator(
+          file: const BarrelFile(path: 'foo.dart'),
+        );
 
         const a = Export(uri: 'package:a/a.dart', tags: {'Foo'});
         sut.addExports({a});
@@ -64,7 +75,9 @@ void main() {
       });
 
       test('Merges exports with matching URI', () {
-        sut = BarrelFile(path: 'foo.dart');
+        sut = BarrelFileGenerator(
+          file: const BarrelFile(path: 'foo.dart'),
+        );
 
         const a = Export(uri: 'package:bar/bar.dart', show: {'Baz'});
         const b = Export(uri: 'package:bar/bar.dart', show: {'Qux'});

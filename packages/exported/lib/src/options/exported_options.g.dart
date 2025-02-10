@@ -6,11 +6,23 @@ part of 'exported_options.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ExportedOptions _$ExportedOptionsFromJson(Map json) => ExportedOptions(
-      files: (json['barrel_files'] as List<dynamic>?)
-          ?.map((e) => BarrelFileOption.fromJson(e as Map))
-          .toList(),
-      exports: (json['exports'] as List<dynamic>?)
-          ?.map((e) => ExportOption.fromJson(e as Map))
-          .toList(),
+ExportedOptions _$ExportedOptionsFromJson(Map json) => $checkedCreate(
+      'ExportedOptions',
+      json,
+      ($checkedConvert) {
+        final val = ExportedOptions(
+          files: $checkedConvert(
+              'barrel_files',
+              (v) => (v as List<dynamic>?)
+                  ?.map((e) => BarrelFile.fromJson(e as Map))
+                  .toList()),
+          exports: $checkedConvert(
+              'exports',
+              (v) => (v as List<dynamic>?)
+                  ?.map((e) => Export.fromJson(e as Map))
+                  .toList()),
+        );
+        return val;
+      },
+      fieldKeyMap: const {'files': 'barrel_files'},
     );
