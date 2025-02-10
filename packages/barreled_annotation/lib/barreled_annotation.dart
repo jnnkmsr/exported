@@ -1,1 +1,0 @@
-export 'src/barreled.dart';

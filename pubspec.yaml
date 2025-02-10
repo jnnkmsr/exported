@@ -1,13 +1,13 @@
-name: barreled_workspace
+name: exported_workspace
 publish_to: none
 
 environment:
   sdk: ^3.6.1
 
 workspace:
-  - packages/barreled
-  - packages/barreled/example
-  - packages/barreled_annotation
+  - packages/exported
+  - packages/exported/example
+  - packages/exported_annotation
   - tools/lints
 
 dev_dependencies:

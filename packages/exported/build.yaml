@@ -1,0 +1,30 @@
+targets:
+  $default:
+    builders:
+      :exported: { enabled: false }
+      :exported_assets: { enabled: false }
+
+      json_serializable:
+        enabled: true
+        generate_for:
+          - lib/src/model/*.dart
+          - lib/src/options/*.dart
+        options:
+          any_map: true
+          explicit_to_json: true
+
+builders:
+  exported:
+    import: package:exported/builder.dart
+    builder_factories: [ exportedBuilder ]
+    build_extensions: { $package$: [ barreled.stub ] }
+    auto_apply: dependents
+    build_to: source
+
+  exported_assets:
+    import: package:exported/builder.dart
+    builder_factories: [ exportedAssetsBuilder ]
+    build_extensions: { .dart: [ .exported.json ] }
+    auto_apply: dependents
+    build_to: cache
+    runs_before: [ :exported ]

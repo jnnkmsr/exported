@@ -1,0 +1,15 @@
+name: exported_annotation
+description: Annotations for exported.
+version: 0.1.0
+publish_to: none
+
+resolution: workspace
+
+environment:
+  sdk: ^3.6.1
+
+dependencies:
+  meta: ^1.15.0
+
+dev_dependencies:
+  exported_lints:
