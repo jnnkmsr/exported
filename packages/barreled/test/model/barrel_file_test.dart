@@ -12,8 +12,8 @@ void main() {
       test('Creates a $BarrelFile for each $BarrelFileOption', () {
         final options = BarreledOptions(
           files: [
-            BarrelFileOption(file: 'foo.dart', tags: const {'Foo'}),
-            BarrelFileOption(file: 'bar.dart', tags: const {'Bar'}),
+            BarrelFileOption(path: 'foo.dart', tags: const {'Foo'}),
+            BarrelFileOption(path: 'bar.dart', tags: const {'Bar'}),
           ],
         );
 
@@ -21,23 +21,15 @@ void main() {
 
         expect(files, hasLength(2));
         for (var i = 0; i < files.length; i++) {
-          expect(files[i].name, options.files[i].file);
-          expect(files[i].dir, options.files[i].dir);
+          expect(files[i].path, options.files[i].path);
           expect(files[i].tags, options.files[i].tags);
         }
       });
     });
 
-    group('.path', () {
-      test('Returns the full relative path to this barrel file', () {
-        sut = BarrelFile(name: 'foo.dart', dir: 'lib');
-        expect(sut.path, 'lib/foo.dart');
-      });
-    });
-
     group('.exports', () {
       test('Returns all exports sorted by URI', () {
-        sut = BarrelFile(name: 'foo.dart', dir: 'lib');
+        sut = BarrelFile(path: 'foo.dart');
 
         const a = BarrelExport(uri: 'package:a/a.dart');
         const b = BarrelExport(uri: 'package:b/b.dart');
@@ -51,7 +43,7 @@ void main() {
 
     group('.addExports()', () {
       test("Adds only export if it matches the file's tags", () {
-        sut = BarrelFile(name: 'foo_bar.dart', dir: 'lib', tags: {'Foo', 'Bar'});
+        sut = BarrelFile(path: 'foo_bar.dart', tags: {'Foo', 'Bar'});
 
         const a = BarrelExport(uri: 'package:a/a.dart', tags: {'Foo'});
         const b = BarrelExport(uri: 'package:b/b.dart', tags: {'Foo', 'Bar'});
@@ -63,7 +55,7 @@ void main() {
       });
 
       test("Always adds an export if the file doesn't have tags", () {
-        sut = BarrelFile(name: 'foo.dart', dir: 'lib');
+        sut = BarrelFile(path: 'foo.dart');
 
         const a = BarrelExport(uri: 'package:a/a.dart', tags: {'Foo'});
         sut.addExports({a});
@@ -72,7 +64,7 @@ void main() {
       });
 
       test('Merges exports with matching URI', () {
-        sut = BarrelFile(name: 'foo.dart', dir: 'lib');
+        sut = BarrelFile(path: 'foo.dart');
 
         const a = BarrelExport(uri: 'package:bar/bar.dart', show: {'Baz'});
         const b = BarrelExport(uri: 'package:bar/bar.dart', show: {'Qux'});

@@ -1,6 +1,6 @@
 import 'package:barreled/src/options/barrel_file_option.dart';
-import 'package:barreled/src/validation/barrel_file_path_sanitizer.dart';
 import 'package:barreled/src/validation/barrel_files_sanitizer.dart';
+import 'package:barreled/src/validation/file_path_sanitizer.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -19,8 +19,8 @@ void main() {
 
       test('Leaves a list without duplicates as is', () {
         expectSanitized(
-          [BarrelFileOption(file: 'foo'), BarrelFileOption(file: 'bar')],
-          [BarrelFileOption(file: 'foo'), BarrelFileOption(file: 'bar')],
+          [BarrelFileOption(path: 'foo'), BarrelFileOption(path: 'bar')],
+          [BarrelFileOption(path: 'foo'), BarrelFileOption(path: 'bar')],
         );
       });
 
@@ -41,23 +41,10 @@ void main() {
       test('Removes duplicates by path', () {
         expectSanitized(
           [
-            BarrelFileOption(file: 'foo', dir: 'lib'),
-            BarrelFileOption(file: 'foo', dir: 'lib'),
+            BarrelFileOption(path: 'foo'),
+            BarrelFileOption(path: 'foo'),
           ],
-          [BarrelFileOption(file: 'foo', dir: 'lib')],
-        );
-      });
-
-      test("Doesn't remove duplicate file names with different paths", () {
-        expectSanitized(
-          [
-            BarrelFileOption(file: 'foo', dir: 'lib'),
-            BarrelFileOption(file: 'foo', dir: 'lib/bar'),
-          ],
-          [
-            BarrelFileOption(file: 'foo', dir: 'lib'),
-            BarrelFileOption(file: 'foo', dir: 'lib/bar'),
-          ],
+          [BarrelFileOption(path: 'foo')],
         );
       });
     });
@@ -69,16 +56,15 @@ void main() {
 
       test('Throws an ArgumentError if there are duplicates with conflicting configurations', () {
         expectArgumentError([
-          BarrelFileOption(file: 'foo', tags: const {'bar'}),
-          BarrelFileOption(file: 'foo', tags: const {'baz'}),
+          BarrelFileOption(path: 'foo', tags: const {'bar'}),
+          BarrelFileOption(path: 'foo', tags: const {'baz'}),
         ]);
       });
     });
   });
 }
 
-class FakeBarrelFilePathSanitizer with Fake implements BarrelFilePathSanitizer {
+class FakeBarrelFilePathSanitizer with Fake implements FilePathSanitizer {
   @override
-  BarrelFilePath sanitize({String? fileInput, String? dirInput}) =>
-      (file: fileInput ?? 'foo.dart', dir: dirInput ?? 'lib');
+  String sanitize(String? input) => input ?? 'foo.dart';
 }

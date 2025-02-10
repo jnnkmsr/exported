@@ -10,6 +10,7 @@ import 'package:build/build.dart';
 import 'package:collection/collection.dart';
 import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 
 class BarreledBuilder extends Builder {
@@ -21,7 +22,7 @@ class BarreledBuilder extends Builder {
   }
 
   @override
-  late final buildExtensions = {r'$lib$': _files.names};
+  late final buildExtensions = {r'$lib$': _files.paths};
   late final Set<BarrelFile> _files;
   late final Version? _dartVersion;
 
@@ -58,7 +59,7 @@ class BarreledBuilder extends Builder {
 
   Future<void> _write(BuildStep buildStep, BarrelFile file) {
     return buildStep.writeAsString(
-      AssetId(buildStep.inputId.package, file.path),
+      AssetId(buildStep.inputId.package, p.join('lib', file.path)),
       _generateOutput(file),
     );
   }
@@ -66,10 +67,7 @@ class BarreledBuilder extends Builder {
   @override
   Future<void> build(BuildStep buildStep) async {
     await _readExportsFromAssets(buildStep);
-    for (final file in _files) {
-      await _write(buildStep, file);
-    }
-    // await Future.wait(_files.map((file) => _write(buildStep, file)));
+    await Future.wait(_files.map((file) => _write(buildStep, file)));
   }
 }
 
@@ -89,5 +87,5 @@ extension on Iterable<BarrelFile> {
     }
   }
 
-  List<String> get names => [for (final file in this) file.name];
+  List<String> get paths => [for (final file in this) file.path];
 }

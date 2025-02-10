@@ -26,7 +26,7 @@ void main() {
     });
 
     group('.()', () {
-      final files = [BarrelFileOption(file: 'foo_bar.dart')];
+      final files = [BarrelFileOption(path: 'foo_bar.dart')];
       final exports = [ExportOption(uri: 'foo')];
 
       setUp(() {
@@ -40,8 +40,8 @@ void main() {
     });
 
     group('.fromJson()', () {
-      final fileJson1 = {BarrelFileOption.fileKey: 'foo_bar.dart'};
-      final fileJson2 = {BarrelFileOption.fileKey: 'baz_qux.dart'};
+      final fileJson1 = {BarrelFileOption.pathKey: 'foo_bar.dart'};
+      final fileJson2 = {BarrelFileOption.pathKey: 'baz_qux.dart'};
       final exportJson1 = {ExportOption.uriKey: 'foo'};
       final exportJson2 = {ExportOption.uriKey: 'bar'};
 

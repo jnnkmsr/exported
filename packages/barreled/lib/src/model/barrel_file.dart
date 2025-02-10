@@ -3,14 +3,12 @@ import 'package:barreled/src/options/barrel_file_option.dart';
 import 'package:barreled/src/options/barreled_options.dart';
 import 'package:barreled/src/options/export_option.dart';
 import 'package:collection/collection.dart';
-import 'package:path/path.dart' as p;
 
 /// Represents a barrel file with an editable list of exports.
 class BarrelFile {
-  /// Creates a [BarrelFile] with the given [name], [dir] abd [tags].
+  /// Creates a [BarrelFile] with the given [path]and [tags].
   BarrelFile({
-    required this.name,
-    required this.dir,
+    required this.path,
     Set<String>? tags,
   }) : tags = tags ?? const {};
 
@@ -24,26 +22,19 @@ class BarrelFile {
     return {
       for (final option in options.files)
         BarrelFile(
-          name: option.file,
-          dir: option.dir,
+          path: option.path,
           tags: option.tags,
         )..addExports(packageExports),
     };
   }
 
-  /// The file name of this barrel file.
-  final String name;
-
-  /// The directory path of this barrel file.
-  final String dir;
+  /// The relative path within the `lib` directory of the target package.
+  final String path;
 
   /// The set of tags for selectively including exports in this barrel file.
   ///
   /// If empty, all exports are included.
   final Set<String> tags;
-
-  /// The full relative path to this barrel file.
-  String get path => p.join(dir, name);
 
   /// Returns the exports in this file.
   List<BarrelExport> get exports => _exports.sorted();
