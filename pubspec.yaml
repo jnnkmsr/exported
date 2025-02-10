@@ -14,7 +14,7 @@ dev_dependencies:
   melos: ^7.0.0-dev.7
 
 melos:
-  repository: https://github.com/jnnkmsr/barreled
+  repository: https://github.com/jnnkmsr/exported
   sdkPath: auto
   ide:
     intellij:
