@@ -1,5 +1,5 @@
-import 'package:collection/collection.dart';
 import 'package:exported/src/options/exported_option_keys.dart' as keys;
+import 'package:exported/src/util/equals_util.dart';
 import 'package:exported/src/validation/show_hide_sanitizer.dart';
 import 'package:exported/src/validation/tags_sanitizer.dart';
 import 'package:exported/src/validation/uri_sanitizer.dart';
@@ -95,13 +95,10 @@ class ExportOption {
       other is ExportOption &&
           runtimeType == other.runtimeType &&
           uri == other.uri &&
-          _setEquality.equals(show, other.show) &&
-          _setEquality.equals(hide, other.hide) &&
-          _setEquality.equals(tags, other.tags);
+          setEquals(show, other.show) &&
+          setEquals(hide, other.hide) &&
+          setEquals(tags, other.tags);
 
   @override
-  int get hashCode =>
-      uri.hashCode ^ _setEquality.hash(show) ^ _setEquality.hash(hide) ^ _setEquality.hash(tags);
-
-  static const _setEquality = SetEquality<String>();
+  int get hashCode => uri.hashCode ^ setHash(show) ^ setHash(hide) ^ setHash(tags);
 }
