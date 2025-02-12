@@ -1,20 +1,20 @@
 import 'package:exported/src/util/pubspec_reader.dart';
-import 'package:exported/src/validation/file_path_sanitizer.dart';
+import 'package:exported/src/validation/file_path_parser.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('$FilePathSanitizer', () {
-    late FilePathSanitizer sut;
+  group('$FilePathParser', () {
+    late FilePathParser sut;
 
     setUp(() {
       PubspecReader.$instance = FakePubspecReader();
-      sut = const FilePathSanitizer('file');
+      sut = const FilePathParser('file');
     });
 
     group('Valid input', () {
       void expectSanitized(String? input, String expected) {
-        expect(sut.sanitize(input), expected);
+        expect(sut.parse(input), expected);
       }
 
       test('Accepts a file name', () {
@@ -81,7 +81,7 @@ void main() {
 
     group('Invalid input', () {
       void expectArgumentError(String? input) {
-        expect(() => sut.sanitize(input), throwsArgumentError);
+        expect(() => sut.parse(input), throwsArgumentError);
       }
 
       test("Throws for an extension other than '.dart'", () {

@@ -1,17 +1,17 @@
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
-import 'package:exported/src/validation/tags_sanitizer.dart';
+import 'package:exported/src/validation/tags_parser.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('$TagsSanitizer', () {
-    late TagsSanitizer sut;
+  group('$TagsParser', () {
+    late TagsParser sut;
 
     setUp(() {
-      sut = const TagsSanitizer(keys.tags);
+      sut = const TagsParser(keys.tags);
     });
 
     void expectSanitized(Set<String>? input, Set<String> expected) =>
-        expect(sut.sanitize(input), expected);
+        expect(sut.parse(input), expected);
 
     test('Leaves a valid set as-is', () {
       expectSanitized(

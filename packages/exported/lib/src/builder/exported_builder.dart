@@ -14,7 +14,7 @@ import 'package:pub_semver/pub_semver.dart';
 
 class ExportedBuilder extends Builder {
   ExportedBuilder({ExportedOptions? options})
-      : _generators = BarrelFileGenerator.fromOptions(options ?? ExportedOptions());
+      : _generators = BarrelFileGenerator.fromOptions(options ?? ExportedOptions.defaults());
 
   late final Set<BarrelFileGenerator> _generators;
   late final Version? _dartVersion = pubspecReader.sdkVersion.target;

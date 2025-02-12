@@ -1,22 +1,22 @@
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/barrel_file.dart';
-import 'package:exported/src/validation/barrel_files_sanitizer.dart';
-import 'package:exported/src/validation/file_path_sanitizer.dart';
+import 'package:exported/src/validation/barrel_files_parser.dart';
+import 'package:exported/src/validation/file_path_parser.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('$BarrelFilesSanitizer', () {
-    late BarrelFilesSanitizer sut;
+  group('$BarrelFilesParser', () {
+    late BarrelFilesParser sut;
 
     setUp(() {
-      BarrelFile.pathSanitizer = FakeBarrelFilePathSanitizer();
-      sut = const BarrelFilesSanitizer(keys.barrelFiles);
+      BarrelFile.pathParser = FakeBarrelFilePathParser();
+      sut = const BarrelFilesParser(keys.barrelFiles);
     });
 
     group('Valid inputs', () {
       void expectSanitized(List<BarrelFile>? input, List<BarrelFile> expected) =>
-          expect(sut.sanitize(input), expected);
+          expect(sut.parse(input), expected);
 
       test('Leaves a list without duplicates as is', () {
         expectSanitized(
@@ -52,7 +52,7 @@ void main() {
 
     group('Invalid inputs', () {
       void expectArgumentError(List<BarrelFile> input) {
-        expect(() => sut.sanitize(input), throwsArgumentError);
+        expect(() => sut.parse(input), throwsArgumentError);
       }
 
       test('Throws an ArgumentError if there are duplicates with conflicting configurations', () {
@@ -65,7 +65,7 @@ void main() {
   });
 }
 
-class FakeBarrelFilePathSanitizer with Fake implements FilePathSanitizer {
+class FakeBarrelFilePathParser with Fake implements FilePathParser {
   @override
-  String sanitize(String? input) => input ?? 'foo.dart';
+  String parse([String? input]) => input ?? 'foo.dart';
 }

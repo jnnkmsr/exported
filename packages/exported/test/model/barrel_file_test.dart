@@ -3,31 +3,29 @@ import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
 import 'package:test/test.dart';
 
-import '../helpers/mock_input_sanitizer.dart';
+import '../helpers/mock_input_parser.dart';
 
 void main() {
   group('BarrelFile', () {
     late BarrelFile sut;
 
-    late MockFilePathSanitizer mockPathSanitizer;
-    late MockTagsSanitizer mockTagsSanitizer;
+    late MockFilePathParser mockPathParser;
+    late MockTagsParser mockTagsParser;
 
     setUp(() {
-      mockPathSanitizer = MockFilePathSanitizer();
-      mockTagsSanitizer = MockTagsSanitizer();
-      BarrelFile.pathSanitizer = mockPathSanitizer;
-      BarrelFile.tagsSanitizer = mockTagsSanitizer;
+      mockPathParser = MockFilePathParser();
+      mockTagsParser = MockTagsParser();
+      BarrelFile.pathParser = mockPathParser;
+      BarrelFile.tagsParser = mockTagsParser;
     });
 
     group('.packageNamed()', () {
       test('Creates a default package-named BarrelFile without tags', () {
-        mockPathSanitizer.whenSanitizeReturn(null, 'package:foo/foo.dart');
-        mockTagsSanitizer.whenSanitizeReturn(null, {});
+        mockPathParser.whenParse(null, 'package:foo/foo.dart');
 
         sut = BarrelFile.packageNamed();
 
-        mockPathSanitizer.verifySanitized(null);
-        mockTagsSanitizer.verifySanitized(null);
+        mockPathParser.verifyParse(null);
 
         expect(sut.path, 'package:foo/foo.dart');
         expect(sut.tags, isEmpty);
@@ -36,24 +34,19 @@ void main() {
 
     group('.fromJson()', () {
       test('Creates a BarrelFile from sanitized JSON inputs', () {
-        mockPathSanitizer.whenSanitizeReturn('foo.dart', 'package:foo/foo.dart');
-        mockTagsSanitizer.whenSanitizeReturn({'foo', 'Foo'}, {'foo'});
+        mockPathParser.whenParseJson('foo.dart', 'package:foo/foo.dart');
+        mockTagsParser.whenParseJson(['foo', 'Foo'], {'foo'});
 
         sut = BarrelFile.fromJson(const {
           keys.path: 'foo.dart',
           keys.tags: ['foo', 'Foo'],
         });
 
-        mockPathSanitizer.verifySanitized('foo.dart');
-        mockTagsSanitizer.verifySanitized({'foo', 'Foo'});
+        mockPathParser.verifyParseJson('foo.dart');
+        mockTagsParser.verifyParseJson(['foo', 'Foo']);
 
         expect(sut.path, 'package:foo/foo.dart');
         expect(sut.tags, {'foo'});
-      });
-
-      test('Throws ArgumentError for invalid types', () {
-        expect(() => BarrelFile.fromJson(const {keys.path: 123}), throwsA(isA<ArgumentError>()));
-        expect(() => BarrelFile.fromJson(const {keys.tags: 123}), throwsA(isA<ArgumentError>()));
       });
     });
 

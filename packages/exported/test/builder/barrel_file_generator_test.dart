@@ -14,13 +14,13 @@ void main() {
           BarrelFile(path: 'foo.dart'),
           BarrelFile(path: 'bar.dart'),
         ];
-        final options = ExportedOptions(files: files);
 
-        final result = BarrelFileGenerator.fromOptions(ExportedOptions(files: files)).toList();
+        final result =
+            BarrelFileGenerator.fromOptions(const ExportedOptions(files: files)).toList();
 
         expect(result, hasLength(2));
         for (var i = 0; i < files.length; i++) {
-          expect(result[i].file, options.files[i]);
+          expect(result[i].file, files[i]);
         }
       });
 

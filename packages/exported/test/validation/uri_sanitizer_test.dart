@@ -1,18 +1,18 @@
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
-import 'package:exported/src/validation/uri_sanitizer.dart';
+import 'package:exported/src/validation/uri_parser.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('$UriSanitizer', () {
-    late UriSanitizer sut;
+  group('$UriParser', () {
+    late UriParser sut;
 
     setUp(() {
-      sut = const UriSanitizer(keys.uri);
+      sut = const UriParser(keys.uri);
     });
 
     group('Valid input', () {
       void expectSanitized(String input, String expected) {
-        expect(sut.sanitize(input), expected);
+        expect(sut.parse(input), expected);
       }
 
       test('Accepts fully-qualified URI', () {
@@ -74,7 +74,7 @@ void main() {
 
     group('Invalid input', () {
       void expectArgumentError(String? input) {
-        expect(() => sut.sanitize(input), throwsArgumentError);
+        expect(() => sut.parse(input), throwsArgumentError);
       }
 
       test('Throws for null, empty or blank input', () {

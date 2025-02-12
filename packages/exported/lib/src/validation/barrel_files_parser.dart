@@ -1,16 +1,16 @@
 import 'package:exported/src/model/barrel_file.dart';
-import 'package:exported/src/validation/input_sanitizer.dart';
+import 'package:exported/src/validation/input_parser.dart';
 
 /// Sanitizes a list of `files` builder options based on the following rules:
 /// - Duplicates with matching configuration are removed.
 /// - Path duplicates with conflicting configuration throw an [ArgumentError].
 /// - If the input is `null` or empty, the default barrel file will be added.
-class BarrelFilesSanitizer extends InputSanitizer<List<BarrelFile>?, List<BarrelFile>> {
-  const BarrelFilesSanitizer(super.inputName);
+class BarrelFilesParser extends ListParser<BarrelFile> {
+  const BarrelFilesParser(super.inputName);
 
   /// Validates the [input] and returns the deduplicated list of exports.
   @override
-  List<BarrelFile> sanitize(List<BarrelFile>? input) {
+  List<BarrelFile> parse([List<BarrelFile>? input]) {
     if (input == null || input.isEmpty) return [BarrelFile.packageNamed()];
 
     final filesByPath = <String, BarrelFile>{};
@@ -24,4 +24,7 @@ class BarrelFilesSanitizer extends InputSanitizer<List<BarrelFile>?, List<Barrel
     }
     return filesByPath.values.toList();
   }
+
+  @override
+  BarrelFile elementFromJson(dynamic json) => BarrelFile.fromJson(json as Map);
 }

@@ -1,17 +1,17 @@
-import 'package:exported/src/validation/show_hide_sanitizer.dart';
+import 'package:exported/src/validation/show_hide_parser.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('$ShowHideSanitizer', () {
-    late ShowHideSanitizer sut;
+  group('$ShowHideParser', () {
+    late ShowHideParser sut;
 
     setUp(() {
-      sut = const ShowHideSanitizer('show');
+      sut = const ShowHideParser('show');
     });
 
     group('Valid input', () {
       void expectSanitized(Set<String>? input, Set<String> expected) =>
-          expect(sut.sanitize(input), expected);
+          expect(sut.parse(input), expected);
 
       test('Leaves a valid set as-is', () {
         expectSanitized(
@@ -65,7 +65,7 @@ void main() {
 
     group('Invalid input', () {
       void expectArgumentError(Set<String> input) {
-        expect(() => sut.sanitize(input), throwsArgumentError);
+        expect(() => sut.parse(input), throwsArgumentError);
       }
 
       test('Throws for invalid identifiers', () {

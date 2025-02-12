@@ -1,32 +1,31 @@
 import 'package:build/build.dart';
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
 import '../helpers/fake_element.dart';
 import '../helpers/fake_exported_reader.dart';
-import '../helpers/mock_input_sanitizer.dart';
+import '../helpers/mock_input_parser.dart';
 
 void main() {
   group('Export', () {
     late Export sut;
 
-    late MockUriSanitizer mockUriSanitizer;
-    late MockShowHideSanitizer mockShowSanitizer;
-    late MockShowHideSanitizer mockHideSanitizer;
-    late MockTagsSanitizer mockTagsSanitizer;
+    late MockUriParser mockUriParser;
+    late MockShowHideParser mockShowParser;
+    late MockShowHideParser mockHideParser;
+    late MockTagsParser mockTagsParser;
 
     setUp(() {
-      mockUriSanitizer = MockUriSanitizer();
-      mockShowSanitizer = MockShowHideSanitizer();
-      mockHideSanitizer = MockShowHideSanitizer();
-      mockTagsSanitizer = MockTagsSanitizer();
-      Export.uriSanitizer = mockUriSanitizer;
-      Export.showSanitizer = mockShowSanitizer;
-      Export.hideSanitizer = mockHideSanitizer;
-      Export.tagsSanitizer = mockTagsSanitizer;
+      mockUriParser = MockUriParser();
+      mockShowParser = MockShowHideParser();
+      mockHideParser = MockShowHideParser();
+      mockTagsParser = MockTagsParser();
+      Export.uriParser = mockUriParser;
+      Export.showParser = mockShowParser;
+      Export.hideParser = mockHideParser;
+      Export.tagsParser = mockTagsParser;
     });
 
     group('.fromAnnotatedElement()', () {
@@ -48,11 +47,11 @@ void main() {
         final element = FakeElement(name: 'Foo');
         final annotation = FakeExportedReader(tags: {'Foo', '   bar '});
 
-        mockTagsSanitizer.whenSanitizeReturn({'Foo', '   bar '}, {'foo', 'bar'});
+        mockTagsParser.whenParse({'Foo', '   bar '}, {'foo', 'bar'});
 
         sut = Export.fromAnnotatedElement(library, element, annotation);
 
-        mockTagsSanitizer.verifySanitized({'Foo', '   bar '});
+        mockTagsParser.verifyParse({'Foo', '   bar '});
         expect(sut.tags, {'foo', 'bar'});
       });
 
@@ -69,27 +68,39 @@ void main() {
     });
 
     group('.fromJson()', () {
-      setUp(() {
+      test('Creates an Export from sanitized JSON inputs', () {
+        mockUriParser.whenParseJson('foo', 'package:foo/foo.dart');
+        mockShowParser.whenParseJson(['  Foo  ', 'Bar'], {'Foo', 'Bar'});
+        mockHideParser.whenParseJson([' '], {});
+        mockTagsParser.whenParseJson(['foo', 'Foo'], {'foo'});
+
         sut = Export.fromJson(const {
-          keys.uri: 'foo_bar',
-          keys.show: ['Baz', 'Qux'],
-          keys.hide: ['Quux', 'Corge'],
-          keys.tags: ['grault', 'garply'],
+          keys.uri: 'foo',
+          keys.show: ['  Foo  ', 'Bar'],
+          keys.hide: [' '],
+          keys.tags: ['foo', 'Foo'],
         });
+
+        mockUriParser.verifyParseJson('foo');
+        mockShowParser.verifyParseJson({'  Foo  ', 'Bar'});
+        mockHideParser.verifyParseJson({' '});
+        mockTagsParser.verifyParseJson({'foo', 'Foo'});
+
+        expect(sut.uri, 'package:foo/foo.dart');
+        expect(sut.show, {'Foo', 'Bar'});
+        expect(sut.hide, isEmpty);
+        expect(sut.tags, {'foo'});
       });
 
-      test('Creates an $Export instance from JSON', () {
-        expect(sut.uri, 'foo_bar');
-        expect(sut.show, {'Baz', 'Qux'});
-        expect(sut.hide, {'Quux', 'Corge'});
-        expect(sut.tags, {'grault', 'garply'});
-      });
-
-      test('Sanitizes inputs', () {
-        verify(() => mockUriSanitizer.sanitize('foo_bar')).called(1);
-        verify(() => mockShowSanitizer.sanitize({'Baz', 'Qux'})).called(1);
-        verify(() => mockHideSanitizer.sanitize({'Quux', 'Corge'})).called(1);
-        verify(() => mockTagsSanitizer.sanitize({'grault', 'garply'})).called(1);
+      test('Throws an ArgumentError if `show` and `hide` are both present', () {
+        expect(
+          () => Export.fromJson(const {
+            keys.uri: 'package:foo/foo.dart',
+            keys.show: ['Foo'],
+            keys.hide: ['Bar'],
+          }),
+          throwsA(isA<ArgumentError>()),
+        );
       });
     });
 

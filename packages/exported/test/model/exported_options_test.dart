@@ -2,8 +2,8 @@ import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/exported_options.dart';
-import 'package:exported/src/validation/barrel_files_sanitizer.dart';
-import 'package:exported/src/validation/exports_sanitizer.dart';
+import 'package:exported/src/validation/barrel_files_parser.dart';
+import 'package:exported/src/validation/exports_parser.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -11,8 +11,8 @@ void main() {
   group('$ExportedOptions', () {
     late ExportedOptions sut;
 
-    late MockBarrelFilesSanitizer mockFilesSanitizer;
-    late MockExportsSanitizer mockExportsSanitizer;
+    late MockBarrelFilesParser mockFilesParser;
+    late MockExportsParser mockExportsParser;
 
     setUpAll(() {
       registerFallbackValue(const BarrelFile(path: 'foo'));
@@ -20,10 +20,10 @@ void main() {
     });
 
     setUp(() {
-      mockFilesSanitizer = MockBarrelFilesSanitizer();
-      mockExportsSanitizer = MockExportsSanitizer();
-      ExportedOptions.filesSanitizer = mockFilesSanitizer;
-      ExportedOptions.exportsSanitizer = mockExportsSanitizer;
+      mockFilesParser = MockBarrelFilesParser();
+      mockExportsParser = MockExportsParser();
+      ExportedOptions.filesParser = mockFilesParser;
+      ExportedOptions.exportsParser = mockExportsParser;
     });
 
     group('.()', () {
@@ -35,8 +35,8 @@ void main() {
       });
 
       test('Sanitizes inputs', () {
-        verify(() => mockFilesSanitizer.sanitize(files)).called(1);
-        verify(() => mockExportsSanitizer.sanitize(exports)).called(1);
+        verify(() => mockFilesParser.parse(files)).called(1);
+        verify(() => mockExportsParser.parse(exports)).called(1);
       });
     });
 
@@ -68,24 +68,24 @@ void main() {
       });
 
       test('Sanitizes inputs', () {
-        verify(() => mockFilesSanitizer.sanitize(files)).called(1);
-        verify(() => mockExportsSanitizer.sanitize(exports)).called(1);
+        verify(() => mockFilesParser.parse(files)).called(1);
+        verify(() => mockExportsParser.parse(exports)).called(1);
       });
     });
   });
 }
 
-class MockBarrelFilesSanitizer with Mock implements BarrelFilesSanitizer {
-  MockBarrelFilesSanitizer() {
-    when(() => sanitize(any())).thenAnswer(
+class MockBarrelFilesParser with Mock implements BarrelFilesParser {
+  MockBarrelFilesParser() {
+    when(() => parse(any())).thenAnswer(
       (i) => i.positionalArguments.first as List<BarrelFile>,
     );
   }
 }
 
-class MockExportsSanitizer with Mock implements ExportsSanitizer {
-  MockExportsSanitizer() {
-    when(() => sanitize(any())).thenAnswer(
+class MockExportsParser with Mock implements ExportsParser {
+  MockExportsParser() {
+    when(() => parse(any())).thenAnswer(
       (i) => i.positionalArguments.first as List<Export>,
     );
   }

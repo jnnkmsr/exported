@@ -1,16 +1,16 @@
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/validation/input_sanitizer.dart';
+import 'package:exported/src/validation/input_parser.dart';
 
 /// Sanitizes a list of `exports` builder options based on the following rules:
 /// - Duplicates with matching configuration are removed.
 /// - URI duplicates with conflicting configuration throw an [ArgumentError].
 /// - `null` is treated as an empty list.
-class ExportsSanitizer extends InputSanitizer<List<Export>?, List<Export>> {
-  const ExportsSanitizer(super.inputName);
+class ExportsParser extends ListParser<Export> {
+  const ExportsParser(super.inputName);
 
   /// Validates the [input] and returns the deduplicated list of exports.
   @override
-  List<Export> sanitize(List<Export>? input) {
+  List<Export> parse([List<Export>? input]) {
     if (input == null) return [];
 
     final exportsByUri = <String, Export>{};
@@ -25,4 +25,7 @@ class ExportsSanitizer extends InputSanitizer<List<Export>?, List<Export>> {
     }
     return exportsByUri.values.toList();
   }
+
+  @override
+  Export elementFromJson(dynamic json) => Export.fromJson(json as Map);
 }

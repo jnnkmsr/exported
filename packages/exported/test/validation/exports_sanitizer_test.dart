@@ -1,19 +1,19 @@
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/validation/exports_sanitizer.dart';
+import 'package:exported/src/validation/exports_parser.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('$ExportsSanitizer', () {
-    late ExportsSanitizer sut;
+  group('$ExportsParser', () {
+    late ExportsParser sut;
 
     setUp(() {
-      sut = const ExportsSanitizer(keys.exports);
+      sut = const ExportsParser(keys.exports);
     });
 
     group('Valid inputs', () {
       void expectSanitized(List<Export>? input, List<Export> expected) =>
-          expect(sut.sanitize(input), expected);
+          expect(sut.parse(input), expected);
 
       test('Leaves a list without duplicates as is', () {
         expectSanitized(
@@ -46,7 +46,7 @@ void main() {
 
     group('Invalid inputs', () {
       void expectArgumentError(List<Export> input) {
-        expect(() => sut.sanitize(input), throwsArgumentError);
+        expect(() => sut.parse(input), throwsArgumentError);
       }
 
       test('Throws an ArgumentError if there are duplicates with conflicting configurations', () {

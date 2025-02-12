@@ -1,4 +1,4 @@
-import 'package:exported/src/validation/input_sanitizer.dart';
+import 'package:exported/src/validation/input_parser.dart';
 import 'package:exported/src/validation/validation_util.dart';
 import 'package:path/path.dart' as p;
 
@@ -12,12 +12,12 @@ import 'package:path/path.dart' as p;
 ///   file name without extension must be snake-case (only lowercase letters,
 ///   numbers, and underscores).
 /// - The path is normalized, but must not end with a trailing `'/'`.
-class UriSanitizer extends InputSanitizer<String?, String> {
-  const UriSanitizer(super.inputName);
+class UriParser extends StringParser {
+  const UriParser(super.inputName);
 
   /// Validates the [input] and returns the sanitized output URI.
   @override
-  String sanitize(String? input) {
+  String parse([String? input]) {
     final uri = input?.trim();
     if (uri == null || uri.isEmpty) {
       throwArgumentError(input, 'A valid package name or URI must be provided');
@@ -72,6 +72,6 @@ class UriSanitizer extends InputSanitizer<String?, String> {
   static const _prefix = 'package:';
 
   @override
-  Never throwArgumentError(String? input, [String? message]) =>
+  Never throwArgumentError(dynamic input, [String? message]) =>
       super.throwArgumentError(input, message ?? 'Invalid package name or URI: $input');
 }

@@ -1,12 +1,9 @@
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/util/equals_util.dart';
-import 'package:exported/src/validation/file_path_sanitizer.dart';
-import 'package:exported/src/validation/tags_sanitizer.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:exported/src/validation/file_path_parser.dart';
+import 'package:exported/src/validation/tags_parser.dart';
 import 'package:meta/meta.dart';
-
-part 'barrel_file.g.dart';
 
 /// Represents a barrel file as defined in the `barrel_files` section of the
 /// `exported` builder options. Parses and validates `build.yaml` input and
@@ -15,10 +12,6 @@ part 'barrel_file.g.dart';
 /// The [path] determines the file’s relative location in the package’s `lib`
 /// folder (normalized, snake-case, and ending with `.dart`), while [tags]
 /// allow selective inclusion of exports.
-@JsonSerializable(
-  constructor: '_sanitized',
-  createToJson: false,
-)
 @immutable
 class BarrelFile {
   /// Internal constructor assigning sanitized values.
@@ -32,7 +25,7 @@ class BarrelFile {
   ///
   /// The [path] defaults to `<package>.dart` (using the package name from
   /// `pubspec.yaml`), and [tags] are empty.
-  factory BarrelFile.packageNamed() = BarrelFile._sanitized;
+  factory BarrelFile.packageNamed() => BarrelFile(path: pathParser.parse());
 
   /// Creates a [BarrelFile] from JSON/YAML input, validating and sanitizing
   /// inputs.
@@ -52,38 +45,24 @@ class BarrelFile {
   /// - Removes empty/blank tags and duplicates.
   ///
   /// Throws an [ArgumentError] for invalid inputs.
-  factory BarrelFile.fromJson(Map json) {
-    try {
-      return _$BarrelFileFromJson(json);
-    } on CheckedFromJsonException catch (e) {
-      const name = keys.barrelFiles;
-      throw ArgumentError.value(json, name, 'Invalid $name options: ${e.message}');
-    }
-  }
-
-  /// Private constructor called by [BarrelFile.fromJson], validating and
-  /// sanitizing inputs.
-  BarrelFile._sanitized({
-    String? path,
-    Set<String>? tags,
-  })  : path = pathSanitizer.sanitize(path),
-        tags = tagsSanitizer.sanitize(tags);
+  factory BarrelFile.fromJson(Map json) => BarrelFile(
+        path: pathParser.parseJson(json[keys.path]),
+        tags: tagsParser.parseJson(json[keys.tags]),
+      );
 
   /// The relative path within the target package’s `lib` directory.
-  @JsonKey(name: keys.path)
   final String path;
 
   /// Tags for selectively including exports.
-  @JsonKey(name: keys.tags)
   final Set<String> tags;
 
-  /// Sanitizer for [path] inputs.
+  /// Parser for [path] inputs.
   @visibleForTesting
-  static FilePathSanitizer pathSanitizer = const FilePathSanitizer(keys.path);
+  static FilePathParser pathParser = const FilePathParser(keys.path);
 
-  /// Sanitizer for [tags] inputs.
+  /// Parser for [tags] inputs.
   @visibleForTesting
-  static TagsSanitizer tagsSanitizer = const TagsSanitizer(keys.tags);
+  static TagsParser tagsParser = const TagsParser(keys.tags);
 
   /// Whether the given [export] should be included in this barrel file.
   ///
