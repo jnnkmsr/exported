@@ -1,7 +1,7 @@
 import 'package:exported/src/builder/barrel_file_generator.dart';
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/options/exported_options.dart';
+import 'package:exported/src/model/exported_options.dart';
 import 'package:test/test.dart';
 
 void main() {

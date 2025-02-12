@@ -1,103 +1,145 @@
+import 'package:build/build.dart';
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
+import '../helpers/fake_element.dart';
+import '../helpers/fake_exported_reader.dart';
+import '../helpers/mock_input_sanitizer.dart';
+
 void main() {
-  group('$Export', () {
+  group('Export', () {
     late Export sut;
 
-    group('.fromJson()', () {
-      test('Creates an $Export instance from a JSON map', () {
-        const json = {
-          keys.uri: 'library.dart',
-          keys.show: ['Shown1', 'Shown2'],
-          keys.hide: ['Hidden1', 'Hidden2'],
-          keys.tags: ['Tag1', 'Tag2'],
-        };
+    late MockUriSanitizer mockUriSanitizer;
+    late MockShowHideSanitizer mockShowSanitizer;
+    late MockShowHideSanitizer mockHideSanitizer;
+    late MockTagsSanitizer mockTagsSanitizer;
 
-        sut = Export.fromJson(json);
+    setUp(() {
+      mockUriSanitizer = MockUriSanitizer();
+      mockShowSanitizer = MockShowHideSanitizer();
+      mockHideSanitizer = MockShowHideSanitizer();
+      mockTagsSanitizer = MockTagsSanitizer();
+      Export.uriSanitizer = mockUriSanitizer;
+      Export.showSanitizer = mockShowSanitizer;
+      Export.hideSanitizer = mockHideSanitizer;
+      Export.tagsSanitizer = mockTagsSanitizer;
+    });
 
-        expect(sut.uri, 'library.dart');
-        expect(sut.show, {'Shown1', 'Shown2'});
-        expect(sut.hide, {'Hidden1', 'Hidden2'});
-        expect(sut.tags, {'Tag1', 'Tag2'});
-      });
+    group('.fromAnnotatedElement()', () {
+      test('Creates an Export an annotated Element', () {
+        final library = AssetId('foo', 'lib/src/foo.dart');
+        final element = FakeElement(name: 'Foo');
+        final annotation = FakeExportedReader(tags: {'foo', 'bar'});
 
-      test('Defaults show, hide, and tags to empty sets', () {
-        const json = {
-          keys.uri: 'library.dart',
-        };
+        sut = Export.fromAnnotatedElement(library, element, annotation);
 
-        sut = Export.fromJson(json);
-
-        expect(sut.uri, 'library.dart');
-        expect(sut.show, isEmpty);
+        expect(sut.uri, 'package:foo/src/foo.dart');
+        expect(sut.show, {'Foo'});
         expect(sut.hide, isEmpty);
-        expect(sut.tags, isEmpty);
+        expect(sut.tags, {'foo', 'bar'});
+      });
+
+      test('Sanitizes tags', () {
+        final library = AssetId('foo', 'lib/src/foo.dart');
+        final element = FakeElement(name: 'Foo');
+        final annotation = FakeExportedReader(tags: {'Foo', '   bar '});
+
+        mockTagsSanitizer.whenSanitizeReturn({'Foo', '   bar '}, {'foo', 'bar'});
+
+        sut = Export.fromAnnotatedElement(library, element, annotation);
+
+        mockTagsSanitizer.verifySanitized({'Foo', '   bar '});
+        expect(sut.tags, {'foo', 'bar'});
+      });
+
+      test('Throws an InvalidGenerationSourceError for an unnamed element', () {
+        final library = AssetId('foo', 'lib/src/foo.dart');
+        final element = FakeElement(name: null);
+        final annotation = FakeExportedReader(tags: {'foo', 'bar'});
+
+        expect(
+          () => Export.fromAnnotatedElement(library, element, annotation),
+          throwsA(isA<InvalidGenerationSourceError>()),
+        );
       });
     });
 
-    group('.toJson()', () {
-      test('Converts a $Export to a JSON map', () {
-        sut = const Export(
-          uri: 'library.dart',
-          show: {'Shown1', 'Shown2'},
-          hide: {'Hidden1', 'Hidden2'},
-          tags: {'Tag1', 'Tag2'},
-        );
-
-        final json = sut.toJson();
-
-        expect(json, {
-          keys.uri: 'library.dart',
-          keys.show: ['Shown1', 'Shown2'],
-          keys.hide: ['Hidden1', 'Hidden2'],
-          keys.tags: ['Tag1', 'Tag2'],
+    group('.fromJson()', () {
+      setUp(() {
+        sut = Export.fromJson(const {
+          keys.uri: 'foo_bar',
+          keys.show: ['Baz', 'Qux'],
+          keys.hide: ['Quux', 'Corge'],
+          keys.tags: ['grault', 'garply'],
         });
       });
 
-      test('Defaults show, hide, and tags to empty lists', () {
-        sut = const Export(uri: 'library.dart');
+      test('Creates an $Export instance from JSON', () {
+        expect(sut.uri, 'foo_bar');
+        expect(sut.show, {'Baz', 'Qux'});
+        expect(sut.hide, {'Quux', 'Corge'});
+        expect(sut.tags, {'grault', 'garply'});
+      });
 
-        final json = sut.toJson();
-
-        expect(json, {
-          keys.uri: 'library.dart',
-          keys.show: <String>[],
-          keys.hide: <String>[],
-          keys.tags: <String>[],
-        });
+      test('Sanitizes inputs', () {
+        verify(() => mockUriSanitizer.sanitize('foo_bar')).called(1);
+        verify(() => mockShowSanitizer.sanitize({'Baz', 'Qux'})).called(1);
+        verify(() => mockHideSanitizer.sanitize({'Quux', 'Corge'})).called(1);
+        verify(() => mockTagsSanitizer.sanitize({'grault', 'garply'})).called(1);
       });
     });
 
-    group('.merge()', () {
-      test('Merges the show and hide filters, but keeps tags', () {
-        const a = Export(
-          uri: 'library.dart',
-          show: {'Shown1', 'Shown2'},
-          hide: {'Hidden1', 'Hidden2'},
-          tags: {'Tag1', 'Tag2'},
-        );
-        const b = Export(
-          uri: 'library.dart',
-          show: {'Shown2', 'Shown3'},
-          hide: {'Hidden2', 'Hidden3'},
-          tags: {'Tag2', 'Tag3'},
-        );
+    group('.==()', () {
+      test('Compares two $Export instances by URI', () {
+        const a = Export(uri: 'foo');
+        const b = Export(uri: 'foo');
+        const c = Export(uri: 'bar');
 
-        final merged = a.merge(b);
+        expect(a, equals(b));
+        expect(a, isNot(equals(c)));
 
-        expect(merged.uri, 'library.dart');
-        expect(merged.show, {'Shown1', 'Shown2', 'Shown3'});
-        expect(merged.hide, {'Hidden1', 'Hidden2', 'Hidden3'});
-        expect(merged.tags, {'Tag1', 'Tag2'});
+        expect(a.hashCode, b.hashCode);
+        expect(a.hashCode, isNot(c.hashCode));
       });
 
-      test('Throws an $ArgumentError if the URIs are different', () {
-        const a = Export(uri: 'library_a.dart');
-        const b = Export(uri: 'library_b.dart');
+      test('Compares two $Export instances by show, ignoring order', () {
+        const a = Export(uri: 'foo', show: {'bar', 'baz'});
+        const b = Export(uri: 'foo', show: {'baz', 'bar'});
+        const c = Export(uri: 'foo', show: {'bar', 'baz', 'qux'});
 
-        expect(() => a.merge(b), throwsArgumentError);
+        expect(a, equals(b));
+        expect(a, isNot(equals(c)));
+
+        expect(a.hashCode, b.hashCode);
+        expect(a.hashCode, isNot(c.hashCode));
+      });
+
+      test('Compares two $Export instances by hide, ignoring order', () {
+        const a = Export(uri: 'foo', hide: {'bar', 'baz'});
+        const b = Export(uri: 'foo', hide: {'baz', 'bar'});
+        const c = Export(uri: 'foo', hide: {'bar', 'baz', 'qux'});
+
+        expect(a, equals(b));
+        expect(a, isNot(equals(c)));
+
+        expect(a.hashCode, b.hashCode);
+        expect(a.hashCode, isNot(c.hashCode));
+      });
+
+      test('Compares two $Export instances by tags, ignoring order', () {
+        const a = Export(uri: 'foo', tags: {'bar', 'baz'});
+        const b = Export(uri: 'foo', tags: {'baz', 'bar'});
+        const c = Export(uri: 'foo', tags: {'bar', 'baz', 'qux'});
+
+        expect(a, equals(b));
+        expect(a, isNot(equals(c)));
+
+        expect(a.hashCode, b.hashCode);
+        expect(a.hashCode, isNot(c.hashCode));
       });
     });
   });

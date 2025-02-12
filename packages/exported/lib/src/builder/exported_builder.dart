@@ -5,7 +5,7 @@ import 'package:build/build.dart';
 import 'package:collection/collection.dart';
 import 'package:exported/src/builder/barrel_file_generator.dart';
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/options/exported_options.dart';
+import 'package:exported/src/model/exported_options.dart';
 import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';

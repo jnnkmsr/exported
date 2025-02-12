@@ -1,7 +1,7 @@
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/options/exported_options.dart';
+import 'package:exported/src/model/exported_options.dart';
 import 'package:exported/src/validation/barrel_files_sanitizer.dart';
 import 'package:exported/src/validation/exports_sanitizer.dart';
 import 'package:mocktail/mocktail.dart';

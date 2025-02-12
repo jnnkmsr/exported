@@ -2,7 +2,7 @@ import 'package:build_test/build_test.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:exported/src/builder/exported_builder.dart';
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
-import 'package:exported/src/options/exported_options.dart';
+import 'package:exported/src/model/exported_options.dart';
 import 'package:exported/src/util/dart_writer.dart';
 import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:meta/meta.dart';

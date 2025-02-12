@@ -1,7 +1,7 @@
 import 'package:build/build.dart';
 import 'package:exported/src/builder/exported_assets_builder.dart';
 import 'package:exported/src/builder/exported_builder.dart';
-import 'package:exported/src/options/exported_options.dart';
+import 'package:exported/src/model/exported_options.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 
 /// Generates Dart barrel files from [exported] elements and specified build

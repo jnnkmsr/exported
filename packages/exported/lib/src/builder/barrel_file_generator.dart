@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/options/exported_options.dart';
+import 'package:exported/src/model/exported_options.dart';
 import 'package:exported/src/util/dart_writer.dart';
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
