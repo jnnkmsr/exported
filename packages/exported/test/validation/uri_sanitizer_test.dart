@@ -1,3 +1,4 @@
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/validation/uri_sanitizer.dart';
 import 'package:test/test.dart';
 
@@ -6,7 +7,7 @@ void main() {
     late UriSanitizer sut;
 
     setUp(() {
-      sut = const UriSanitizer(inputName: 'package');
+      sut = const UriSanitizer(keys.uri);
     });
 
     group('Valid input', () {

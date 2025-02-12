@@ -1,3 +1,4 @@
+import 'package:exported/src/validation/input_sanitizer.dart';
 import 'package:exported/src/validation/validation_util.dart';
 
 // TODO: Test show/hide conflict resolution.
@@ -12,13 +13,11 @@ import 'package:exported/src/validation/validation_util.dart';
 ///   and underscores, and must not start with a number or underscore).
 ///
 /// Throws an [ArgumentError] if any of the identifiers is not valid.
-class ShowHideSanitizer with InputValidator {
-  const ShowHideSanitizer({required this.inputName});
-
-  @override
-  final String inputName;
+class ShowHideSanitizer extends InputSanitizer<Set<String>?, Set<String>> {
+  const ShowHideSanitizer(super.inputName);
 
   /// Validates the [input] and returns the sanitized set of identifiers.
+  @override
   Set<String> sanitize(Set<String>? input, [Set<String>? other]) {
     final output = input?.map((tag) => tag.trim()).where((tag) {
         if (tag.isEmpty) return false;

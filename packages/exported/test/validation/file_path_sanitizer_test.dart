@@ -9,7 +9,7 @@ void main() {
 
     setUp(() {
       PubspecReader.$instance = FakePubspecReader();
-      sut = FilePathSanitizer(inputName: 'file');
+      sut = const FilePathSanitizer('file');
     });
 
     group('Valid input', () {

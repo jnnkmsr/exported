@@ -1,4 +1,5 @@
 import 'package:exported/src/util/pubspec_reader.dart';
+import 'package:exported/src/validation/input_sanitizer.dart';
 import 'package:exported/src/validation/validation_util.dart';
 import 'package:path/path.dart' as p;
 
@@ -16,13 +17,8 @@ import 'package:path/path.dart' as p;
 ///   extension is present, it must be `.dart`.
 ///
 /// Any invalid input throws an [ArgumentError].
-class FilePathSanitizer with InputValidator {
-  FilePathSanitizer({
-    required this.inputName,
-  });
-
-  @override
-  final String inputName;
+class FilePathSanitizer extends InputSanitizer<String?, String> {
+  const FilePathSanitizer(super.inputName);
 
   /// Reads the default package name from the `pubspec.yaml`.
   ///
@@ -38,6 +34,7 @@ class FilePathSanitizer with InputValidator {
 
   /// Validates the [input] returns the sanitized relative path within the
   /// target package's `lib` directory.
+  @override
   String sanitize(String? input) {
     final path = input?.trim();
     if (path == null || path.isEmpty) return _defaultFile;

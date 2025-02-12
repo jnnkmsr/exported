@@ -6,7 +6,7 @@ void main() {
     late ShowHideSanitizer sut;
 
     setUp(() {
-      sut = const ShowHideSanitizer(inputName: 'show');
+      sut = const ShowHideSanitizer('show');
     });
 
     group('Valid input', () {

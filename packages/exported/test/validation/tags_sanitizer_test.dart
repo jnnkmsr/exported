@@ -1,3 +1,4 @@
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/validation/tags_sanitizer.dart';
 import 'package:test/test.dart';
 
@@ -6,7 +7,7 @@ void main() {
     late TagsSanitizer sut;
 
     setUp(() {
-      sut = const TagsSanitizer();
+      sut = const TagsSanitizer(keys.tags);
     });
 
     void expectSanitized(Set<String>? input, Set<String> expected) =>

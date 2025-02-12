@@ -1,3 +1,4 @@
+import 'package:exported/src/validation/input_sanitizer.dart';
 import 'package:exported/src/validation/validation_util.dart';
 import 'package:path/path.dart' as p;
 
@@ -11,13 +12,11 @@ import 'package:path/path.dart' as p;
 ///   file name without extension must be snake-case (only lowercase letters,
 ///   numbers, and underscores).
 /// - The path is normalized, but must not end with a trailing `'/'`.
-class UriSanitizer with InputValidator {
-  const UriSanitizer({required this.inputName});
-
-  @override
-  final String inputName;
+class UriSanitizer extends InputSanitizer<String?, String> {
+  const UriSanitizer(super.inputName);
 
   /// Validates the [input] and returns the sanitized output URI.
+  @override
   String sanitize(String? input) {
     final uri = input?.trim();
     if (uri == null || uri.isEmpty) {

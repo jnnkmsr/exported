@@ -58,9 +58,9 @@ class ExportedOptions {
 
   /// Sanitizer for the [exports] input. Exchangeable by test doubles.
   @visibleForTesting
-  static BarrelFilesSanitizer filesSanitizer = const BarrelFilesSanitizer(inputName: keys.barrelFiles);
+  static BarrelFilesSanitizer filesSanitizer = const BarrelFilesSanitizer(keys.barrelFiles);
 
   /// Sanitizer for the [files] input. Exchangeable by test doubles.
   @visibleForTesting
-  static ExportsSanitizer exportsSanitizer = const ExportsSanitizer(inputName: keys.exports);
+  static ExportsSanitizer exportsSanitizer = const ExportsSanitizer(keys.exports);
 }

@@ -1,3 +1,4 @@
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/validation/exports_sanitizer.dart';
 import 'package:test/test.dart';
@@ -7,7 +8,7 @@ void main() {
     late ExportsSanitizer sut;
 
     setUp(() {
-      sut = const ExportsSanitizer(inputName: 'exports');
+      sut = const ExportsSanitizer(keys.exports);
     });
 
     group('Valid inputs', () {

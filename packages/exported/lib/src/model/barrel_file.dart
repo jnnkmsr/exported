@@ -79,11 +79,11 @@ class BarrelFile {
 
   /// Sanitizer for [path] inputs.
   @visibleForTesting
-  static FilePathSanitizer pathSanitizer = FilePathSanitizer(inputName: keys.path);
+  static FilePathSanitizer pathSanitizer = const FilePathSanitizer(keys.path);
 
   /// Sanitizer for [tags] inputs.
   @visibleForTesting
-  static TagsSanitizer tagsSanitizer = const TagsSanitizer();
+  static TagsSanitizer tagsSanitizer = const TagsSanitizer(keys.tags);
 
   /// Whether the given [export] should be included in this barrel file.
   ///

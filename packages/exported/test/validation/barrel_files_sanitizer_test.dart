@@ -1,3 +1,4 @@
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/validation/barrel_files_sanitizer.dart';
 import 'package:exported/src/validation/file_path_sanitizer.dart';
@@ -10,7 +11,7 @@ void main() {
 
     setUp(() {
       BarrelFile.pathSanitizer = FakeBarrelFilePathSanitizer();
-      sut = const BarrelFilesSanitizer(inputName: 'files');
+      sut = const BarrelFilesSanitizer(keys.barrelFiles);
     });
 
     group('Valid inputs', () {

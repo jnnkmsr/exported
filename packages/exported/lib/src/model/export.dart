@@ -137,19 +137,19 @@ class Export implements Comparable<Export> {
 
   /// Sanitizer for [uri] inputs.
   @visibleForTesting
-  static UriSanitizer uriSanitizer = const UriSanitizer(inputName: keys.uri);
+  static UriSanitizer uriSanitizer = const UriSanitizer(keys.uri);
 
   /// Sanitizer for [show] inputs.
   @visibleForTesting
-  static ShowHideSanitizer showSanitizer = const ShowHideSanitizer(inputName: keys.show);
+  static ShowHideSanitizer showSanitizer = const ShowHideSanitizer(keys.show);
 
   /// Sanitizer for [hide] inputs.
   @visibleForTesting
-  static ShowHideSanitizer hideSanitizer = const ShowHideSanitizer(inputName: keys.hide);
+  static ShowHideSanitizer hideSanitizer = const ShowHideSanitizer(keys.hide);
 
   /// Sanitizer for [tags] inputs.
   @visibleForTesting
-  static TagsSanitizer tagsSanitizer = const TagsSanitizer();
+  static TagsSanitizer tagsSanitizer = const TagsSanitizer(keys.tags);
 
   /// Copies this instance, combining [show] and [hide] filters with the ones
   /// from [other] if the [uri]s match.
