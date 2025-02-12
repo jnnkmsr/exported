@@ -1,22 +1,25 @@
+import 'package:build/build.dart';
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/validation/show_hide_sanitizer.dart';
-import 'package:exported/src/validation/tags_sanitizer.dart';
-import 'package:exported/src/validation/uri_sanitizer.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
+import '../helpers/fake_element.dart';
+import '../helpers/fake_exported_reader.dart';
+import '../helpers/mock_input_sanitizer.dart';
+
 void main() {
-  group('$Export', () {
+  group('Export', () {
     late Export sut;
 
-    late MockExportUriSanitizer mockUriSanitizer;
+    late MockUriSanitizer mockUriSanitizer;
     late MockShowHideSanitizer mockShowSanitizer;
     late MockShowHideSanitizer mockHideSanitizer;
     late MockTagsSanitizer mockTagsSanitizer;
 
     setUp(() {
-      mockUriSanitizer = MockExportUriSanitizer();
+      mockUriSanitizer = MockUriSanitizer();
       mockShowSanitizer = MockShowHideSanitizer();
       mockHideSanitizer = MockShowHideSanitizer();
       mockTagsSanitizer = MockTagsSanitizer();
@@ -26,21 +29,42 @@ void main() {
       Export.tagsSanitizer = mockTagsSanitizer;
     });
 
-    group('.()', () {
-      setUp(() {
-        sut = const Export(
-          uri: 'foo_bar',
-          show: {'Baz', 'Qux'},
-          hide: {'Quux', 'Corge'},
-          tags: {'grault', 'garply'},
-        );
+    group('.fromAnnotatedElement()', () {
+      test('Creates an Export an annotated Element', () {
+        final library = AssetId('foo', 'lib/src/foo.dart');
+        final element = FakeElement(name: 'Foo');
+        final annotation = FakeExportedReader(tags: {'foo', 'bar'});
+
+        sut = Export.fromAnnotatedElement(library, element, annotation);
+
+        expect(sut.uri, 'package:foo/src/foo.dart');
+        expect(sut.show, {'Foo'});
+        expect(sut.hide, isEmpty);
+        expect(sut.tags, {'foo', 'bar'});
       });
 
-      test('Sanitizes inputs', () {
-        verify(() => mockUriSanitizer.sanitize('foo_bar')).called(1);
-        verify(() => mockShowSanitizer.sanitize({'Baz', 'Qux'})).called(1);
-        verify(() => mockHideSanitizer.sanitize({'Quux', 'Corge'})).called(1);
-        verify(() => mockTagsSanitizer.sanitize({'grault', 'garply'})).called(1);
+      test('Sanitizes tags', () {
+        final library = AssetId('foo', 'lib/src/foo.dart');
+        final element = FakeElement(name: 'Foo');
+        final annotation = FakeExportedReader(tags: {'Foo', '   bar '});
+
+        mockTagsSanitizer.whenSanitizeReturn({'Foo', '   bar '}, {'foo', 'bar'});
+
+        sut = Export.fromAnnotatedElement(library, element, annotation);
+
+        mockTagsSanitizer.verifySanitized({'Foo', '   bar '});
+        expect(sut.tags, {'foo', 'bar'});
+      });
+
+      test('Throws an InvalidGenerationSourceError for an unnamed element', () {
+        final library = AssetId('foo', 'lib/src/foo.dart');
+        final element = FakeElement(name: null);
+        final annotation = FakeExportedReader(tags: {'foo', 'bar'});
+
+        expect(
+          () => Export.fromAnnotatedElement(library, element, annotation),
+          throwsA(isA<InvalidGenerationSourceError>()),
+        );
       });
     });
 
@@ -119,26 +143,4 @@ void main() {
       });
     });
   });
-}
-
-class MockExportUriSanitizer with Mock implements UriSanitizer {
-  MockExportUriSanitizer() {
-    when(() => sanitize(any())).thenAnswer((i) => i.positionalArguments.first as String);
-  }
-}
-
-class MockTagsSanitizer with Mock implements TagsSanitizer {
-  MockTagsSanitizer() {
-    when(() => sanitize(any())).thenAnswer(
-      (i) => i.positionalArguments.first as Set<String>? ?? {},
-    );
-  }
-}
-
-class MockShowHideSanitizer with Mock implements ShowHideSanitizer {
-  MockShowHideSanitizer() {
-    when(() => sanitize(any())).thenAnswer(
-      (i) => i.positionalArguments.first as Set<String>? ?? {},
-    );
-  }
 }

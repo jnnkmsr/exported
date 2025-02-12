@@ -1,10 +1,9 @@
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/validation/file_path_sanitizer.dart';
-import 'package:exported/src/validation/tags_sanitizer.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
+
+import '../helpers/mock_input_sanitizer.dart';
 
 void main() {
   group('BarrelFile', () {
@@ -22,13 +21,13 @@ void main() {
 
     group('.packageNamed()', () {
       test('Creates a default package-named BarrelFile without tags', () {
-        when(() => mockPathSanitizer.sanitize(null)).thenReturn('package:foo/foo.dart');
-        when(() => mockTagsSanitizer.sanitize(null)).thenReturn({});
+        mockPathSanitizer.whenSanitizeReturn(null, 'package:foo/foo.dart');
+        mockTagsSanitizer.whenSanitizeReturn(null, {});
 
         sut = BarrelFile.packageNamed();
 
-        verify(() => mockPathSanitizer.sanitize(null)).called(1);
-        verify(() => mockTagsSanitizer.sanitize(null)).called(1);
+        mockPathSanitizer.verifySanitized(null);
+        mockTagsSanitizer.verifySanitized(null);
 
         expect(sut.path, 'package:foo/foo.dart');
         expect(sut.tags, isEmpty);
@@ -37,16 +36,16 @@ void main() {
 
     group('.fromJson()', () {
       test('Creates a BarrelFile from sanitized JSON inputs', () {
-        when(() => mockPathSanitizer.sanitize('foo.dart')).thenReturn('package:foo/foo.dart');
-        when(() => mockTagsSanitizer.sanitize({'foo', 'Foo'})).thenReturn({'foo'});
+        mockPathSanitizer.whenSanitizeReturn('foo.dart', 'package:foo/foo.dart');
+        mockTagsSanitizer.whenSanitizeReturn({'foo', 'Foo'}, {'foo'});
 
         sut = BarrelFile.fromJson(const {
           keys.path: 'foo.dart',
           keys.tags: ['foo', 'Foo'],
         });
 
-        verify(() => mockPathSanitizer.sanitize('foo.dart')).called(1);
-        verify(() => mockTagsSanitizer.sanitize({'foo', 'Foo'})).called(1);
+        mockPathSanitizer.verifySanitized('foo.dart');
+        mockTagsSanitizer.verifySanitized({'foo', 'Foo'});
 
         expect(sut.path, 'package:foo/foo.dart');
         expect(sut.tags, {'foo'});
@@ -116,16 +115,4 @@ void main() {
       });
     });
   });
-}
-
-class MockFilePathSanitizer extends Mock implements FilePathSanitizer {
-  MockFilePathSanitizer() {
-    when(() => sanitize(any())).thenReturn('');
-  }
-}
-
-class MockTagsSanitizer extends Mock implements TagsSanitizer {
-  MockTagsSanitizer() {
-    when(() => sanitize(any())).thenReturn(const {});
-  }
 }
