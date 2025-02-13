@@ -39,10 +39,11 @@ class BarrelFile {
   /// - Trims leading/trailing whitespace.
   /// - Normalizes the path, ensures it is relative and snake-case, and removes
   ///   any leading `lib/`.
-  /// - Ensures the file extension is `.dart` or adds it if missing.
+  /// - Ensures the file extension is `.dart` or adds it if missing. If an
+  ///   extension is present, it must be `.dart`.
   /// - If [path] is not provided, is empty/blank, or ends with `/`, the
-  ///   default barrel-file path `$package.dart` is used, reading the package
-  ///   name from `pubspec.yaml`.
+  ///   default barrel-file path `$package.dart` is used, reading `package`
+  ///   from `pubspec.yaml`.
   ///
   /// **[tags]:**
   /// - Trims whitespace and converts to lowercase.

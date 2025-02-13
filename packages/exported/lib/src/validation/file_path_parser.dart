@@ -3,18 +3,16 @@ import 'package:exported/src/validation/input_parser.dart';
 import 'package:exported/src/validation/validation_util.dart';
 import 'package:path/path.dart' as p;
 
-/// Sanitizes a barrel-file path input based on the following rules:
-/// - Inputs are trimmed.
-/// - `null`, empty or blank inputs are replaced with the default file name
-///   `<package>.dart`, reading the package name from the `pubspec.yaml`.
-/// - Paths are normalized.
-/// - All path components must be snake-case (only lowercase letters, numbers,
-///   and underscores).
-/// - Paths must be relative and are assumed to be relative to the `lib`
-///   directory. A leading `lib/` directory is removed.
-/// - For directory-paths ending with a `/`, the default file name is appended.
-/// - For file-path inputs, a missing `.dart` extension is appended. If an
+/// Validates and sanitizes a barrel-file path input.
+///
+/// - Trims leading/trailing whitespace.
+/// - Normalizes the path, ensures it is relative and snake-case, and removes
+///   any leading `lib/`.
+/// - Ensures the file extension is `.dart` or adds it if missing. If an
 ///   extension is present, it must be `.dart`.
+/// - If the input is `null` or empty/blank, or ends with `/`, the default
+///   barrel-file path `$package.dart` is used, reading `package` from
+///   `pubspec.yaml`.
 ///
 /// Any invalid input throws an [ArgumentError].
 class FilePathParser extends StringParser {
@@ -28,12 +26,9 @@ class FilePathParser extends StringParser {
   /// The default `lib` directory, removed from the input if specified.
   static const _defaultDir = 'lib';
 
-  /// The default `<package>.dart` file name, reading the package name from the
-  /// `pubspec.yaml`.
+  /// The default `$package.dart` path, reading `package` from `pubspec.yaml`.
   static final _defaultFile = '${_pubspecReader.name}.dart';
 
-  /// Validates the [input] returns the sanitized relative path within the
-  /// target package's `lib` directory.
   @override
   String parse([String? input]) {
     final path = input?.trim();
@@ -60,14 +55,15 @@ class FilePathParser extends StringParser {
     }
 
     // Validate and sanitize the file name.
-    if (!isSnakeCase(p.posix.basenameWithoutExtension(file))) {
-      throwArgumentError(path, 'Invalid file name: $file');
+    final fileName = p.posix.basenameWithoutExtension(file);
+    if (!isSnakeCase(fileName)) {
+      throwArgumentError(path, 'File name "$fileName" contains invalid characters');
     }
     final extension = p.posix.extension(file);
     file = switch (extension) {
       '.dart' => file,
       '' => '$file.dart',
-      _ => throwArgumentError(path, 'Invalid file extension: $extension'),
+      _ => throwArgumentError(path, 'Extension must be ".dart"'),
     };
 
     // Validate and sanitize the directory parts, removing a leading `lib` if
@@ -79,7 +75,7 @@ class FilePathParser extends StringParser {
 
     for (final dir in dirs) {
       if (!isSnakeCase(dir)) {
-        throwArgumentError(path, 'Invalid directory name: $dir');
+        throwArgumentError(path, 'Directory name "$dir" contains invalid characters');
       }
     }
     return p.posix.joinAll([...dirs, file]);

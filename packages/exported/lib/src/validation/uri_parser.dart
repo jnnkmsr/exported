@@ -2,20 +2,26 @@ import 'package:exported/src/validation/input_parser.dart';
 import 'package:exported/src/validation/validation_util.dart';
 import 'package:path/path.dart' as p;
 
-/// Sanitizes a Dart export URI string input based on the following rules:
-/// - The input is trimmed and must not be null, empty, or blank.
-/// - If missing, a leading `'package:'` prefix is added.
-/// - If the input is just a package name, it is converted to a URI of the form
-///   `'package:<packageName>/<packageName>.dart'`.
-/// - If missing, a `'.dart'` extension is appended to the library file name.
-/// - All URI components (package name, intermediate directories, and library
-///   file name without extension must be snake-case (only lowercase letters,
-///   numbers, and underscores).
-/// - The path is normalized, but must not end with a trailing `'/'`.
+// TODO: Simplify [UriParser] by using [Uri].
+
+/// Validates and sanitizes a Dart export URI string input.
+///
+/// - Trims leading/trailing whitespace.
+/// - If the input is `null` or empty/blank, an [ArgumentError] is thrown.
+/// - Normalizes the URI, ensuring a valid Dart `package:` URI:
+///   - Normalizes the path, ensures snake-case, and adds a leading `package:`
+///     prefix if missing.
+///   - Ensures the file extension is `.dart` or adds it if missing.
+///   - Converts a single package or library name to a URI of the form
+///     `'package:$package/$package.dart'`.
+///
+/// Any invalid input throws an [ArgumentError].
 class UriParser extends StringParser {
   const UriParser(super.inputName);
 
-  /// Validates the [input] and returns the sanitized output URI.
+  /// The scheme prefix for a Dart package URI.
+  static const _scheme = 'package:';
+
   @override
   String parse([String? input]) {
     final uri = input?.trim();
@@ -24,14 +30,11 @@ class UriParser extends StringParser {
     }
 
     // Remove the prefix and split using POSIX style (always '/' as separator).
-    final path = uri.startsWith(_prefix) ? uri.substring(_prefix.length) : uri;
+    final path = uri.startsWith(_scheme) ? uri.substring(_scheme.length) : uri;
     if (path.endsWith('/')) {
-      throwArgumentError(uri, 'Invalid package name or URI: $uri');
+      throwArgumentError(uri, 'Cannot be a directory path');
     }
     final parts = p.posix.split(p.posix.normalize(path));
-    if (parts.isEmpty) {
-      throwArgumentError(uri, 'Invalid package name or URI: $uri');
-    }
 
     // Validate the package name.
     var package = parts.first;
@@ -40,24 +43,25 @@ class UriParser extends StringParser {
       package = p.posix.basenameWithoutExtension(package);
     }
     if (!isSnakeCase(package)) {
-      throwArgumentError(uri, 'Invalid package name or URI: $uri');
+      throwArgumentError(uri, 'Package name "$package" contains invalid characters');
     }
     if (parts.length == 1) {
-      return "$_prefix${p.posix.join(package, '$package.dart')}";
+      return "$_scheme${p.posix.join(package, '$package.dart')}";
     }
 
     // Validate intermediate directory parts.
-    final directories = parts.sublist(1, parts.length - 1);
-    for (final directory in directories) {
-      if (!isSnakeCase(directory)) {
-        throwArgumentError(uri, 'Invalid package name or URI: $uri');
+    final dirs = parts.sublist(1, parts.length - 1);
+    for (final dir in dirs) {
+      if (!isSnakeCase(dir)) {
+        throwArgumentError(uri, 'Directory name "$dir" contains invalid characters');
       }
     }
 
     // Validate the library-file name.
     var file = parts.last;
-    if (!isSnakeCase(p.posix.basenameWithoutExtension(file))) {
-      throwArgumentError(uri);
+    final fileName = p.posix.basenameWithoutExtension(file);
+    if (!isSnakeCase(fileName)) {
+      throwArgumentError(uri, 'File name "$fileName" contains invalid characters');
     }
     file = switch (p.posix.extension(file)) {
       '.dart' => file,
@@ -65,13 +69,6 @@ class UriParser extends StringParser {
       _ => throwArgumentError(uri),
     };
 
-    return '$_prefix${p.posix.joinAll([package, ...directories, file])}';
+    return '$_scheme${p.posix.joinAll([package, ...dirs, file])}';
   }
-
-  /// The prefix for a Dart package URI.
-  static const _prefix = 'package:';
-
-  @override
-  Never throwArgumentError(dynamic input, [String? message]) =>
-      super.throwArgumentError(input, message ?? 'Invalid package name or URI: $input');
 }

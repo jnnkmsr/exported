@@ -75,16 +75,16 @@ class Export implements Comparable<Export> {
   ///
   /// **[uri]:**
   /// - Trims leading/trailing whitespace.
+  /// - If [uri] is not provided or empty/blank, an [ArgumentError] is thrown.
   /// - Normalizes the URI, ensuring a valid Dart `package:` URI:
   ///   - Normalizes the path, ensures snake-case, and adds a leading `package:`
   ///     prefix if missing.
   ///   - Ensures the file extension is `.dart` or adds it if missing.
   ///   - Converts a single package or library name to a URI of the form
   ///     `'package:$package/$package.dart'`.
-  /// - If [uri] is not provided or empty/blank, an [ArgumentError] is thrown.
   ///
   /// **[show]/[hide]:**
-  /// - Trims whitespace and removes duplicate elements.
+  /// - Trims whitespace and removes empty/blank or duplicate elements.
   /// - Ensures all elements are valid Dart identifiers.
   /// - If both [show] and [hide] are provided, [hide] takes precedence.
   ///
