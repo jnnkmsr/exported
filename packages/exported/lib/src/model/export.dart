@@ -114,6 +114,9 @@ class Export implements Comparable<Export> {
   /// Tags for selectively including this export in barrel files.
   final Set<String> tags;
 
+  /// Whether this export has any [show] or [hide] filters.
+  bool get _hasFilters => show.isNotEmpty || hide.isNotEmpty;
+
   /// Parser for [uri] inputs.
   @visibleForTesting
   static UriParser uriParser = const UriParser(keys.uri);
@@ -130,14 +133,37 @@ class Export implements Comparable<Export> {
   @visibleForTesting
   static TagsParser tagsParser = const TagsParser(keys.tags);
 
-  /// Copies this instance, combining [show] and [hide] filters with the ones
-  /// from [other] if the [uri]s match.
+  /// Merges this instance with [other], combining their [show] and [hide]
+  /// filters if the [uri]s match.
+  ///
+  /// The resulting [Export] will contain the combined elements based on the
+  /// [show] and [hide] filters from both instances:
+  ///
+  /// - If either instance has no filters (i.e., it exports everything), the
+  ///   resulting [Export] will also have empty [show] and [hide] filters.
+  /// - If both instances have [show] filters, the resulting [Export] will
+  ///   include the union of the two [show] filters.
+  /// - If both instances have [hide] filters, the resulting [Export] will only
+  ///   hide the elements that are present in both [hide] filters.
+  /// - If one instance has a [show] filter and the other has a [hide] filter,
+  ///   the resulting [Export] will discard the [show] filter and retain the
+  ///   [hide] filter. Any elements that are present in both the [show] and
+  ///   [hide] filters will be excluded from the final export.
+  ///
+  /// If the [uri]s do not match, this instance is returned unmodified.
   Export merge(Export other) {
     if (uri != other.uri) return this;
+    if (!_hasFilters || !other._hasFilters) {
+      return Export(uri: uri, tags: tags);
+    }
+    final mergedShow = show.union(other.show);
+    final mergedHide = hide.isNotEmpty && other.hide.isNotEmpty
+        ? hide.intersection(other.hide)
+        : hide.union(other.hide);
     return Export(
       uri: uri,
-      show: show.union(other.show),
-      hide: hide.union(other.hide),
+      show: (hide.isNotEmpty || other.hide.isNotEmpty) ? {} : mergedShow,
+      hide: mergedHide.difference(mergedShow),
       tags: tags,
     );
   }
