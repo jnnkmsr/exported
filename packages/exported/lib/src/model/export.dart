@@ -86,7 +86,7 @@ class Export implements Comparable<Export> {
   /// **[show]/[hide]:**
   /// - Trims whitespace and removes duplicate elements.
   /// - Ensures all elements are valid Dart identifiers.
-  /// - Ensures only one of `show` or `hide` is present.
+  /// - If both [show] and [hide] are provided, [hide] takes precedence.
   ///
   /// **[tags]:**
   /// - Trims whitespace and converts to lowercase.
@@ -101,14 +101,10 @@ class Export implements Comparable<Export> {
         _ => throw AssertionError('Unexpected JSON input: $json'),
       };
   factory Export._fromJson(Map json) {
-    final show = showParser.parseJson(json[keys.show]);
     final hide = hideParser.parseJson(json[keys.hide]);
-    if (show.isNotEmpty && hide.isNotEmpty) {
-      hideParser.throwArgumentError(keys.hide, 'Cannot have both `show` and `hide` filters');
-    }
     return Export(
       uri: uriParser.parseJson(json[keys.uri]),
-      show: show,
+      show: hide.isEmpty ? showParser.parseJson(json[keys.show]) : {},
       hide: hide,
       tags: tagsParser.parseJson(json[keys.tags]),
     );
@@ -168,10 +164,12 @@ class Export implements Comparable<Export> {
     if (!_hasFilters || !other._hasFilters) {
       return Export(uri: uri, tags: tags);
     }
+
     final mergedShow = show.union(other.show);
     final mergedHide = hide.isNotEmpty && other.hide.isNotEmpty
         ? hide.intersection(other.hide)
         : hide.union(other.hide);
+
     return Export(
       uri: uri,
       show: (hide.isNotEmpty || other.hide.isNotEmpty) ? {} : mergedShow,
@@ -185,8 +183,7 @@ class Export implements Comparable<Export> {
     final buffer = StringBuffer()..write("export '$uri'");
     if (show.isNotEmpty) buffer.write(' show ${show.sorted().join(', ')}');
     if (hide.isNotEmpty) buffer.write(' hide ${hide.sorted().join(', ')}');
-    buffer.write(';');
-    return buffer.toString();
+    return (buffer..write(';')).toString();
   }
 
   /// Converts this [Export] to a JSON-serializable map.

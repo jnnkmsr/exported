@@ -101,15 +101,16 @@ void main() {
       expect(sut.uri, 'package:foo/foo.dart');
     });
 
-    test('Throws an ArgumentError if `show` and `hide` are both present', () {
-      expect(
-        () => Export.fromJson(const {
-          keys.uri: 'package:foo/foo.dart',
-          keys.show: ['Foo'],
-          keys.hide: ['Bar'],
-        }),
-        throwsA(isA<ArgumentError>()),
-      );
+    test('Only includes `hide` if `show`/`hide` are both specified', () {
+      sut = Export.fromJson(const {
+        keys.uri: 'package:foo/foo.dart',
+        keys.show: ['Foo'],
+        keys.hide: ['Bar'],
+      });
+
+      expect(sut.uri, 'package:foo/foo.dart');
+      expect(sut.show, isEmpty);
+      expect(sut.hide, {'Bar'});
     });
   });
 
