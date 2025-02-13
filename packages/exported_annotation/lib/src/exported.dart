@@ -6,9 +6,15 @@ const exported = Exported();
 
 /// Annotates a top-level dart element as an export that will be included in
 /// one or more generated barrel files.
+// TODO: Add library support.
+//       Requires manual checking that the element is not an `import`/`export`
+//       or `part` directive.
 @Target({
   TargetKind.extension,
+  TargetKind.extensionType,
   TargetKind.function,
+  TargetKind.getter, // TODO: Handle checking for top-level getter.
+  TargetKind.setter, // TODO: Handle checking for top-level setter.
   TargetKind.topLevelVariable,
   TargetKind.type,
 })
