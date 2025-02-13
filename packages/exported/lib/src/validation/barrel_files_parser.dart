@@ -26,5 +26,10 @@ class BarrelFilesParser extends ListParser<BarrelFile> {
   }
 
   @override
-  BarrelFile elementFromJson(dynamic json) => BarrelFile.fromJson(json as Map);
+  BarrelFile elementFromJson(dynamic json) {
+    if (json is! String && json is! Map) {
+      throwArgumentError(json, 'Must be either path strings or key-value maps');
+    }
+    return BarrelFile.fromJson(json);
+  }
 }

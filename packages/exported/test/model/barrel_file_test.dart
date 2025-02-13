@@ -47,6 +47,17 @@ void main() {
       expect(sut.path, 'package:foo/foo.dart');
       expect(sut.tags, {'foo'});
     });
+
+    test('Creates an instance without tags from a path string input', () {
+      mockPathParser.whenParse('foo.dart', 'package:foo/foo.dart');
+
+      sut = BarrelFile.fromJson('foo.dart');
+
+      mockPathParser.verifyParse('foo.dart');
+
+      expect(sut.path, 'package:foo/foo.dart');
+      expect(sut.tags, isEmpty);
+    });
   });
 
   group('shouldInclude()', () {

@@ -30,22 +30,32 @@ class BarrelFile {
   /// Creates a [BarrelFile] from JSON/YAML input, validating and sanitizing
   /// inputs.
   ///
-  /// The following rules apply:
+  /// Input can be either a path string or a key-value map. For string inputs,
+  /// the [path] is sanitized and [tags] are empty.
+  ///
+  /// Input validation and sanitization rules are as follows:
   ///
   /// **[path]:**
   /// - Trims leading/trailing whitespace.
   /// - Normalizes the path, ensures it is relative and snake-case, and removes
   ///   any leading `lib/`.
   /// - Ensures the file extension is `.dart` or adds it if missing.
-  /// - If the path is empty, blank, or ends with `/`, the file name is set to
-  ///   `$package.dart`, using the package name from `pubspec.yaml`.
+  /// - If [path] is not provided, is empty/blank, or ends with `/`, the
+  ///   default barrel-file path `$package.dart` is used, reading the package
+  ///   name from `pubspec.yaml`.
   ///
   /// **[tags]:**
   /// - Trims whitespace and converts to lowercase.
   /// - Removes empty/blank tags and duplicates.
   ///
   /// Throws an [ArgumentError] for invalid inputs.
-  factory BarrelFile.fromJson(Map json) => BarrelFile(
+  factory BarrelFile.fromJson(dynamic json) => switch (json) {
+        String _ => BarrelFile(path: pathParser.parse(json)),
+        Map _ => BarrelFile._fromJson(json),
+        // This should have been checked by a previous ExportsParser.
+        _ => throw AssertionError('Unexpected JSON input: $json'),
+      };
+  factory BarrelFile._fromJson(Map json) => BarrelFile(
         path: pathParser.parseJson(json[keys.path]),
         tags: tagsParser.parseJson(json[keys.tags]),
       );

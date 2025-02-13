@@ -68,6 +68,11 @@ class Export implements Comparable<Export> {
   /// Creates an [Export] from JSON/YAML input, validating and sanitizing
   /// inputs.
   ///
+  /// Input can be either a URI string or a key-value map. For string input,
+  /// the [uri] is sanitized and [show], [hide] and [tags] are empty.
+  ///
+  /// Input validation and sanitization rules are as follows:
+  ///
   /// **[uri]:**
   /// - Trims leading/trailing whitespace.
   /// - Normalizes the URI, ensuring a valid Dart `package:` URI:
@@ -76,6 +81,7 @@ class Export implements Comparable<Export> {
   ///   - Ensures the file extension is `.dart` or adds it if missing.
   ///   - Converts a single package or library name to a URI of the form
   ///     `'package:$package/$package.dart'`.
+  /// - If [uri] is not provided or empty/blank, an [ArgumentError] is thrown.
   ///
   /// **[show]/[hide]:**
   /// - Trims whitespace and removes duplicate elements.
@@ -88,7 +94,13 @@ class Export implements Comparable<Export> {
   ///
   /// Throws an [ArgumentError] for invalid JSON input or inputs that cannot be
   /// sanitized.
-  factory Export.fromJson(Map json) {
+  factory Export.fromJson(dynamic json) => switch (json) {
+        String _ => Export(uri: uriParser.parse(json)),
+        Map _ => Export._fromJson(json),
+        // This should have been checked by a previous ExportsParser.
+        _ => throw AssertionError('Unexpected JSON input: $json'),
+      };
+  factory Export._fromJson(Map json) {
     final show = showParser.parseJson(json[keys.show]);
     final hide = hideParser.parseJson(json[keys.hide]);
     if (show.isNotEmpty && hide.isNotEmpty) {

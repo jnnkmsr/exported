@@ -91,6 +91,16 @@ void main() {
       expect(sut.tags, {'foo'});
     });
 
+    test('Creates an instance without filters/tags from a URI string input', () {
+      mockUriParser.whenParse('foo', 'package:foo/foo.dart');
+
+      sut = Export.fromJson('foo');
+
+      mockUriParser.verifyParse('foo');
+
+      expect(sut.uri, 'package:foo/foo.dart');
+    });
+
     test('Throws an ArgumentError if `show` and `hide` are both present', () {
       expect(
         () => Export.fromJson(const {
