@@ -28,7 +28,7 @@ class ExportsParser extends ListParser<Export> {
 
   @override
   Export elementFromJson(dynamic json) {
-    if (json is! String || json is! Map) {
+    if (json is! String && json is! Map) {
       throwArgumentError(json, 'Must be either URI strings or key-value maps');
     }
     return Export.fromJson(json);
