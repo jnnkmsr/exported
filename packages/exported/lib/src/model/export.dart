@@ -171,8 +171,8 @@ class Export implements Comparable<Export> {
   /// Converts this [Export] to a single-line Dart `export` directive.
   String toDart() {
     final buffer = StringBuffer()..write("export '$uri'");
-    if (show.isNotEmpty) buffer.write(' show ${show.sorted().join(',')}');
-    if (hide.isNotEmpty) buffer.write(' hide ${hide.sorted().join(',')}');
+    if (show.isNotEmpty) buffer.write(' show ${show.sorted().join(', ')}');
+    if (hide.isNotEmpty) buffer.write(' hide ${hide.sorted().join(', ')}');
     buffer.write(';');
     return buffer.toString();
   }
