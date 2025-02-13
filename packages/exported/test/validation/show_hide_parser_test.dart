@@ -1,14 +1,13 @@
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
-import 'package:exported/src/validation/tags_parser.dart';
+import 'package:exported/src/validation/show_hide_parser.dart';
 import 'package:test/test.dart';
 
 import '../helpers/input_parser_test_helpers.dart';
 
 void main() {
-  late TagsParser sut;
+  late ShowHideParser sut;
 
   setUp(() {
-    sut = const TagsParser(keys.tags);
+    sut = const ShowHideParser('show');
   });
 
   group('parse()', () {
@@ -16,6 +15,13 @@ void main() {
       sut.expectParses(
         {'foo', 'bar'},
         {'foo', 'bar'},
+      );
+    });
+
+    test('Accepts valid Dart identifiers', () {
+      sut.expectParses(
+        {'foo', 'Bar', 'baz_qux', 'quux1', 'corge_2', 'GraultGarply_3_'},
+        {'foo', 'Bar', 'baz_qux', 'quux1', 'corge_2', 'GraultGarply_3_'},
       );
     });
 
@@ -41,17 +47,31 @@ void main() {
       );
     });
 
-    test('Remove empty or blank tags', () {
+    test('Remove empty or blank elements', () {
       sut.expectParses(
         {'foo', '', 'bar', '  '},
         {'foo', 'bar'},
       );
     });
+
+    test('Throws for invalid identifiers', () {
+      sut.expectThrows({'foo bar'});
+      sut.expectThrows({'foo-bar'});
+      sut.expectThrows({'1foo'});
+      sut.expectThrows({'_foo'});
+      sut.expectThrows({'foo!'});
+      sut.expectThrows({'FooBar@'});
+      sut.expectThrows({'foo/bar'});
+    });
   });
 
   group('parseJson()', () {
     test('Parses and sanitizes a JSON list', () {
-      sut.expectParsesJson(['foo', 'Foo'], {'foo'});
+      sut.expectParsesJson(['foo', ' foo'], {'foo'});
+    });
+
+    test('Throws for a invalid JSON list elements', () {
+      sut.expectThrowsJson(['foo bar']);
     });
 
     test('Throws for an invalid JSON type', () {
