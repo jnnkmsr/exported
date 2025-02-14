@@ -12,70 +12,70 @@ void main() {
 
   group('parse()', () {
     test('Leaves a valid set as-is', () {
-      sut.expectParses(
+      sut.expectParse(
         {'foo', 'bar'},
         {'foo', 'bar'},
       );
     });
 
     test('Accepts valid Dart identifiers', () {
-      sut.expectParses(
+      sut.expectParse(
         {'foo', 'Bar', 'baz_qux', 'quux1', 'corge_2', 'GraultGarply_3_'},
         {'foo', 'Bar', 'baz_qux', 'quux1', 'corge_2', 'GraultGarply_3_'},
       );
     });
 
     test('Accepts an empty set', () {
-      sut.expectParses({}, {});
+      sut.expectParse({}, {});
     });
 
     test('Treats null as an empty set', () {
-      sut.expectParses(null, {});
+      sut.expectParse(null, {});
     });
 
     test('Trims leading and trailing whitespace', () {
-      sut.expectParses(
+      sut.expectParse(
         {'  foo', 'bar  ', '  baz  '},
         {'foo', 'bar', 'baz'},
       );
     });
 
     test('Removes duplicates', () {
-      sut.expectParses(
+      sut.expectParse(
         {'foo', '  foo', 'bar', 'bar  ', 'baz', '  baz  '},
         {'foo', 'bar', 'baz'},
       );
     });
 
     test('Remove empty or blank elements', () {
-      sut.expectParses(
+      sut.expectParse(
         {'foo', '', 'bar', '  '},
         {'foo', 'bar'},
       );
     });
 
     test('Throws for invalid identifiers', () {
-      sut.expectThrows({'foo bar'});
-      sut.expectThrows({'foo-bar'});
-      sut.expectThrows({'1foo'});
-      sut.expectThrows({'_foo'});
-      sut.expectThrows({'foo!'});
-      sut.expectThrows({'FooBar@'});
-      sut.expectThrows({'foo/bar'});
+      sut.expectParseThrows({'foo bar'});
+      sut.expectParseThrows({'foo-bar'});
+      sut.expectParseThrows({'1foo'});
+      sut.expectParseThrows({'_foo'});
+      sut.expectParseThrows({'foo!'});
+      sut.expectParseThrows({'FooBar@'});
+      sut.expectParseThrows({'foo/bar'});
     });
   });
 
   group('parseJson()', () {
     test('Parses and sanitizes a JSON list', () {
-      sut.expectParsesJson(['foo', ' foo'], {'foo'});
+      sut.expectParseJson(['foo', ' foo'], {'foo'});
     });
 
     test('Throws for a invalid JSON list elements', () {
-      sut.expectThrowsJson(['foo bar']);
+      sut.expectParseJsonThrows(['foo bar']);
     });
 
     test('Throws for an invalid JSON type', () {
-      sut.expectThrowsJson('foo');
+      sut.expectParseJsonThrows('foo');
     });
   });
 }

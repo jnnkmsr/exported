@@ -5,7 +5,7 @@ import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/exported_options.dart';
 import 'package:test/test.dart';
 
-import '../helpers/mock_input_parser.dart';
+import '../helpers/input_parser_test_doubles.dart';
 
 void main() {
   late ExportedOptions sut;
@@ -24,8 +24,8 @@ void main() {
     test('Creates ExportedOptions with the default file and no exports', () {
       const defaultBarrelFile = BarrelFile(path: 'foo.dart');
 
-      mockBarrelFilesParser.whenParse(null, [defaultBarrelFile]);
-      mockExportsParser.whenParse(null, []);
+      mockBarrelFilesParser.mockParse(null, [defaultBarrelFile]);
+      mockExportsParser.mockParse(null, []);
 
       sut = ExportedOptions.defaults();
 
@@ -38,8 +38,8 @@ void main() {
     test('Creates default ExportedOptions from empty builder options', () {
       const defaultBarrelFile = BarrelFile(path: 'foo.dart');
 
-      mockBarrelFilesParser.whenParseJson(null, [defaultBarrelFile]);
-      mockExportsParser.whenParseJson(null, []);
+      mockBarrelFilesParser.mockParseJson(null, [defaultBarrelFile]);
+      mockExportsParser.mockParseJson(null, []);
 
       sut = ExportedOptions.fromOptions(BuilderOptions.empty);
 
@@ -61,8 +61,8 @@ void main() {
       final barrelFiles = [for (final json in barrelFilesJson) BarrelFile.fromJson(json)];
       final exports = [for (final json in exportsJson) Export.fromJson(json)];
 
-      mockBarrelFilesParser.whenParseJson(barrelFilesJson, barrelFiles);
-      mockExportsParser.whenParseJson(exportsJson, exports);
+      mockBarrelFilesParser.mockParseJson(barrelFilesJson, barrelFiles);
+      mockExportsParser.mockParseJson(exportsJson, exports);
 
       sut = ExportedOptions.fromOptions(
         const BuilderOptions({

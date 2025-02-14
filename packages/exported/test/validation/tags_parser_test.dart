@@ -13,43 +13,43 @@ void main() {
 
   group('parse()', () {
     test('Leaves a valid set as-is', () {
-      sut.expectParses(
+      sut.expectParse(
         {'foo', 'bar'},
         {'foo', 'bar'},
       );
     });
 
     test('Accepts an empty set', () {
-      sut.expectParses({}, {});
+      sut.expectParse({}, {});
     });
 
     test('Treats null as an empty set', () {
-      sut.expectParses(null, {});
+      sut.expectParse(null, {});
     });
 
     test('Trims leading and trailing whitespace', () {
-      sut.expectParses(
+      sut.expectParse(
         {'  foo', 'bar  ', '  baz  '},
         {'foo', 'bar', 'baz'},
       );
     });
 
     test('Converts to lower-case', () {
-      sut.expectParses(
+      sut.expectParse(
         {'FOO', 'Bar', 'baZ'},
         {'foo', 'bar', 'baz'},
       );
     });
 
     test('Removes duplicates after trimming and converting to lower-case', () {
-      sut.expectParses(
+      sut.expectParse(
         {'foo', '  foo', 'bar', 'Bar', 'baz', 'BAZ'},
         {'foo', 'bar', 'baz'},
       );
     });
 
     test('Remove empty or blank tags', () {
-      sut.expectParses(
+      sut.expectParse(
         {'foo', '', 'bar', '  '},
         {'foo', 'bar'},
       );
@@ -58,11 +58,11 @@ void main() {
 
   group('parseJson()', () {
     test('Parses and sanitizes a JSON list', () {
-      sut.expectParsesJson(['foo', 'Foo'], {'foo'});
+      sut.expectParseJson(['foo', 'Foo'], {'foo'});
     });
 
     test('Throws for an invalid JSON type', () {
-      sut.expectThrowsJson('foo');
+      sut.expectParseJsonThrows('foo');
     });
   });
 }

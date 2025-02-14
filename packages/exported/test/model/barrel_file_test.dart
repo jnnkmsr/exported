@@ -3,7 +3,7 @@ import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:test/test.dart';
 
-import '../helpers/mock_input_parser.dart';
+import '../helpers/input_parser_test_doubles.dart';
 
 // TODO[BarrelFile]: Set up mocks in every test.
 
@@ -22,7 +22,7 @@ void main() {
 
   group('BarrelFile.packageNamed()', () {
     test('Creates a default package-named instance without tags', () {
-      mockPathParser.whenParse(null, 'package:foo/foo.dart');
+      mockPathParser.mockParse(null, 'package:foo/foo.dart');
 
       sut = BarrelFile.packageNamed();
 
@@ -35,8 +35,8 @@ void main() {
 
   group('BarrelFile.fromJson()', () {
     test('Creates an instance from sanitized JSON inputs', () {
-      mockPathParser.whenParseJson('foo.dart', 'package:foo/foo.dart');
-      mockTagsParser.whenParseJson(['foo', 'Foo'], {'foo'});
+      mockPathParser.mockParseJson('foo.dart', 'package:foo/foo.dart');
+      mockTagsParser.mockParseJson(['foo', 'Foo'], {'foo'});
 
       sut = BarrelFile.fromJson(const {
         keys.path: 'foo.dart',
@@ -51,7 +51,7 @@ void main() {
     });
 
     test('Creates an instance without tags from a path string input', () {
-      mockPathParser.whenParse('foo.dart', 'package:foo/foo.dart');
+      mockPathParser.mockParse('foo.dart', 'package:foo/foo.dart');
 
       sut = BarrelFile.fromJson('foo.dart');
 

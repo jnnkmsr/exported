@@ -4,11 +4,9 @@ import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
-import '../helpers/fake_element.dart';
-import '../helpers/fake_exported_reader.dart';
-import '../helpers/mock_input_parser.dart';
-
-// TODO[Export]: Set up mocks in every test.
+import '../helpers/element_test_doubles.dart';
+import '../helpers/exported_reader_test_doubles.dart';
+import '../helpers/input_parser_test_doubles.dart';
 
 void main() {
   late Export sut;
@@ -23,6 +21,7 @@ void main() {
     mockShowParser = MockShowHideParser();
     mockHideParser = MockShowHideParser();
     mockTagsParser = MockTagsParser();
+
     Export.uriParser = mockUriParser;
     Export.showParser = mockShowParser;
     Export.hideParser = mockHideParser;
@@ -34,6 +33,8 @@ void main() {
       final library = AssetId('foo', 'lib/src/foo.dart');
       final element = FakeElement(name: 'Foo');
       final annotation = FakeExportedReader(tags: {'foo', 'bar'});
+
+      mockTagsParser.mockParse({'foo', 'bar'});
 
       sut = Export.fromAnnotatedElement(library, element, annotation);
 
@@ -48,7 +49,7 @@ void main() {
       final element = FakeElement(name: 'Foo');
       final annotation = FakeExportedReader(tags: {'Foo', '   bar '});
 
-      mockTagsParser.whenParse({'Foo', '   bar '}, {'foo', 'bar'});
+      mockTagsParser.mockParse({'Foo', '   bar '}, {'foo', 'bar'});
 
       sut = Export.fromAnnotatedElement(library, element, annotation);
 
@@ -70,10 +71,10 @@ void main() {
 
   group('Export.fromJson()', () {
     test('Creates an instance from sanitized JSON inputs', () {
-      mockUriParser.whenParseJson('foo', 'package:foo/foo.dart');
-      mockShowParser.whenParseJson(['  Foo  ', 'Bar'], {'Foo', 'Bar'});
-      mockHideParser.whenParseJson([' '], {});
-      mockTagsParser.whenParseJson(['foo', 'Foo'], {'foo'});
+      mockUriParser.mockParseJson('foo', 'package:foo/foo.dart');
+      mockShowParser.mockParseJson(['  Foo  ', 'Bar'], {'Foo', 'Bar'});
+      mockHideParser.mockParseJson([' '], {});
+      mockTagsParser.mockParseJson(['foo', 'Foo'], {'foo'});
 
       sut = Export.fromJson(const {
         keys.uri: 'foo',
@@ -94,7 +95,7 @@ void main() {
     });
 
     test('Creates an instance without filters/tags from a URI string input', () {
-      mockUriParser.whenParse('foo', 'package:foo/foo.dart');
+      mockUriParser.mockParse('foo', 'package:foo/foo.dart');
 
       sut = Export.fromJson('foo');
 
@@ -104,6 +105,11 @@ void main() {
     });
 
     test('Only includes `hide` if `show`/`hide` are both specified', () {
+      mockUriParser.mockParseJson('package:foo/foo.dart');
+      mockShowParser.mockParseJson(['Foo'], {'Foo'});
+      mockHideParser.mockParseJson(['Bar'], {'Bar'});
+      mockTagsParser.mockParseJson(null, {});
+
       sut = Export.fromJson(const {
         keys.uri: 'package:foo/foo.dart',
         keys.show: ['Foo'],
