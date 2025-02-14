@@ -3,10 +3,6 @@ name: >
 run-name: >
   🏷️ Push tags after automated versioning
 
-# TODO: Conditionally run for version-related PRs only.
-# TODO: Automatic GitHub release for `timeo` tags:
-#   https://github.com/softprops/action-gh-release
-
 on:
   push:
     branches: [develop]

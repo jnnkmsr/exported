@@ -3,8 +3,6 @@ name: >
 run-name: >
   🤖 Auto-merge pull request #${{ github.event.pull_request.number }}
 
-# TODO: Approve pull request before merging.
-
 on:
   pull_request:
     types: [opened]
