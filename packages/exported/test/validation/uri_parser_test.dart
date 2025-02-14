@@ -1,4 +1,4 @@
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/validation/uri_parser.dart';
 import 'package:test/test.dart';
 

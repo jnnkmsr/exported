@@ -1,6 +1,9 @@
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/validation/input_parser.dart';
 
+// TODO[BarrelFilesParser]: Clean up doc comment.
+// TODO[BarrelFilesParser]: Merge duplicate files instead of throwing?
+
 /// Sanitizes a list of `files` builder options based on the following rules:
 /// - Duplicates with matching configuration are removed.
 /// - Path duplicates with conflicting configuration throw an [ArgumentError].
@@ -17,7 +20,7 @@ class BarrelFilesParser extends ListParser<BarrelFile> {
     for (final file in input) {
       final existing = filesByPath[file.path];
       if (existing != null && existing != file) {
-        throwArgumentError(file.path, 'Duplicate conflicting files: ${file.path}');
+        throwArgumentError(file.path, 'Duplicate conflicting paths');
       } else if (existing == null) {
         filesByPath[file.path] = file;
       }
@@ -28,7 +31,7 @@ class BarrelFilesParser extends ListParser<BarrelFile> {
   @override
   BarrelFile elementFromJson(dynamic json) {
     if (json is! String && json is! Map) {
-      throwArgumentError(json, 'Must be either path strings or key-value maps');
+      throwArgumentError(json, 'Only path strings or key-value maps are allowed');
     }
     return BarrelFile.fromJson(json);
   }

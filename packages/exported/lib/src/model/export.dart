@@ -2,7 +2,7 @@ import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:collection/collection.dart';
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/util/equals_util.dart';
 import 'package:exported/src/validation/show_hide_parser.dart';
 import 'package:exported/src/validation/tags_parser.dart';
@@ -10,6 +10,11 @@ import 'package:exported/src/validation/uri_parser.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 import 'package:meta/meta.dart';
 import 'package:source_gen/source_gen.dart';
+
+// TODO[Export]: Validate that annotated elements are top-level (getter/setter).
+// TODO[Export]: Validate annotation target (check for invalid directives).
+//   As soon as libraries are supported the [TargetKind.library] will also
+//   include `import`, `export` and `part` directives, which should be excluded.
 
 /// Represents a Dart `export` directive with a [uri] and an optional [show] or
 /// [hide] filter.
@@ -92,15 +97,20 @@ class Export implements Comparable<Export> {
   /// - Trims whitespace and converts to lowercase.
   /// - Removes empty/blank tags and duplicates.
   ///
-  /// Throws an [ArgumentError] for invalid JSON input or inputs that cannot be
-  /// sanitized.
+  /// Any invalid input throws an [ArgumentError].
   factory Export.fromJson(dynamic json) => switch (json) {
         String _ => Export(uri: uriParser.parse(json)),
         Map _ => Export._fromJson(json),
         // This should have been checked by a previous ExportsParser.
         _ => throw AssertionError('Unexpected JSON input: $json'),
       };
+
+  /// Called by [Export.fromJson] if the input is a key-value map.
   factory Export._fromJson(Map json) {
+    final invalidOptions = json.keys.toSet().difference(_options);
+    if (invalidOptions.isNotEmpty) {
+      throw ArgumentError('Invalid `${keys.barrelFiles}` options: $invalidOptions');
+    }
     final hide = hideParser.parseJson(json[keys.hide]);
     return Export(
       uri: uriParser.parseJson(json[keys.uri]),
@@ -124,6 +134,9 @@ class Export implements Comparable<Export> {
 
   /// Whether this export has any [show] or [hide] filters.
   bool get _hasFilters => show.isNotEmpty || hide.isNotEmpty;
+
+  /// The keys of all `barrel_files` builder options.
+  static const _options = {keys.uri, keys.show, keys.hide, keys.tags};
 
   /// Parser for [uri] inputs.
   @visibleForTesting

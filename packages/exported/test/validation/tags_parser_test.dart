@@ -1,4 +1,4 @@
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/validation/tags_parser.dart';
 import 'package:test/test.dart';
 
@@ -34,9 +34,16 @@ void main() {
       );
     });
 
-    test('Removes duplicates', () {
+    test('Converts to lower-case', () {
       sut.expectParses(
-        {'foo', '  foo', 'bar', 'bar  ', 'baz', '  baz  '},
+        {'FOO', 'Bar', 'baZ'},
+        {'foo', 'bar', 'baz'},
+      );
+    });
+
+    test('Removes duplicates after trimming and converting to lower-case', () {
+      sut.expectParses(
+        {'foo', '  foo', 'bar', 'Bar', 'baz', 'BAZ'},
         {'foo', 'bar', 'baz'},
       );
     });

@@ -23,15 +23,13 @@ class BarrelFileGenerator {
   /// Converts each [BarrelFile] to a [BarrelFileGenerator] and adds a
   /// [Export] for each [Export] to all files that match the
   /// export's tags.
-  static Set<BarrelFileGenerator> fromOptions(ExportedOptions options) {
-    return {
-      for (final option in options.files)
-        BarrelFileGenerator(
-          file: option,
-          initialExports: options.exports,
-        ),
-    };
-  }
+  static Set<BarrelFileGenerator> fromOptions(ExportedOptions options) => {
+        for (final option in options.barrelFiles)
+          BarrelFileGenerator(
+            file: option,
+            initialExports: options.exports,
+          ),
+      };
 
   /// The [BarrelFile] to generate.
   final BarrelFile file;

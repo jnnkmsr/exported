@@ -1,92 +1,88 @@
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:build/build.dart';
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/exported_options.dart';
-import 'package:exported/src/validation/barrel_files_parser.dart';
-import 'package:exported/src/validation/exports_parser.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
+import '../helpers/mock_input_parser.dart';
+
 void main() {
-  group('$ExportedOptions', () {
-    late ExportedOptions sut;
+  late ExportedOptions sut;
 
-    late MockBarrelFilesParser mockFilesParser;
-    late MockExportsParser mockExportsParser;
+  late MockBarrelFilesParser mockBarrelFilesParser;
+  late MockExportsParser mockExportsParser;
 
-    setUpAll(() {
-      registerFallbackValue(const BarrelFile(path: 'foo'));
-      registerFallbackValue(const Export(uri: 'foo'));
-    });
+  setUp(() {
+    mockBarrelFilesParser = MockBarrelFilesParser();
+    mockExportsParser = MockExportsParser();
+    ExportedOptions.filesParser = mockBarrelFilesParser;
+    ExportedOptions.exportsParser = mockExportsParser;
+  });
 
-    setUp(() {
-      mockFilesParser = MockBarrelFilesParser();
-      mockExportsParser = MockExportsParser();
-      ExportedOptions.filesParser = mockFilesParser;
-      ExportedOptions.exportsParser = mockExportsParser;
-    });
+  group('ExportedOptions.defaults()', () {
+    test('Creates ExportedOptions with the default file and no exports', () {
+      const defaultBarrelFile = BarrelFile(path: 'foo.dart');
 
-    group('.()', () {
-      final files = [const BarrelFile(path: 'foo_bar.dart')];
-      final exports = [const Export(uri: 'foo')];
+      mockBarrelFilesParser.whenParse(null, [defaultBarrelFile]);
+      mockExportsParser.whenParse(null, []);
 
-      setUp(() {
-        sut = ExportedOptions(files: files, exports: exports);
-      });
+      sut = ExportedOptions.defaults();
 
-      test('Sanitizes inputs', () {
-        verify(() => mockFilesParser.parse(files)).called(1);
-        verify(() => mockExportsParser.parse(exports)).called(1);
-      });
-    });
-
-    group('.fromJson()', () {
-      final fileJson1 = {keys.path: 'foo_bar.dart'};
-      final fileJson2 = {keys.path: 'baz_qux.dart'};
-      final exportJson1 = {keys.uri: 'foo'};
-      final exportJson2 = {keys.uri: 'bar'};
-
-      final files = [
-        BarrelFile.fromJson(fileJson1),
-        BarrelFile.fromJson(fileJson2),
-      ];
-      final exports = [
-        Export.fromJson(exportJson1),
-        Export.fromJson(exportJson2),
-      ];
-
-      setUp(() {
-        sut = ExportedOptions.fromJson({
-          keys.barrelFiles: [fileJson1, fileJson2],
-          keys.exports: [exportJson1, exportJson2],
-        });
-      });
-
-      test('Creates a $ExportedOptions from JSON', () {
-        expect(sut.files, files);
-        expect(sut.exports, exports);
-      });
-
-      test('Sanitizes inputs', () {
-        verify(() => mockFilesParser.parse(files)).called(1);
-        verify(() => mockExportsParser.parse(exports)).called(1);
-      });
+      expect(sut.barrelFiles, [defaultBarrelFile]);
+      expect(sut.exports, isEmpty);
     });
   });
-}
 
-class MockBarrelFilesParser with Mock implements BarrelFilesParser {
-  MockBarrelFilesParser() {
-    when(() => parse(any())).thenAnswer(
-      (i) => i.positionalArguments.first as List<BarrelFile>,
-    );
-  }
-}
+  group('ExportedOptions.fromOptions()', () {
+    test('Creates default ExportedOptions from empty builder options', () {
+      const defaultBarrelFile = BarrelFile(path: 'foo.dart');
 
-class MockExportsParser with Mock implements ExportsParser {
-  MockExportsParser() {
-    when(() => parse(any())).thenAnswer(
-      (i) => i.positionalArguments.first as List<Export>,
-    );
-  }
+      mockBarrelFilesParser.whenParseJson(null, [defaultBarrelFile]);
+      mockExportsParser.whenParseJson(null, []);
+
+      sut = ExportedOptions.fromOptions(BuilderOptions.empty);
+
+      expect(sut.barrelFiles, [defaultBarrelFile]);
+      expect(sut.exports, isEmpty);
+    });
+
+    test('Creates ExportedOptions from sanitized builder options', () {
+      const barrelFilesJson = [
+        {keys.path: 'foo.dart'},
+        {keys.path: 'bar.dart'},
+        {keys.path: 'baz.dart'},
+      ];
+      const exportsJson = [
+        {keys.uri: 'foo'},
+        {keys.uri: 'bar'},
+        {keys.uri: 'baz'},
+      ];
+      final barrelFiles = [for (final json in barrelFilesJson) BarrelFile.fromJson(json)];
+      final exports = [for (final json in exportsJson) Export.fromJson(json)];
+
+      mockBarrelFilesParser.whenParseJson(barrelFilesJson, barrelFiles);
+      mockExportsParser.whenParseJson(exportsJson, exports);
+
+      sut = ExportedOptions.fromOptions(
+        const BuilderOptions({
+          keys.barrelFiles: barrelFilesJson,
+          keys.exports: exportsJson,
+        }),
+      );
+
+      mockBarrelFilesParser.verifyParseJson(barrelFilesJson);
+      mockExportsParser.verifyParseJson(exportsJson);
+
+      expect(sut.barrelFiles, barrelFiles);
+      expect(sut.exports, exports);
+    });
+
+    test('Throws an ArgumentError for invalid builder options', () {
+      expect(
+        () => ExportedOptions.fromOptions(const BuilderOptions({'invalid': 'option'})),
+        throwsArgumentError,
+      );
+    });
+  });
 }

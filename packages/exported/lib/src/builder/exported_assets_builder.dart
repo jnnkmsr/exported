@@ -9,7 +9,10 @@ import 'package:exported_annotation/exported_annotation.dart';
 import 'package:meta/meta.dart';
 import 'package:source_gen/source_gen.dart';
 
-// TODO: Builder test for `BarreledExportsBuilder`.
+// TODO[ExportedAssetsBuilder]: Doc comment.
+// TODO[ExportedAssetsBuilder]: Builder test.
+// TODO[ExportedAssetsBuilder]: Rename to a more descriptive name.
+//   Alternative names: `ExportedJsonBuilder`, `ExportedCacheBuilder`
 
 class ExportedAssetsBuilder extends Builder {
   @override

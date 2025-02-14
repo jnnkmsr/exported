@@ -4,6 +4,8 @@ import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/exported_options.dart';
 import 'package:test/test.dart';
 
+// TODO[BarrelFileGenerator]: Refactor tests.
+
 void main() {
   group('$BarrelFileGenerator', () {
     late BarrelFileGenerator sut;
@@ -16,7 +18,7 @@ void main() {
         ];
 
         final result =
-            BarrelFileGenerator.fromOptions(const ExportedOptions(files: files)).toList();
+            BarrelFileGenerator.fromOptions(const ExportedOptions(barrelFiles: files)).toList();
 
         expect(result, hasLength(2));
         for (var i = 0; i < files.length; i++) {

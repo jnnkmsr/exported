@@ -4,17 +4,13 @@ import 'package:exported/src/builder/exported_builder.dart';
 import 'package:exported/src/model/exported_options.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 
-/// Generates Dart barrel files from [exported] elements and specified build
-/// options.
+/// Generates Dart barrel files by processing JSON data written into the build
+/// cache by [exportedAssetsBuilder].
 ///
-/// Needs previous execution of [exportedAssetsBuilder] to generate the
-/// intermediate JSON files into the build cache.
-Builder exportedBuilder(BuilderOptions options) {
-  return ExportedBuilder(
-    options: ExportedOptions.fromOptions(options),
-  );
-}
+/// Takes additional `build.yaml` configuration [options].
+Builder exportedBuilder(BuilderOptions options) =>
+    ExportedBuilder(options: ExportedOptions.fromOptions(options));
 
-/// Generates intermediate JSON files with barrel-file exports into the build
-/// cache.
+/// Collects elements annotated with [exported] and converts them into JSON
+/// assets written into the build cache for [exportedBuilder] to process.
 Builder exportedAssetsBuilder(BuilderOptions _) => ExportedAssetsBuilder();

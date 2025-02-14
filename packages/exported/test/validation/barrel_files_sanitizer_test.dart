@@ -1,9 +1,11 @@
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/barrel_file.dart';
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/validation/barrel_files_parser.dart';
 import 'package:exported/src/validation/file_path_parser.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
+
+// TODO: Refactor [BarrelFilesParser] tests.
 
 void main() {
   group('$BarrelFilesParser', () {

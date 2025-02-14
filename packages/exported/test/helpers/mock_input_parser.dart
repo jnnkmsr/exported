@@ -1,3 +1,7 @@
+import 'package:exported/src/model/barrel_file.dart';
+import 'package:exported/src/model/export.dart';
+import 'package:exported/src/validation/barrel_files_parser.dart';
+import 'package:exported/src/validation/exports_parser.dart';
 import 'package:exported/src/validation/file_path_parser.dart';
 import 'package:exported/src/validation/input_parser.dart';
 import 'package:exported/src/validation/show_hide_parser.dart';
@@ -5,6 +9,12 @@ import 'package:exported/src/validation/tags_parser.dart';
 import 'package:exported/src/validation/uri_parser.dart';
 import 'package:meta/meta.dart';
 import 'package:mocktail/mocktail.dart';
+
+// TODO[MockInputParser]: Remove default mock initialization.
+
+class MockBarrelFilesParser extends MockListParser<BarrelFile> implements BarrelFilesParser {}
+
+class MockExportsParser extends MockListParser<Export> implements ExportsParser {}
 
 class MockFilePathParser extends MockStringParser implements FilePathParser {}
 
@@ -30,6 +40,12 @@ abstract class MockStringSetParser extends MockInputParser<Set<String>, List<Str
 
   Set<String> _parsedJsonInputOrDefault(Invocation invocation) =>
       (invocation.positionalArguments.first as List<String>?)?.toSet() ?? fallback;
+}
+
+abstract class MockListParser<ElementType>
+    extends MockInputParser<List<ElementType>, List<ElementType>> {
+  @override
+  List<ElementType> get fallback => const [];
 }
 
 abstract class MockInputParser<InputType, JsonType> extends Mock implements InputParser<InputType> {

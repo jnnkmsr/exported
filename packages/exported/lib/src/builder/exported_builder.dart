@@ -12,6 +12,8 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 
+// TODO[ExportedBuilder]: Doc comment.
+
 class ExportedBuilder extends Builder {
   ExportedBuilder({ExportedOptions? options})
       : _generators = BarrelFileGenerator.fromOptions(options ?? ExportedOptions.defaults());

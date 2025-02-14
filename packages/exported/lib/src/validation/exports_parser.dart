@@ -1,6 +1,9 @@
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/validation/input_parser.dart';
 
+// TODO[ExportsParser]: Clean up doc comment.
+// TODO[ExportsParser]: Merge duplicate exports instead of throwing?
+
 /// Sanitizes a list of `exports` builder options based on the following rules:
 /// - Duplicates with matching configuration are removed.
 /// - URI duplicates with conflicting configuration throw an [ArgumentError].
@@ -15,12 +18,11 @@ class ExportsParser extends ListParser<Export> {
 
     final exportsByUri = <String, Export>{};
     for (final export in input) {
-      final uri = export.uri;
-      final existing = exportsByUri[uri];
+      final existing = exportsByUri[export.uri];
       if (existing != null && existing != export) {
-        throwArgumentError(uri, 'Duplicate conflicting exports: $uri');
+        throwArgumentError(export.uri, 'Duplicate conflicting exports');
       } else if (existing == null) {
-        exportsByUri[uri] = export;
+        exportsByUri[export.uri] = export;
       }
     }
     return exportsByUri.values.toList();
@@ -29,7 +31,7 @@ class ExportsParser extends ListParser<Export> {
   @override
   Export elementFromJson(dynamic json) {
     if (json is! String && json is! Map) {
-      throwArgumentError(json, 'Must be either URI strings or key-value maps');
+      throwArgumentError(json, 'Only URI strings or key-value maps are allowed');
     }
     return Export.fromJson(json);
   }

@@ -1,12 +1,10 @@
 import 'package:build/build.dart';
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/validation/barrel_files_parser.dart';
 import 'package:exported/src/validation/exports_parser.dart';
 import 'package:meta/meta.dart';
-
-// TODO: Allow simple string lists of export URIs and file names.
 
 /// Configuration options for the `exported` builder.
 @immutable
@@ -14,53 +12,63 @@ class ExportedOptions {
   /// Internal constructor assigning sanitized values.
   @visibleForTesting
   const ExportedOptions({
-    this.files = const [],
+    this.barrelFiles = const [],
     this.exports = const [],
   });
 
-  factory ExportedOptions.defaults() => ExportedOptions(
-        files: filesParser.parse(),
-        exports: exportsParser.parse(),
-      );
-
-  /// Creates [ExportedOptions] parsed from the given builder [options].
+  /// Creates [ExportedOptions] with default values.
   ///
-  /// Throws an [ArgumentError] if invalid [options] are provided.
+  /// Sets up a single barrel file `lib/$package.dart`, reading the '$package'
+  /// name from the target package's `pubspec.yaml`.
+  factory ExportedOptions.defaults() => ExportedOptions(barrelFiles: filesParser.parse());
+
+  /// Creates [ExportedOptions] parsed from builder [options], validating and
+  /// sanitizing inputs.
+  ///
+  /// Set [barrelFiles] and [exports] from the `barrel_files` and `exports`
+  /// sections of the builder options, respectively. Removes duplicates with
+  /// matching configuration and throws an [ArgumentError] for barrel files or
+  /// exports that have the same path/URI but conflicting configuration.
+  ///
+  /// Missing or empty sections are treated as empty lists.
+  ///
+  /// Validates and sanitizes every [BarrelFile] and [Export] input and throws
+  /// an [ArgumentError] for any invalid input or option keys.
   factory ExportedOptions.fromOptions(BuilderOptions options) =>
-      ExportedOptions.fromJson(options.config);
+      ExportedOptions._fromJson(options.config);
 
-  /// Creates [ExportedOptions] from a JSON (or YAML) map.
-  ///
-  /// Throws an [ArgumentError] if invalid inputs are provided.
-  factory ExportedOptions.fromJson(Map json) => ExportedOptions(
-        files: filesParser.parseJson(json[keys.barrelFiles]),
-        exports: exportsParser.parseJson(json[keys.exports]),
-      );
-
-  /// The list of barrel files to generate. Set through the `files` field of
+  /// Called by [ExportedOptions.fromOptions] to parse, validate and sanitize
   /// the builder options.
+  factory ExportedOptions._fromJson(Map json) {
+    final invalidOptions = json.keys.toSet().difference(_options);
+    if (invalidOptions.isNotEmpty) {
+      throw ArgumentError('Invalid options: $invalidOptions');
+    }
+    return ExportedOptions(
+      barrelFiles: filesParser.parseJson(json[keys.barrelFiles]),
+      exports: exportsParser.parseJson(json[keys.exports]),
+    );
+  }
+
+  /// The list of barrel files to generate.
   ///
-  /// Input will be sanitized based on the following rules:
-  /// - Duplicates with matching configuration are removed.
-  /// - Path duplicates with conflicting configuration throw an [ArgumentError].
-  /// - `null` is treated as an empty list.
-  final List<BarrelFile> files;
+  /// Set through the `barrel_files` field of the builder options.
+  final List<BarrelFile> barrelFiles;
 
   /// A list of exports to include in the generated barrel files in addition to
-  /// the annotated elements in the source files. Set through the `exports`
-  /// section of the builder options.
+  /// the annotated elements in the source files.
   ///
-  /// Input will be sanitized based on the following rules:
-  /// - Duplicates with matching configuration are removed.
-  /// - URI duplicates with conflicting configuration throw an [ArgumentError].
-  /// - `null` is treated as an empty list.
+  /// Set through the `exports` section of the builder options.
   final List<Export> exports;
 
-  /// Parser for the [exports] input. Exchangeable by test doubles.
+  /// The keys of all builder options.
+  static const _options = {keys.barrelFiles, keys.exports};
+
+  /// Parser for the [exports] input.
   @visibleForTesting
   static BarrelFilesParser filesParser = const BarrelFilesParser(keys.barrelFiles);
 
-  /// Parser for the [files] input. Exchangeable by test doubles.
+  /// Parser for the [barrelFiles] input.
   @visibleForTesting
   static ExportsParser exportsParser = const ExportsParser(keys.exports);
 }

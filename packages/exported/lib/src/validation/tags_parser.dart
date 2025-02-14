@@ -1,10 +1,8 @@
-// TODO: Test and document lower-case conversion.
-
 import 'package:exported/src/validation/input_parser.dart';
 
 /// Validates and sanitizes barrel-file or export tag input.
 ///
-/// - Converts `null` (no) input to an empty set.
+/// - Converts missing input (`null`) to an empty set.
 /// - Converts all tags to lower-case for case-insensitive matching.
 /// - Trims whitespace and removes empty/blank or duplicate elements.
 ///
@@ -13,6 +11,12 @@ class TagsParser extends StringSetParser {
   const TagsParser(super.inputName);
 
   @override
-  Set<String> parse([Set<String>? input]) =>
-      input?.map((tag) => tag.trim().toLowerCase()).where((tag) => tag.isNotEmpty).toSet() ?? {};
+  Set<String> parse([Set<String>? input]) => input?.map(_parseTag).nonNulls.toSet() ?? {};
+
+  /// Trims and converts the [input] to a lower-case tag. Returns `null` if
+  /// empty or blank.
+  String? _parseTag(String input) {
+    final tag = input.trim().toLowerCase();
+    return tag.isEmpty ? null : tag;
+  }
 }

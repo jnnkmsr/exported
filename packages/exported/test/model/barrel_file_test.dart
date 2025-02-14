@@ -1,9 +1,11 @@
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:test/test.dart';
 
 import '../helpers/mock_input_parser.dart';
+
+// TODO[BarrelFile]: Set up mocks in every test.
 
 void main() {
   late BarrelFile sut;
@@ -18,7 +20,7 @@ void main() {
     BarrelFile.tagsParser = mockTagsParser;
   });
 
-  group('packageNamed()', () {
+  group('BarrelFile.packageNamed()', () {
     test('Creates a default package-named instance without tags', () {
       mockPathParser.whenParse(null, 'package:foo/foo.dart');
 
@@ -31,7 +33,7 @@ void main() {
     });
   });
 
-  group('fromJson()', () {
+  group('BarrelFile.fromJson()', () {
     test('Creates an instance from sanitized JSON inputs', () {
       mockPathParser.whenParseJson('foo.dart', 'package:foo/foo.dart');
       mockTagsParser.whenParseJson(['foo', 'Foo'], {'foo'});
@@ -57,6 +59,13 @@ void main() {
 
       expect(sut.path, 'package:foo/foo.dart');
       expect(sut.tags, isEmpty);
+    });
+
+    test('Throws an ArgumentError for invalid options', () {
+      expect(
+        () => BarrelFile.fromJson(const {'invalid': 'option'}),
+        throwsArgumentError,
+      );
     });
   });
 

@@ -2,7 +2,7 @@ import 'package:exported/src/validation/input_parser.dart';
 import 'package:exported/src/validation/validation_util.dart';
 import 'package:path/path.dart' as p;
 
-// TODO: Simplify [UriParser] by using [Uri].
+// TODO[UriParser]: Simplify by using [Uri].
 
 /// Validates and sanitizes a Dart export URI string input.
 ///

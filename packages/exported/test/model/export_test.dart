@@ -1,12 +1,14 @@
 import 'package:build/build.dart';
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
 import '../helpers/fake_element.dart';
 import '../helpers/fake_exported_reader.dart';
 import '../helpers/mock_input_parser.dart';
+
+// TODO[Export]: Set up mocks in every test.
 
 void main() {
   late Export sut;
@@ -27,7 +29,7 @@ void main() {
     Export.tagsParser = mockTagsParser;
   });
 
-  group('fromAnnotatedElement()', () {
+  group('Export.fromAnnotatedElement()', () {
     test('Creates an instance an annotated Element', () {
       final library = AssetId('foo', 'lib/src/foo.dart');
       final element = FakeElement(name: 'Foo');
@@ -66,7 +68,7 @@ void main() {
     });
   });
 
-  group('fromJson()', () {
+  group('Export.fromJson()', () {
     test('Creates an instance from sanitized JSON inputs', () {
       mockUriParser.whenParseJson('foo', 'package:foo/foo.dart');
       mockShowParser.whenParseJson(['  Foo  ', 'Bar'], {'Foo', 'Bar'});
@@ -111,6 +113,13 @@ void main() {
       expect(sut.uri, 'package:foo/foo.dart');
       expect(sut.show, isEmpty);
       expect(sut.hide, {'Bar'});
+    });
+
+    test('Throws an ArgumentError for invalid options', () {
+      expect(
+        () => Export.fromJson(const {'invalid': 'option'}),
+        throwsArgumentError,
+      );
     });
   });
 

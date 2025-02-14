@@ -1,7 +1,9 @@
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/validation/exports_parser.dart';
 import 'package:test/test.dart';
+
+// TODO: Refactor [ExportsParser] tests.
 
 void main() {
   group('$ExportsParser', () {
