@@ -3,26 +3,26 @@ import 'package:exported/src/model/export.dart';
 import 'package:exported/src/validation/barrel_files_parser.dart';
 import 'package:exported/src/validation/exports_parser.dart';
 import 'package:exported/src/validation/file_path_parser.dart';
-import 'package:exported/src/validation/input_parser.dart';
+import 'package:exported/src/validation/option_parser.dart';
 import 'package:exported/src/validation/show_hide_parser.dart';
 import 'package:exported/src/validation/tags_parser.dart';
 import 'package:exported/src/validation/uri_parser.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockBarrelFilesParser extends MockInputParser<List<BarrelFile>>
+class MockBarrelFilesParser extends MockOptionParser<List<BarrelFile>>
     implements BarrelFilesParser {}
 
-class MockExportsParser extends MockInputParser<List<Export>> implements ExportsParser {}
+class MockExportsParser extends MockOptionParser<List<Export>> implements ExportsParser {}
 
-class MockFilePathParser extends MockInputParser<String> implements FilePathParser {}
+class MockFilePathParser extends MockOptionParser<String> implements FilePathParser {}
 
-class MockShowHideParser extends MockInputParser<Set<String>> implements ShowHideParser {}
+class MockShowHideParser extends MockOptionParser<Set<String>> implements ShowHideParser {}
 
-class MockTagsParser extends MockInputParser<Set<String>> implements TagsParser {}
+class MockTagsParser extends MockOptionParser<Set<String>> implements TagsParser {}
 
-class MockUriParser extends MockInputParser<String> implements UriParser {}
+class MockUriParser extends MockOptionParser<String> implements UriParser {}
 
-abstract class MockInputParser<InputType> extends Mock implements InputParser<InputType> {
+abstract class MockOptionParser<InputType> extends Mock implements OptionParser<InputType> {
   void mockParse(InputType? input, [InputType? output]) {
     when(() => parse(input)).thenReturn(output ?? input!);
   }

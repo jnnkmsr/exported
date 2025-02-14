@@ -1,5 +1,5 @@
 import 'package:exported/src/model/barrel_file.dart';
-import 'package:exported/src/validation/input_parser.dart';
+import 'package:exported/src/validation/option_parser.dart';
 
 // TODO[BarrelFilesParser]: Clean up doc comment.
 // TODO[BarrelFilesParser]: Merge duplicate files instead of throwing?
@@ -8,7 +8,7 @@ import 'package:exported/src/validation/input_parser.dart';
 /// - Duplicates with matching configuration are removed.
 /// - Path duplicates with conflicting configuration throw an [ArgumentError].
 /// - If the input is `null` or empty, the default barrel file will be added.
-class BarrelFilesParser extends ListParser<BarrelFile> {
+class BarrelFilesParser extends ListOptionParser<BarrelFile> {
   const BarrelFilesParser(super.inputName);
 
   /// Validates the [input] and returns the deduplicated list of exports.

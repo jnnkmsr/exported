@@ -1,4 +1,4 @@
-import 'package:exported/src/validation/input_parser.dart';
+import 'package:exported/src/validation/option_parser.dart';
 
 /// Validates and sanitizes barrel-file or export tag input.
 ///
@@ -7,7 +7,7 @@ import 'package:exported/src/validation/input_parser.dart';
 /// - Trims whitespace and removes empty/blank or duplicate elements.
 ///
 /// Any invalid input throws an [ArgumentError].
-class TagsParser extends StringSetParser {
+class TagsParser extends StringSetOptionParser {
   const TagsParser(super.inputName);
 
   @override

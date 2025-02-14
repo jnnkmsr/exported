@@ -2,7 +2,7 @@ import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:exported/src/validation/file_path_parser.dart';
 import 'package:test/test.dart';
 
-import '../helpers/input_parser_test_helpers.dart';
+import '../helpers/option_parser_test_helpers.dart';
 import '../helpers/pubspec_reader_test_doubles.dart';
 
 void main() {

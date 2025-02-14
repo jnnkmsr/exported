@@ -1,16 +1,16 @@
 import 'package:meta/meta.dart';
 
-/// Base [InputParser] for string [String] inputs.
-abstract class StringParser extends InputParser<String> {
-  const StringParser(super.inputName);
+/// Base [OptionParser] for string [String] inputs.
+abstract class StringOptionParser extends OptionParser<String> {
+  const StringOptionParser(super.inputName);
 
   @override
   String? typeCheckMessage(dynamic input) => 'Expected a string';
 }
 
-/// Base [InputParser] for string [Set] inputs.
-abstract class StringSetParser extends InputParser<Set<String>> {
-  const StringSetParser(super.inputName);
+/// Base [OptionParser] for string [Set] inputs.
+abstract class StringSetOptionParser extends OptionParser<Set<String>> {
+  const StringSetOptionParser(super.inputName);
 
   @override
   Set<String> fromJson(dynamic json) => (json as List?)?.cast<String>().toSet() ?? {};
@@ -19,26 +19,28 @@ abstract class StringSetParser extends InputParser<Set<String>> {
   String? typeCheckMessage(dynamic input) => 'Expected a list of strings';
 }
 
-/// Base [InputParser] for [Set] input types.
-abstract class SetParser<ElementType> extends IterableParser<ElementType, Set<ElementType>> {
-  const SetParser(super.inputName);
+/// Base [OptionParser] for [Set] input types.
+abstract class SetOptionParser<ElementType>
+    extends IterableOptionParser<ElementType, Set<ElementType>> {
+  const SetOptionParser(super.inputName);
 
   @override
   Set<ElementType> iterableFrom(Iterable<ElementType>? elements) => elements?.toSet() ?? {};
 }
 
-/// Base [InputParser] for [List] input types.
-abstract class ListParser<ElementType> extends IterableParser<ElementType, List<ElementType>> {
-  const ListParser(super.inputName);
+/// Base [OptionParser] for [List] input types.
+abstract class ListOptionParser<ElementType>
+    extends IterableOptionParser<ElementType, List<ElementType>> {
+  const ListOptionParser(super.inputName);
 
   @override
   List<ElementType> iterableFrom(Iterable<ElementType>? elements) => elements?.toList() ?? [];
 }
 
-/// Base [InputParser] for [Iterable] input types.
-abstract class IterableParser<ElementType, IterableType extends Iterable<ElementType>>
-    extends InputParser<IterableType> {
-  const IterableParser(super.inputName);
+/// Base [OptionParser] for [Iterable] input types.
+abstract class IterableOptionParser<ElementType, IterableType extends Iterable<ElementType>>
+    extends OptionParser<IterableType> {
+  const IterableOptionParser(super.inputName);
 
   @override
   @nonVirtual
@@ -60,11 +62,11 @@ abstract class IterableParser<ElementType, IterableType extends Iterable<Element
   String? typeCheckMessage(dynamic input) => 'Expected a list of $ElementType';
 }
 
-/// Base class for sanitizers providing a common [parse] interface and a
-/// method to throw an [ArgumentError] with a message that includes the input
+/// Base class for all option parsers providing a common [parse] interface and
+/// a method to throw an [ArgumentError] with a message that includes the input
 /// name and value.
-abstract class InputParser<InputType> {
-  const InputParser(this.inputName);
+abstract class OptionParser<InputType> {
+  const OptionParser(this.inputName);
 
   /// The name of the input that is sanitized. Used in error messages.
   final String inputName;

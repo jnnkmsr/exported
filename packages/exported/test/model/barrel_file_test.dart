@@ -3,7 +3,7 @@ import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:test/test.dart';
 
-import '../helpers/input_parser_test_doubles.dart';
+import '../helpers/option_parser_test_doubles.dart';
 
 // TODO[BarrelFile]: Set up mocks in every test.
 

@@ -1,4 +1,4 @@
-import 'package:exported/src/validation/input_parser.dart';
+import 'package:exported/src/validation/option_parser.dart';
 import 'package:exported/src/validation/validation_util.dart';
 
 /// Validates and sanitizes `show`/`hide` filter input.
@@ -9,7 +9,7 @@ import 'package:exported/src/validation/validation_util.dart';
 ///   numbers and underscores, and must not start with a number or underscore).
 ///
 /// Any invalid input throws an [ArgumentError].
-class ShowHideParser extends StringSetParser {
+class ShowHideParser extends StringSetOptionParser {
   const ShowHideParser(super.inputName);
 
   @override

@@ -1,4 +1,4 @@
-import 'package:exported/src/validation/input_parser.dart';
+import 'package:exported/src/validation/option_parser.dart';
 import 'package:exported/src/validation/validation_util.dart';
 import 'package:path/path.dart' as p;
 
@@ -16,7 +16,7 @@ import 'package:path/path.dart' as p;
 ///     `'package:$package/$package.dart'`.
 ///
 /// Any invalid input throws an [ArgumentError].
-class UriParser extends StringParser {
+class UriParser extends StringOptionParser {
   const UriParser(super.inputName);
 
   /// The scheme prefix for a Dart package URI.

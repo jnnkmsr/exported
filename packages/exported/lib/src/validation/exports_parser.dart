@@ -1,5 +1,5 @@
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/validation/input_parser.dart';
+import 'package:exported/src/validation/option_parser.dart';
 
 // TODO[ExportsParser]: Clean up doc comment.
 // TODO[ExportsParser]: Merge duplicate exports instead of throwing?
@@ -8,7 +8,7 @@ import 'package:exported/src/validation/input_parser.dart';
 /// - Duplicates with matching configuration are removed.
 /// - URI duplicates with conflicting configuration throw an [ArgumentError].
 /// - `null` is treated as an empty list.
-class ExportsParser extends ListParser<Export> {
+class ExportsParser extends ListOptionParser<Export> {
   const ExportsParser(super.inputName);
 
   /// Validates the [input] and returns the deduplicated list of exports.

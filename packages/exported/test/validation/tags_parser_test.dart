@@ -2,7 +2,7 @@ import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/validation/tags_parser.dart';
 import 'package:test/test.dart';
 
-import '../helpers/input_parser_test_helpers.dart';
+import '../helpers/option_parser_test_helpers.dart';
 
 void main() {
   late TagsParser sut;

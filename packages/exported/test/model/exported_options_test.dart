@@ -5,7 +5,7 @@ import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/exported_options.dart';
 import 'package:test/test.dart';
 
-import '../helpers/input_parser_test_doubles.dart';
+import '../helpers/option_parser_test_doubles.dart';
 
 void main() {
   late ExportedOptions sut;
