@@ -4,31 +4,29 @@ import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
-/// Helper class to read the package name and Dart SDK version from the target
-/// package's `pubspec.yaml`.
-class PubspecReader {
-  /// Creates a [PubspecReader] instance.
+/// Helper class to read the package name from the `pubspec.yaml`.
+class PackageNameReader {
+  /// Creates a [PackageNameReader] instance.
   ///
   /// The [fileSystem] defaults to [LocalFileSystem], but should be replaced
   /// with a [MemoryFileSystem] in tests.
   @visibleForTesting
-  PubspecReader([
+  PackageNameReader([
     FileSystem fileSystem = const LocalFileSystem(),
   ]) : _fileSystem = fileSystem;
 
-  /// Singleton instance of [PubspecReader] using the default [LocalFileSystem].
-  factory PubspecReader.instance() => $instance;
-
-  /// The singleton instance returned by [PubspecReader.instance]. Replace this
-  /// in tests to inject a test double.
+  /// Singleton instance of [PackageNameReader] using the [LocalFileSystem].
+  ///
+  /// In tests, [$instance] should be replaced with a test double.
+  factory PackageNameReader.instance() => $instance;
   @visibleForTesting
-  static PubspecReader $instance = PubspecReader();
+  static PackageNameReader $instance = PackageNameReader();
 
   final FileSystem _fileSystem;
 
   /// Reads the `name` from the `pubspec.yaml`, or returns a previously read
   /// value.
-  late final String name = _read((yaml) => yaml.name, _name);
+  late final String name = _read((yaml) => yaml.name, _nameKey);
 
   /// Reads a value from the `pubspec.yaml` using the provided [accessor], or
   /// returns a previously read value.
@@ -49,15 +47,15 @@ class PubspecReader {
   /// previously read value.
   late final YamlMap _yaml = _readYaml();
   YamlMap _readYaml() {
-    final pubspecFile = _fileSystem.directory(_packageDir).childFile(_pubspecFileName);
+    final pubspecFile = _fileSystem.directory(_packageDir).childFile(_pubspecFile);
     return loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
   }
 }
 
 extension on YamlMap {
-  String get name => this[_name] as String;
+  String get name => this[_nameKey] as String;
 }
 
-const _name = 'name';
+const _nameKey = 'name';
 const _packageDir = './';
-const _pubspecFileName = 'pubspec.yaml';
+const _pubspecFile = 'pubspec.yaml';

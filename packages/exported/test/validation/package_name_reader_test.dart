@@ -1,17 +1,17 @@
-import 'package:exported/src/validation/pubspec_reader.dart';
+import 'package:exported/src/validation/package_name_reader.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:test/test.dart';
 
 void main() {
-  late PubspecReader sut;
+  late PackageNameReader sut;
 
   late File pubspecFile;
   late FileSystem fileSystem;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    sut = PubspecReader(fileSystem);
+    sut = PackageNameReader(fileSystem);
   });
 
   group('Valid pubspec.yaml', () {
