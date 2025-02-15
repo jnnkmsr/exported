@@ -1,5 +1,5 @@
-import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:exported/src/validation/option_parser.dart';
+import 'package:exported/src/validation/pubspec_reader.dart';
 import 'package:exported/src/validation/validation_util.dart';
 import 'package:path/path.dart' as p;
 

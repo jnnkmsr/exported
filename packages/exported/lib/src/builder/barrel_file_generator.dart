@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
+import 'package:exported/src/builder/dart_writer.dart';
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/util/dart_writer.dart';
 
 /// Generates the contents of a [BarrelFile].
 class BarrelFileGenerator {

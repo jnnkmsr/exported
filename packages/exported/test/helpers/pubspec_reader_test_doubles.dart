@@ -1,4 +1,4 @@
-import 'package:exported/src/util/pubspec_reader.dart';
+import 'package:exported/src/validation/pubspec_reader.dart';
 import 'package:mocktail/mocktail.dart';
 
 class FakePubspecReader with Fake implements PubspecReader {

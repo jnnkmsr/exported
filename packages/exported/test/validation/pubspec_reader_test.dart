@@ -1,4 +1,4 @@
-import 'package:exported/src/util/pubspec_reader.dart';
+import 'package:exported/src/validation/pubspec_reader.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:test/test.dart';
