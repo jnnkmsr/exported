@@ -1,7 +1,6 @@
 import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -24,16 +23,6 @@ void main() {
         expect(sut.name, equals('foo'));
       });
     });
-
-    group('version', () {
-      test('Reads the Dart SDK version from the `environment:sdk` field', () {
-        pubspecFile.writeAsStringSync(
-          'environment:\n'
-          '  sdk: ^3.6.1\n',
-        );
-        expect(sut.sdkVersion, equals(VersionConstraint.parse('^3.6.1')));
-      });
-    });
   });
 
   group('Invalid pubspec.yaml', () {
@@ -43,20 +32,17 @@ void main() {
     test('Throws a FormatException if the pubspec.yaml has missing fields', () {
       pubspecFile.writeAsStringSync('version: 1.0.0\n');
       expect(() => sut.name, throwsA(isA<FormatException>()));
-      expect(() => sut.sdkVersion, throwsA(isA<FormatException>()));
     });
 
     test('Throws a FormatException if the pubspec.yaml contains invalid YAML', () {
       pubspecFile.writeAsStringSync('Non-YAML content');
       expect(() => sut.name, throwsA(isA<FormatException>()));
-      expect(() => sut.sdkVersion, throwsA(isA<FormatException>()));
     });
   });
 
   group('No pubspec.yaml', () {
     test('Throws a FileSystemException when attempting to read values', () {
       expect(() => sut.name, throwsA(isA<FileSystemException>()));
-      expect(() => sut.sdkVersion, throwsA(isA<FileSystemException>()));
     });
   });
 }

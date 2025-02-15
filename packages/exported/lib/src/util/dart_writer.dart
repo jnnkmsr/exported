@@ -1,6 +1,5 @@
 import 'package:dart_style/dart_style.dart';
 import 'package:meta/meta.dart';
-import 'package:pub_semver/pub_semver.dart';
 
 /// Helper class for writing generated Dart source code.
 ///
@@ -12,24 +11,17 @@ import 'package:pub_semver/pub_semver.dart';
 /// // GENERATED CODE - DO NOT MODIFY BY HAND
 /// ```
 class DartWriter {
-  DartWriter({this.languageVersion});
-
-  /// The language version to use when formatting the code.
-  ///
-  /// Defaults to [DartFormatter.latestLanguageVersion].
-  final Version? languageVersion;
-
   /// The header comment to include at the top of the generated file.
   @visibleForTesting
   static const header = '// GENERATED CODE - DO NOT MODIFY BY HAND';
 
+  static final _formatter = DartFormatter(
+    languageVersion: DartFormatter.latestLanguageVersion,
+  );
+
   late final _buffer = StringBuffer()
     ..writeln(header)
     ..writeln();
-
-  late final _formatter = DartFormatter(
-    languageVersion: languageVersion ?? DartFormatter.latestLanguageVersion,
-  );
 
   /// Adds a line of code.
   void addLine(String line) => _buffer.writeln(line);

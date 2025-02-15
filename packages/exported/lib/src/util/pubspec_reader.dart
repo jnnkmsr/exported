@@ -2,7 +2,6 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
-import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
 /// Helper class to read the package name and Dart SDK version from the target
@@ -31,13 +30,6 @@ class PubspecReader {
   /// value.
   late final String name = _read((yaml) => yaml.name, _name);
 
-  /// Reads the `environment:sdk` from the `pubspec.yaml`, or returns a
-  /// previously read value.
-  late final VersionConstraint sdkVersion = _read(
-    (yaml) => VersionConstraint.parse(yaml.environment.sdk),
-    '$_environment:$_sdk',
-  );
-
   /// Reads a value from the `pubspec.yaml` using the provided [accessor], or
   /// returns a previously read value.
   ///
@@ -64,12 +56,8 @@ class PubspecReader {
 
 extension on YamlMap {
   String get name => this[_name] as String;
-  YamlMap get environment => this[_environment] as YamlMap;
-  String get sdk => this[_sdk] as String;
 }
 
 const _name = 'name';
-const _environment = 'environment';
-const _sdk = 'sdk';
 const _packageDir = './';
 const _pubspecFileName = 'pubspec.yaml';

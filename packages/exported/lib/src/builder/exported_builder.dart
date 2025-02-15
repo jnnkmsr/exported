@@ -4,12 +4,9 @@ import 'package:exported/src/builder/barrel_file_generator.dart';
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/exported_options.dart';
-import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 import 'package:glob/glob.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
-import 'package:pub_semver/pub_semver.dart';
 import 'package:source_gen/source_gen.dart';
 
 // TODO: Remove PubspecReader and read from BuildStep instead
@@ -25,13 +22,6 @@ class ExportedBuilder implements Builder {
 
   late final List<BarrelFile> _barrelFiles;
   late final List<Export> _exports;
-  late final Version? _dartVersion = pubspecReader.sdkVersion.version;
-
-  /// Reads the Dart SDK version from the `pubspec.yaml`.
-  ///
-  /// In tests, set [PubspecReader.$instance] to inject doubles.
-  @visibleForTesting
-  static PubspecReader pubspecReader = PubspecReader.instance();
 
   @override
   Map<String, List<String>> get buildExtensions =>
@@ -47,7 +37,7 @@ class ExportedBuilder implements Builder {
     /// Writes the given [file] with all collected exports.
     Future<void> writeFile(BarrelFile file) => buildStep.writeAsString(
           AssetId(buildStep.inputId.package, p.join('lib', file.path)),
-          BarrelFileGenerator(file: file, exports: _exports).generate(_dartVersion),
+          BarrelFileGenerator(file: file, exports: _exports).generate(),
         );
 
     final assets = buildStep.findAssets(Glob('lib/**.dart'));
@@ -65,17 +55,4 @@ class ExportedBuilder implements Builder {
         .annotatedWith(const TypeChecker.fromRuntime(Exported))
         .map(export);
   }
-}
-
-extension on VersionConstraint {
-  /// Converts a [VersionConstraint] to a [Version].
-  ///
-  /// - If the constraint is already a [Version], it is returned as is.
-  /// - If the constraint is a [VersionRange], returns either the min or max
-  ///   version, preferring min if both are present.
-  Version? get version => switch (this) {
-        final Version version => version,
-        final VersionRange range => range.min ?? range.max,
-        _ => null,
-      };
 }

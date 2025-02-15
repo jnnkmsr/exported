@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/util/dart_writer.dart';
-import 'package:pub_semver/pub_semver.dart';
 
 /// Generates the contents of a [BarrelFile].
 class BarrelFileGenerator {
@@ -34,9 +33,9 @@ class BarrelFileGenerator {
 
   /// Generates the Dart contents of the [BarrelFile], containing sorted
   /// `export` directives for all added [Export]s.
-  String generate(Version? dartVersion) {
+  String generate() {
     final exports = _exportsByUri.values.sorted();
-    final writer = DartWriter(languageVersion: dartVersion);
+    final writer = DartWriter();
     for (final export in exports) {
       writer.addLine(export.toDart());
     }
