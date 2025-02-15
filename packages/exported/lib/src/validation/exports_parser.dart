@@ -1,13 +1,10 @@
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/validation/option_parser.dart';
 
-// TODO[ExportsParser]: Clean up doc comment.
-// TODO[ExportsParser]: Merge duplicate exports instead of throwing?
-
-/// Sanitizes a list of `exports` builder options based on the following rules:
-/// - Duplicates with matching configuration are removed.
-/// - URI duplicates with conflicting configuration throw an [ArgumentError].
-/// - `null` is treated as an empty list.
+/// Validates and sanitizes a list of `exports` builder options.
+///
+/// - Removes duplicate exports by [Export.merge].
+/// - Missing input (`null`) is treated as an empty list.
 class ExportsParser extends ListOptionParser<Export> {
   const ExportsParser(super.inputName);
 
@@ -18,12 +15,11 @@ class ExportsParser extends ListOptionParser<Export> {
 
     final exportsByUri = <String, Export>{};
     for (final export in input) {
-      final existing = exportsByUri[export.uri];
-      if (existing != null && existing != export) {
-        throwArgumentError(export.uri, 'Duplicate conflicting exports');
-      } else if (existing == null) {
-        exportsByUri[export.uri] = export;
-      }
+      exportsByUri.update(
+        export.uri,
+        (existingExport) => existingExport.merge(export),
+        ifAbsent: () => export,
+      );
     }
     return exportsByUri.values.toList();
   }
