@@ -102,7 +102,7 @@ void main() {
     });
   });
 
-  group('==(), hashCode', () {
+  group('==()', () {
     test('Compares by path', () {
       const a = BarrelFile(path: 'foo.dart');
       const b = BarrelFile(path: 'foo.dart');

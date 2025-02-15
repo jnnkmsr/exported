@@ -279,7 +279,7 @@ void main() {
     });
   });
 
-  group('==(), hashCode', () {
+  group('==()', () {
     test('Compares by URI', () {
       const a = Export(uri: 'package:foo/foo.dart');
       const b = Export(uri: 'package:foo/foo.dart');
