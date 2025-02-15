@@ -1,13 +1,11 @@
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/validation/option_parser.dart';
 
-// TODO[BarrelFilesParser]: Clean up doc comment.
-// TODO[BarrelFilesParser]: Merge duplicate files instead of throwing?
-
-/// Sanitizes a list of `files` builder options based on the following rules:
-/// - Duplicates with matching configuration are removed.
-/// - Path duplicates with conflicting configuration throw an [ArgumentError].
-/// - If the input is `null` or empty, the default barrel file will be added.
+/// Validates and sanitizes a list of `barrel_files` builder options.
+///
+/// - Removes duplicate paths by merging tags.
+/// - If the input is `null` or empty, the default package-named barrel file
+///   will be added.
 class BarrelFilesParser extends ListOptionParser<BarrelFile> {
   const BarrelFilesParser(super.inputName);
 
@@ -18,12 +16,14 @@ class BarrelFilesParser extends ListOptionParser<BarrelFile> {
 
     final filesByPath = <String, BarrelFile>{};
     for (final file in input) {
-      final existing = filesByPath[file.path];
-      if (existing != null && existing != file) {
-        throwArgumentError(file.path, 'Duplicate conflicting paths');
-      } else if (existing == null) {
-        filesByPath[file.path] = file;
-      }
+      filesByPath.update(
+        file.path,
+        (existingFile) => BarrelFile(
+          path: existingFile.path,
+          tags: existingFile.tags.union(file.tags),
+        ),
+        ifAbsent: () => file,
+      );
     }
     return filesByPath.values.toList();
   }

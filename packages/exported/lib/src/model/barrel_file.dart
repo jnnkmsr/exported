@@ -15,7 +15,6 @@ import 'package:meta/meta.dart';
 @immutable
 class BarrelFile {
   /// Internal constructor assigning sanitized values.
-  @visibleForTesting
   const BarrelFile({
     required this.path,
     this.tags = const {},

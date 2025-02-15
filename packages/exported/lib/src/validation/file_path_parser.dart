@@ -3,7 +3,7 @@ import 'package:exported/src/validation/option_parser.dart';
 import 'package:exported/src/validation/validation_util.dart';
 import 'package:path/path.dart' as p;
 
-/// Validates and sanitizes a barrel-file path input.
+/// Validates and sanitizes a `barrel_files:path` input.
 ///
 /// - Trims leading/trailing whitespace.
 /// - Normalizes the path, ensures it is relative and snake-case, and removes

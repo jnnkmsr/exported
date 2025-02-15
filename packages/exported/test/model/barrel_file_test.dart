@@ -5,8 +5,6 @@ import 'package:test/test.dart';
 
 import '../helpers/option_parser_test_doubles.dart';
 
-// TODO[BarrelFile]: Set up mocks in every test.
-
 void main() {
   late BarrelFile sut;
 
