@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:exported/src/model/equals_util.dart';
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
@@ -85,11 +86,32 @@ class BarrelFile {
   @visibleForTesting
   static TagsParser tagsParser = const TagsParser(keys.tags);
 
+  /// Builds a sorted and merged list of [Export]s to include in this barrel
+  /// file, filtering out any that do not match the [tags].
+  ///
+  /// Includes an [Export] if it is untagged or if there is at least one
+  /// matching tag.
+  ///
+  /// If duplicate there are multiple matching exports with the same URI, they
+  /// are merged by combining `show` and `hide` filters.
+  List<Export> buildExports(Iterable<Export> exports) {
+    final matchingExportsByUri = <String, Export>{};
+    for (final export in exports) {
+      if (!_shouldInclude(export)) continue;
+      matchingExportsByUri.update(
+        export.uri,
+        (existingExport) => existingExport.merge(export),
+        ifAbsent: () => export,
+      );
+    }
+    return matchingExportsByUri.values.sorted();
+  }
+
   /// Whether the given [export] should be included in this barrel file.
   ///
   /// Returns `true` if this file or the [export] are untagged, or if there is
   /// at least one matching tag.
-  bool shouldInclude(Export export) =>
+  bool _shouldInclude(Export export) =>
       tags.isEmpty || export.tags.isEmpty || tags.intersection(export.tags).isNotEmpty;
 
   @override

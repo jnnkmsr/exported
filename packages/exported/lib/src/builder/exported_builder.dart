@@ -1,15 +1,14 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:exported/src/builder/barrel_file_generator.dart';
+import 'package:exported/src/builder/barrel_file_writer.dart';
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/exported_options.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 import 'package:glob/glob.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:source_gen/source_gen.dart';
-
-// TODO: Remove PubspecReader and read from BuildStep instead
 
 /// Generates Dart barrel files from annotated elements and builder options.
 class ExportedBuilder implements Builder {
@@ -27,6 +26,9 @@ class ExportedBuilder implements Builder {
   Map<String, List<String>> get buildExtensions =>
       {r'$lib$': _barrelFiles.map((file) => file.path).toList()};
 
+  @visibleForTesting
+  static BarrelFileWriter writer = BarrelFileWriter();
+
   @override
   Future<void> build(BuildStep buildStep) async {
     /// Collects all exports from a single library asset.
@@ -37,7 +39,7 @@ class ExportedBuilder implements Builder {
     /// Writes the given [file] with all collected exports.
     Future<void> writeFile(BarrelFile file) => buildStep.writeAsString(
           AssetId(buildStep.inputId.package, p.join('lib', file.path)),
-          BarrelFileGenerator(file: file, exports: _exports).generate(),
+          writer.write(file.buildExports(_exports)),
         );
 
     final assets = buildStep.findAssets(Glob('lib/**.dart'));

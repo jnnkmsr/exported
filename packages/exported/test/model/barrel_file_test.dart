@@ -67,38 +67,55 @@ void main() {
     });
   });
 
-  group('shouldInclude()', () {
-    const path = 'foo.dart';
-    const uri = 'package:foo/foo.dart';
-
-    test('Returns true if neither the BarrelFile nor the Export are tagged', () {
-      sut = const BarrelFile(path: path);
-      const export = Export(uri: uri);
-      expect(sut.shouldInclude(export), isTrue);
+  group('buildExports()', () {
+    test('Returns an empty list if there are no exports', () {
+      sut = const BarrelFile(path: 'foo.dart');
+      expect(sut.buildExports([]), isEmpty);
     });
 
-    test('Returns true if the BarrelFile is not tagged', () {
-      sut = const BarrelFile(path: path);
-      const export = Export(uri: uri, tags: {'foo'});
-      expect(sut.shouldInclude(export), isTrue);
+    test('Includes only untagged exports or exports with matching tags', () {
+      sut = const BarrelFile(path: 'foo.dart', tags: {'foo', 'bar'});
+
+      const a = Export(uri: 'package:a/a.dart');
+      const b = Export(uri: 'package:b/b.dart', tags: {'foo', 'baz'});
+      const c = Export(uri: 'package:c/c.dart', tags: {'bar', 'qux'});
+      const d = Export(uri: 'package:d/d.dart', tags: {'baz', 'qux'});
+
+      expect(sut.buildExports([a, b, c, d]), [a, b, c]);
     });
 
-    test('Returns true if the Export is not tagged', () {
-      sut = const BarrelFile(path: path, tags: {'foo'});
-      const export = Export(uri: uri);
-      expect(sut.shouldInclude(export), isTrue);
+    test('Includes all exports if the file has no tags', () {
+      sut = const BarrelFile(path: 'foo.dart');
+
+      const a = Export(uri: 'package:a/a.dart');
+      const b = Export(uri: 'package:b/b.dart', tags: {'foo', 'baz'});
+      const c = Export(uri: 'package:c/c.dart', tags: {'bar', 'qux'});
+      const d = Export(uri: 'package:d/d.dart', tags: {'baz', 'qux'});
+
+      expect(sut.buildExports([a, b, c, d]), [a, b, c, d]);
     });
 
-    test('Returns true if there is a matching tag', () {
-      sut = const BarrelFile(path: path, tags: {'foo', 'bar'});
-      const export = Export(uri: uri, tags: {'bar', 'baz'});
-      expect(sut.shouldInclude(export), isTrue);
+    test('Merges exports with the same URI', () {
+      sut = const BarrelFile(path: 'foo.dart');
+
+      const a1 = Export(uri: 'package:a/a.dart', show: {'foo'});
+      const a2 = Export(uri: 'package:a/a.dart', show: {'bar'});
+      const a3 = Export(uri: 'package:a/a.dart', show: {'baz'});
+      final a = a1.merge(a2).merge(a3);
+      const b = Export(uri: 'package:b/b.dart', hide: {'qux'});
+
+      expect(sut.buildExports([a1, a2, a3, b]), [a, b]);
     });
 
-    test('Returns false if there are no matching tags', () {
-      sut = const BarrelFile(path: path, tags: {'foo', 'bar'});
-      const export = Export(uri: uri, tags: {'baz', 'qux'});
-      expect(sut.shouldInclude(export), isFalse);
+    test('Returns exports sorted by URI', () {
+      sut = const BarrelFile(path: 'foo.dart');
+
+      const a = Export(uri: 'package:a/a.dart');
+      const b = Export(uri: 'package:b/b.dart');
+      const c = Export(uri: 'package:c/c.dart');
+      const d = Export(uri: 'package:d/d.dart');
+
+      expect(sut.buildExports([d, a, c, b]), [a, b, c, d]);
     });
   });
 
