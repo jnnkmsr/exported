@@ -1,10 +1,32 @@
 import 'package:analyzer/dart/constant/value.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:mocktail/mocktail.dart';
 import 'package:source_gen/source_gen.dart';
 
-class FakeExportedReader extends Mock implements ConstantReader {
-  FakeExportedReader({required Set<String>? tags}) {
+class FakeAnnotatedElement extends Fake implements AnnotatedElement {
+  FakeAnnotatedElement({
+    required String? elementName,
+    Set<String>? tags,
+  })  : element = _FakeElement(name: elementName),
+        annotation = _FakeExportedReader(tags: tags);
+
+  @override
+  final Element element;
+
+  @override
+  final ConstantReader annotation;
+}
+
+class _FakeElement extends Fake implements Element {
+  _FakeElement({required this.name});
+
+  @override
+  final String? name;
+}
+
+class _FakeExportedReader extends Mock implements ConstantReader {
+  _FakeExportedReader({required Set<String>? tags}) {
     when(() => read(keys.tags)).thenReturn(_FakeTagsReader(tags));
   }
 }

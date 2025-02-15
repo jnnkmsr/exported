@@ -2,14 +2,6 @@ builders:
   exported:
     import: package:exported/builder.dart
     builder_factories: [ exportedBuilder ]
-    build_extensions: { $package$: [ barreled.stub ] }
+    build_extensions: { $package$: [ .stub ] }
     auto_apply: dependents
     build_to: source
-
-  exported_assets:
-    import: package:exported/builder.dart
-    builder_factories: [ exportedAssetsBuilder ]
-    build_extensions: { .dart: [ .exported.json ] }
-    auto_apply: dependents
-    build_to: cache
-    runs_before: [ :exported ]

@@ -1,52 +1,26 @@
 import 'package:collection/collection.dart';
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/model/exported_options.dart';
 import 'package:exported/src/util/dart_writer.dart';
-import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 /// Generates the contents of a [BarrelFile].
 class BarrelFileGenerator {
-  /// Creates a [BarrelFileGenerator] for the given [file], optionally adding
-  /// [initialExports] by calling [addExports].
-  @visibleForTesting
-  BarrelFileGenerator({
-    required this.file,
-    Iterable<Export> initialExports = const {},
-  }) {
-    addExports(initialExports);
-  }
-
-  /// Initializes a set of [BarrelFileGenerator]s from the given [options].
+  /// Creates a [BarrelFileGenerator] for the given [file] and [exports].
   ///
-  /// Converts each [BarrelFile] to a [BarrelFileGenerator] and adds a
-  /// [Export] for each [Export] to all files that match the
-  /// export's tags.
-  static Set<BarrelFileGenerator> fromOptions(ExportedOptions options) => {
-        for (final option in options.barrelFiles)
-          BarrelFileGenerator(
-            file: option,
-            initialExports: options.exports,
-          ),
-      };
-
-  /// The [BarrelFile] to generate.
-  final BarrelFile file;
-
-  /// Returns the exports in this file.
-  List<Export> get exports => _exportsByUri.values.sorted();
-  late final Map<String, Export> _exportsByUri = {};
-
-  /// Adds all [exports] with matching tags to this file.
+  /// Adds [exports] with matching tags to the file.
   /// - [exports] without tags are always be added.
   /// - [exports] with tags are added if they have at least one matching tag.
   ///
-  /// If an export with the same URI already exists, it is merged with the new
-  /// export by combining the `show` and `hide` filters.
-  void addExports(Iterable<Export> exports) {
+  /// If duplicate exports with the same URI are added, they are merged by
+  /// combining `show` and `hide` filters.
+  BarrelFileGenerator({
+    required BarrelFile file,
+    required Iterable<Export> exports,
+  }) : _file = file {
+    _exportsByUri = {};
     for (final export in exports) {
-      if (!file.shouldInclude(export)) continue;
+      if (!_file.shouldInclude(export)) continue;
       _exportsByUri.update(
         export.uri,
         (existing) => existing.merge(export),
@@ -55,7 +29,13 @@ class BarrelFileGenerator {
     }
   }
 
+  final BarrelFile _file;
+  late final Map<String, Export> _exportsByUri;
+
+  /// Generates the Dart contents of the [BarrelFile], containing sorted
+  /// `export` directives for all added [Export]s.
   String generate(Version? dartVersion) {
+    final exports = _exportsByUri.values.sorted();
     final writer = DartWriter(languageVersion: dartVersion);
     for (final export in exports) {
       writer.addLine(export.toDart());

@@ -34,31 +34,30 @@ class Export implements Comparable<Export> {
     this.tags = const {},
   });
 
-  /// Creates an [Export] from an [element] annotated with `@exported`, with:
-  /// - the [uri] of the [library] containing the [element],
-  /// - the [show] filter containing the [element]'s name, and
-  /// - [tags] read from the [annotation] input.
+  /// Creates an [Export] from an [Element] annotated with `@exported`, with:
+  /// - the [uri] of the [library] containing the [Element],
+  /// - the [show] filter containing the [Element]'s name, and
+  /// - [tags] read from the [annotatedElement]'s annotation input.
   ///
   /// Sanitizes [tags]:
   /// - Trims whitespace and converts to lowercase.
   /// - Removes empty/blank tags and duplicates.
   ///
-  /// Throws an [InvalidGenerationSourceError] if the [element] is an invalidly
-  /// annotated (unnamed) element.
+  /// Throws an [InvalidGenerationSourceError] if the [annotatedElement] is
+  /// invalidly annotated.
   factory Export.fromAnnotatedElement(
     AssetId library,
-    Element element,
-    ConstantReader annotation,
+    AnnotatedElement annotatedElement,
   ) {
-    final show = element.name;
+    final show = annotatedElement.element.name;
     if (show == null || show.isEmpty) {
       throw InvalidGenerationSourceError(
         '`@$exported` is used on an unnamed element',
-        element: element,
+        element: annotatedElement.element,
       );
     }
 
-    final tagReader = annotation.read(keys.tags);
+    final tagReader = annotatedElement.annotation.read(keys.tags);
     final tags = (tagReader.isSet ? tagReader.setValue : <DartObject>{})
         .map((tag) => tag.toStringValue()!)
         .toSet();

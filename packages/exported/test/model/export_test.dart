@@ -4,8 +4,7 @@ import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
-import '../helpers/element_test_doubles.dart';
-import '../helpers/exported_reader_test_doubles.dart';
+import '../helpers/annotated_element_test_doubles.dart';
 import '../helpers/option_parser_test_doubles.dart';
 
 void main() {
@@ -31,12 +30,14 @@ void main() {
   group('Export.fromAnnotatedElement()', () {
     test('Creates an instance an annotated Element', () {
       final library = AssetId('foo', 'lib/src/foo.dart');
-      final element = FakeElement(name: 'Foo');
-      final annotation = FakeExportedReader(tags: {'foo', 'bar'});
+      final annotatedElement = FakeAnnotatedElement(
+        elementName: 'Foo',
+        tags: {'foo', 'bar'},
+      );
 
       mockTagsParser.mockParse({'foo', 'bar'});
 
-      sut = Export.fromAnnotatedElement(library, element, annotation);
+      sut = Export.fromAnnotatedElement(library, annotatedElement);
 
       expect(sut.uri, 'package:foo/src/foo.dart');
       expect(sut.show, {'Foo'});
@@ -46,12 +47,14 @@ void main() {
 
     test('Sanitizes tags', () {
       final library = AssetId('foo', 'lib/src/foo.dart');
-      final element = FakeElement(name: 'Foo');
-      final annotation = FakeExportedReader(tags: {'Foo', '   bar '});
+      final annotatedElement = FakeAnnotatedElement(
+        elementName: 'Foo',
+        tags: {'Foo', '   bar '},
+      );
 
       mockTagsParser.mockParse({'Foo', '   bar '}, {'foo', 'bar'});
 
-      sut = Export.fromAnnotatedElement(library, element, annotation);
+      sut = Export.fromAnnotatedElement(library, annotatedElement);
 
       mockTagsParser.verifyParse({'Foo', '   bar '});
       expect(sut.tags, {'foo', 'bar'});
@@ -59,11 +62,10 @@ void main() {
 
     test('Throws an InvalidGenerationSourceError for an unnamed element', () {
       final library = AssetId('foo', 'lib/src/foo.dart');
-      final element = FakeElement(name: null);
-      final annotation = FakeExportedReader(tags: {'foo', 'bar'});
+      final annotatedElement = FakeAnnotatedElement(elementName: null);
 
       expect(
-        () => Export.fromAnnotatedElement(library, element, annotation),
+        () => Export.fromAnnotatedElement(library, annotatedElement),
         throwsA(isA<InvalidGenerationSourceError>()),
       );
     });

@@ -9,19 +9,6 @@ import 'package:meta/meta.dart';
 /// Configuration options for the `exported` builder.
 @immutable
 class ExportedOptions {
-  /// Internal constructor assigning sanitized values.
-  @visibleForTesting
-  const ExportedOptions({
-    this.barrelFiles = const [],
-    this.exports = const [],
-  });
-
-  /// Creates [ExportedOptions] with default values.
-  ///
-  /// Sets up a single barrel file `lib/$package.dart`, reading the '$package'
-  /// name from the target package's `pubspec.yaml`.
-  factory ExportedOptions.defaults() => ExportedOptions(barrelFiles: filesParser.parse());
-
   /// Creates [ExportedOptions] parsed from builder [options], validating and
   /// sanitizing inputs.
   ///
@@ -44,11 +31,17 @@ class ExportedOptions {
     if (invalidOptions.isNotEmpty) {
       throw ArgumentError('Invalid options: $invalidOptions');
     }
-    return ExportedOptions(
+    return ExportedOptions._(
       barrelFiles: filesParser.parseJson(json[keys.barrelFiles]),
       exports: exportsParser.parseJson(json[keys.exports]),
     );
   }
+
+  /// Internal constructor assigning sanitized values.
+  const ExportedOptions._({
+    this.barrelFiles = const [],
+    this.exports = const [],
+  });
 
   /// The list of barrel files to generate.
   ///

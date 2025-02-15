@@ -20,20 +20,6 @@ void main() {
     ExportedOptions.exportsParser = mockExportsParser;
   });
 
-  group('ExportedOptions.defaults()', () {
-    test('Creates ExportedOptions with the default file and no exports', () {
-      const defaultBarrelFile = BarrelFile(path: 'foo.dart');
-
-      mockBarrelFilesParser.mockParse(null, [defaultBarrelFile]);
-      mockExportsParser.mockParse(null, []);
-
-      sut = ExportedOptions.defaults();
-
-      expect(sut.barrelFiles, [defaultBarrelFile]);
-      expect(sut.exports, isEmpty);
-    });
-  });
-
   group('ExportedOptions.fromOptions()', () {
     test('Creates default ExportedOptions from empty builder options', () {
       const defaultBarrelFile = BarrelFile(path: 'foo.dart');
