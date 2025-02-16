@@ -184,7 +184,7 @@ class Export implements Comparable<Export> {
 
     return Export(
       uri: uri,
-      show: (hide.isNotEmpty || other.hide.isNotEmpty) ? {} : mergedShow,
+      show: other.hide.isEmpty ? mergedShow : {},
       hide: mergedHide.difference(mergedShow),
       tags: tags,
     );
