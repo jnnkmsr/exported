@@ -25,5 +25,6 @@ linter:
     always_put_required_named_parameters_first: false
     always_use_package_imports: true
     flutter_style_todos: false
+    one_member_abstracts: false
     prefer_relative_imports: false
     public_member_api_docs: false
