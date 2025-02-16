@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
-import 'package:exported/src/model/equals_util.dart';
-import 'package:exported/src/model/export.dart';
-import 'package:exported/src/model/exported_option_keys.dart' as keys;
+import 'package:exported/src/model_legacy/equals_util.dart';
+import 'package:exported/src/model_legacy/export.dart';
+import 'package:exported/src/model_legacy/exported_option_keys.dart' as keys;
 import 'package:exported/src/validation/file_path_parser.dart';
 import 'package:exported/src/validation/tags_parser.dart';
 import 'package:meta/meta.dart';

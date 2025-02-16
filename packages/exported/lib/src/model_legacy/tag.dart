@@ -1,4 +1,4 @@
-import 'package:exported/src/model/exported_option_keys.dart' as keys;
+import 'package:exported/src/model_legacy/exported_option_keys.dart' as keys;
 
 extension type const Tags._(Set<Tag> _value) implements Object {
   factory Tags.parse(dynamic input) {

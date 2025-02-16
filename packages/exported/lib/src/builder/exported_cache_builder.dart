@@ -1,8 +1,8 @@
 import 'package:build/build.dart';
-import 'package:exported/src/model/export_new.dart';
-import 'package:exported/src/model/export_uri.dart';
-import 'package:exported/src/model/exported_option_keys.dart' as keys;
-import 'package:exported/src/model/tag.dart';
+import 'package:exported/src/model_legacy/export_new.dart';
+import 'package:exported/src/model_legacy/export_uri.dart';
+import 'package:exported/src/model_legacy/exported_option_keys.dart' as keys;
+import 'package:exported/src/model_legacy/tag.dart';
 import 'package:source_gen/source_gen.dart';
 
 class ExportedCacheBuilder implements Builder {

@@ -1,6 +1,6 @@
-import 'package:exported/src/model/export_new.dart';
-import 'package:exported/src/model/export_uri.dart';
-import 'package:exported/src/model/tag.dart';
+import 'package:exported/src/model_legacy/export_new.dart';
+import 'package:exported/src/model_legacy/export_uri.dart';
+import 'package:exported/src/model_legacy/tag.dart';
 
 class ExportCache {
   final Map<Tag, Map<ExportUri, Export>> _exportsByTag = {};

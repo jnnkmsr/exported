@@ -1,9 +1,9 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:exported/src/builder/barrel_file_writer.dart';
-import 'package:exported/src/model/barrel_file.dart';
-import 'package:exported/src/model/export.dart';
-import 'package:exported/src/model/exported_options.dart';
+import 'package:exported/src/model_legacy/barrel_file.dart';
+import 'package:exported/src/model_legacy/export.dart';
+import 'package:exported/src/model_legacy/exported_options.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';

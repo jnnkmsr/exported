@@ -1,7 +1,7 @@
-import 'package:exported/src/model/export_filter.dart';
-import 'package:exported/src/model/export_uri.dart';
-import 'package:exported/src/model/parser.dart';
-import 'package:exported/src/model/tag.dart';
+import 'package:exported/src/model_legacy/export_filter.dart';
+import 'package:exported/src/model_legacy/export_uri.dart';
+import 'package:exported/src/model_legacy/parser.dart';
+import 'package:exported/src/model_legacy/tag.dart';
 
 class Export {
   const Export._({

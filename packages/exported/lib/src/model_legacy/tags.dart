@@ -1,7 +1,7 @@
-import 'package:exported/src/model/barrel_file_new.dart';
-import 'package:exported/src/model/export_new.dart';
-import 'package:exported/src/model/exported_option_keys.dart' as keys;
-import 'package:exported/src/model/parser_helpers.dart';
+import 'package:exported/src/model_legacy/barrel_file_new.dart';
+import 'package:exported/src/model_legacy/export_new.dart';
+import 'package:exported/src/model_legacy/exported_option_keys.dart' as keys;
+import 'package:exported/src/model_legacy/parser_helpers.dart';
 import 'package:meta/meta.dart';
 
 /// A set of tags for selectively including [Export]s in [BarrelFile]s.

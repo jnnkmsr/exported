@@ -1,6 +1,6 @@
 import 'package:build/build.dart';
-import 'package:exported/src/model/export.dart';
-import 'package:exported/src/model/exported_option_keys.dart' as keys;
+import 'package:exported/src/model_legacy/export.dart';
+import 'package:exported/src/model_legacy/exported_option_keys.dart' as keys;
 import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 

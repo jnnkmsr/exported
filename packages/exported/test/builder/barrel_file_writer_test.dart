@@ -1,5 +1,5 @@
 import 'package:exported/src/builder/barrel_file_writer.dart';
-import 'package:exported/src/model/export.dart';
+import 'package:exported/src/model_legacy/export.dart';
 import 'package:test/test.dart';
 
 void main() {

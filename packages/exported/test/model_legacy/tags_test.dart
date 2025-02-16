@@ -1,5 +1,5 @@
-import 'package:exported/src/model/exported_option_keys.dart' as keys;
-import 'package:exported/src/model/tags.dart';
+import 'package:exported/src/model_legacy/exported_option_keys.dart' as keys;
+import 'package:exported/src/model_legacy/tags.dart';
 import 'package:test/test.dart' hide Tags;
 
 void main() {

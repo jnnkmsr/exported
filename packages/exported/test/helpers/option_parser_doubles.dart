@@ -1,5 +1,5 @@
-import 'package:exported/src/model/barrel_file.dart';
-import 'package:exported/src/model/export.dart';
+import 'package:exported/src/model_legacy/barrel_file.dart';
+import 'package:exported/src/model_legacy/export.dart';
 import 'package:exported/src/validation/barrel_files_parser.dart';
 import 'package:exported/src/validation/exports_parser.dart';
 import 'package:exported/src/validation/file_path_parser.dart';

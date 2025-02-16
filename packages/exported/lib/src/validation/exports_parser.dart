@@ -1,4 +1,4 @@
-import 'package:exported/src/model/export.dart';
+import 'package:exported/src/model_legacy/export.dart';
 import 'package:exported/src/validation/option_parser.dart';
 
 /// Validates and sanitizes a list of `exports` builder options.
