@@ -1,6 +1,6 @@
 import 'package:exported/src/model_legacy/export_filter.dart';
-import 'package:exported/src/model_legacy/export_uri.dart';
-import 'package:exported/src/model_legacy/tag.dart';
+import 'package:exported/src/model/export_uri.dart';
+import 'package:exported/src/model/tag.dart';
 import 'package:meta/meta.dart';
 
 Parser get parser => Parser.instance;
@@ -16,7 +16,7 @@ class Parser {
   @visibleForTesting
   static Parser instance = const Parser._();
 
-  ExportUriParser get uri => ExportUri.parse;
+  ExportUriParser get uri => ExportUri.fromOptions;
   HideParser get hide => Hide.parse;
   ShowParser get show => Show.parse;
   TagParser get tag => Tag.parse;

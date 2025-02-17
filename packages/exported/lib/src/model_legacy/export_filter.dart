@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:exported/src/model_legacy/exported_option_keys.dart' as keys;
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model_legacy/parser_helpers.dart';
 import 'package:meta/meta.dart';
 

@@ -1,39 +1,54 @@
+import 'dart:convert';
+
+import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:exported/src/model_legacy/export_new.dart';
-import 'package:exported/src/model_legacy/export_uri.dart';
-import 'package:exported/src/model_legacy/exported_option_keys.dart' as keys;
-import 'package:exported/src/model_legacy/tag.dart';
+import 'package:exported/src/model/export.dart';
+import 'package:exported/src/model/export_cache.dart';
+import 'package:exported_annotation/exported_annotation.dart';
 import 'package:source_gen/source_gen.dart';
 
+/// Callback for reading an [Export] from an [annotatedElement], annotated with
+/// [Exported] within a library at [uri].
+typedef ExportAnnotationReader = Export Function(
+  Uri uri,
+  AnnotatedElement annotatedElement,
+);
+
 class ExportedCacheBuilder implements Builder {
+  ExportedCacheBuilder({
+    ExportCache? cache,
+    ExportAnnotationReader annotationReader = Export.fromAnnotatedElement,
+  })  : _cache = cache ?? ExportCache(),
+        _annotationReader = annotationReader;
+
+  static const jsonExtension = '.exported.json';
+
   @override
-  Map<String, List<String>> get buildExtensions => {
-        '.dart': ['.exported.json'],
-      };
+  final Map<String, List<String>> buildExtensions = const {
+    '.dart': [jsonExtension],
+  };
 
-  final Map<Tag, Map<ExportUri, Export>> _exportsByTag = {};
+  final ExportCache _cache;
+  final ExportAnnotationReader _annotationReader;
 
-  void addExport(Export export) {
-    _exportsByTag.putIfAbsent(export.tag, () => {}).update(
-          export.uri,
-          (existing) => existing.merge(export),
-          ifAbsent: () => export,
-        );
+  void _readExports(Uri uri, LibraryElement library) {
+    LibraryReader(library)
+        .annotatedWith(const TypeChecker.fromRuntime(Exported))
+        .map((annotatedElement) => _annotationReader(uri, annotatedElement))
+        .forEach(_cache.add);
   }
 
-  Export export(AnnotatedElement annotatedElement) {
-    final tagReader = annotatedElement.annotation.read(keys.tags);
-
-    throw UnimplementedError();
-  }
+  Future<void> _writeJson(BuildStep buildStep, AssetId outputId) =>
+      buildStep.writeAsString(outputId, jsonEncode(_cache.toJson()));
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    final libraryAsset = buildStep.inputId;
+    final inputId = buildStep.inputId;
     final resolver = buildStep.resolver;
-    if (!await resolver.isLibrary(libraryAsset)) return;
+    if (!await resolver.isLibrary(inputId)) return;
 
-    final library = await resolver.libraryFor(libraryAsset);
+    _readExports(inputId.uri, await resolver.libraryFor(inputId));
+
+    await _writeJson(buildStep, inputId.changeExtension(jsonExtension));
   }
-
 }

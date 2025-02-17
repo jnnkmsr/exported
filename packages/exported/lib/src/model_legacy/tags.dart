@@ -1,6 +1,6 @@
 import 'package:exported/src/model_legacy/barrel_file_new.dart';
-import 'package:exported/src/model_legacy/export_new.dart';
-import 'package:exported/src/model_legacy/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/export.dart';
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model_legacy/parser_helpers.dart';
 import 'package:meta/meta.dart';
 
