@@ -1,32 +1,16 @@
-import 'package:source_gen/source_gen.dart';
 
 typedef ExportFilterFromJson = ExportFilter Function(dynamic input);
 
 sealed class ExportFilter {
-  factory ExportFilter.fromCache(dynamic json) {
+  // ignore: avoid_unused_constructor_parameters
+  factory ExportFilter.fromCache(Map json) {
     throw UnimplementedError();
   }
 
-  factory ExportFilter.fromAnnotatedElement(AnnotatedElement element) {
+  // ignore: avoid_unused_constructor_parameters
+  factory ExportFilter.showElement(String name) {
     throw UnimplementedError();
   }
-
-  // factory ExportFilter({
-  //   Set<String> show = const {},
-  //   Set<String> hide = const {},
-  // }) {
-  //   if (show.isEmpty && hide.isEmpty) return const _None();
-  //   if (hide.isNotEmpty) {
-  //     final symbols = _Symbols.parse(hide);
-  //     if (symbols != null) return _Hide._(symbols);
-  //   }
-  //   if (show.isNotEmpty) {
-  //     final symbols = _Symbols.parse(show);
-  //     if (symbols != null) return _Show._(symbols);
-  //   }
-  //   return const _None();
-  // }
-  // factory ExportFilter.showSingle(String element) => _Show._(_Symbols._({_Symbol._(element)}));
 
   static const ExportFilter none = _None();
 
@@ -119,3 +103,20 @@ extension type const _Symbols._(Set<_Symbol> _) implements Set<_Symbol> {
 extension type const _Symbol._(String _) implements Object {
   static _Symbol? parse(dynamic input) => _Symbol._(input as String);
 }
+
+// factory ExportFilter({
+//   Set<String> show = const {},
+//   Set<String> hide = const {},
+// }) {
+//   if (show.isEmpty && hide.isEmpty) return const _None();
+//   if (hide.isNotEmpty) {
+//     final symbols = _Symbols.parse(hide);
+//     if (symbols != null) return _Hide._(symbols);
+//   }
+//   if (show.isNotEmpty) {
+//     final symbols = _Symbols.parse(show);
+//     if (symbols != null) return _Show._(symbols);
+//   }
+//   return const _None();
+// }
+// factory ExportFilter.showSingle(String element) => _Show._(_Symbols._({_Symbol._(element)}));

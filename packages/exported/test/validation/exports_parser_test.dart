@@ -1,5 +1,5 @@
-import 'package:exported/src/model_legacy/export.dart';
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model_legacy/export.dart';
 import 'package:exported/src/validation/exports_parser.dart';
 import 'package:test/test.dart';
 

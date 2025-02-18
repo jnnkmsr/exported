@@ -4,8 +4,6 @@
 /// If the resultant set is empty, [emptyBuilder] is called to create an
 /// empty set. This can be used to ensure the same instance is returned for
 /// empty sets.
-///
-/// See [ShowHide] and [Tags] for examples of usage.
 SetT parseSet<SetT extends Object, ElementT extends Object>(
   dynamic input,
   String key,

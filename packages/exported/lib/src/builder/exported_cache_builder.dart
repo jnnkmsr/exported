@@ -2,25 +2,13 @@ import 'dart:convert';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_cache.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 import 'package:source_gen/source_gen.dart';
 
-/// Callback for reading an [Export] from an [annotatedElement], annotated with
-/// [Exported] within a library at [uri].
-typedef ExportAnnotationReader = Export Function(
-  Uri uri,
-  AnnotatedElement annotatedElement,
-);
-
 class ExportedCacheBuilder implements Builder {
-  ExportedCacheBuilder({
-    ExportCache? cache,
-    ExportAnnotationReader annotationReader = Export.fromAnnotatedElement,
-  })  : _cache = cache ?? ExportCache(),
-        _annotationReader = annotationReader;
-
   static const jsonExtension = '.exported.json';
 
   @override
@@ -28,18 +16,27 @@ class ExportedCacheBuilder implements Builder {
     '.dart': [jsonExtension],
   };
 
-  final ExportCache _cache;
-  final ExportAnnotationReader _annotationReader;
-
-  void _readExports(Uri uri, LibraryElement library) {
-    LibraryReader(library)
-        .annotatedWith(const TypeChecker.fromRuntime(Exported))
-        .map((annotatedElement) => _annotationReader(uri, annotatedElement))
-        .forEach(_cache.add);
+  Export _readExportFromAnnotation(Uri uri, AnnotatedElement annotatedElement) {
+    final elementName = annotatedElement.element.name!;
+    final tags =
+        annotatedElement.annotation.read(keys.tags).setValue.map((e) => e.toStringValue()!);
+    return Export.fromAnnotation(uri.toString(), elementName, tags);
   }
 
-  Future<void> _writeJson(BuildStep buildStep, AssetId outputId) =>
-      buildStep.writeAsString(outputId, jsonEncode(_cache.toJson()));
+  ExportCache _readExportsFromLibrary(Uri uri, LibraryElement library) {
+    final cache = ExportCache();
+    LibraryReader(library)
+        .annotatedWith(const TypeChecker.fromRuntime(Exported))
+        .map((annotatedElement) => _readExportFromAnnotation(uri, annotatedElement))
+        .forEach(cache.add);
+    return cache;
+  }
+
+  Future<void> _writeJsonForLibrary(BuildStep buildStep, AssetId inputId, ExportCache cache) {
+    final outputId = inputId.changeExtension(jsonExtension);
+    final json = jsonEncode(cache.toJson());
+    return buildStep.writeAsString(outputId, json);
+  }
 
   @override
   Future<void> build(BuildStep buildStep) async {
@@ -47,8 +44,7 @@ class ExportedCacheBuilder implements Builder {
     final resolver = buildStep.resolver;
     if (!await resolver.isLibrary(inputId)) return;
 
-    _readExports(inputId.uri, await resolver.libraryFor(inputId));
-
-    await _writeJson(buildStep, inputId.changeExtension(jsonExtension));
+    final exports = _readExportsFromLibrary(inputId.uri, await resolver.libraryFor(inputId));
+    await _writeJsonForLibrary(buildStep, inputId, exports);
   }
 }

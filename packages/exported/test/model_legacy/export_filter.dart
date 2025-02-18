@@ -110,14 +110,14 @@ void main() {
         expect(() => Hide.parse({keys.hide: 42}), throwsArgumentError);
         expect(
             () => Show.parse({
-                  keys.show: ['foo', 42]
+                  keys.show: ['foo', 42],
                 }),
-            throwsArgumentError);
+            throwsArgumentError,);
         expect(
             () => Hide.parse({
-                  keys.hide: ['foo', 42]
+                  keys.hide: ['foo', 42],
                 }),
-            throwsArgumentError);
+            throwsArgumentError,);
       });
     });
 

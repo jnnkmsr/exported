@@ -1,6 +1,6 @@
-import 'package:exported/src/model_legacy/export_filter.dart';
 import 'package:exported/src/model/export_uri.dart';
 import 'package:exported/src/model/tag.dart';
+import 'package:exported/src/model_legacy/export_filter.dart';
 import 'package:meta/meta.dart';
 
 Parser get parser => Parser.instance;

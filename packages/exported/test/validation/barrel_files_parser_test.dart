@@ -1,5 +1,5 @@
-import 'package:exported/src/model_legacy/barrel_file.dart';
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model_legacy/barrel_file.dart';
 import 'package:exported/src/validation/barrel_files_parser.dart';
 import 'package:exported/src/validation/package_name_reader.dart';
 import 'package:test/test.dart';
