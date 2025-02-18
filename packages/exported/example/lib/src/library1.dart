@@ -5,7 +5,7 @@ class Class1 {
   void method() {}
 }
 
-@exported
+@Exported(tags: {'foo', 'bar'})
 void function1() {}
 
 @exported
@@ -13,7 +13,7 @@ extension Class1Extension on Class1 {
   void extensionMethod() {}
 }
 
-@exported
+@Exported(tags: {'bar'})
 extension type Id(int id) {
   void extensionTypeMethod() {}
 }
