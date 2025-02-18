@@ -1,51 +1,49 @@
-import 'package:exported/src/model/export_filter.dart';
 import 'package:exported/src/model/export_uri.dart';
+import 'package:exported/src/model/filter.dart';
 import 'package:exported/src/model/tag.dart';
 
 class Export {
   const Export._(
     this.uri,
-    ExportFilter? filter,
-    Tags? tags,
-  )   : _filter = filter ?? ExportFilter.none,
-        tags = tags ?? Tags.none;
+    Filter? filter,
+    Tag? tag,
+  )   : _filter = filter ?? Filter.none,
+        tag = tag ?? Tag.none;
 
-  Export.fromAnnotation(
-    String uri,
-    String element,
-    Iterable<String> tags,
-  )   : uri = ExportUri(uri),
-        _filter = ExportFilter.showElement(element),
-        tags = Tags.parse(tags);
+  Export.fromJson(Map json)
+      : uri = ExportUri.fromJson(json),
+        _filter = Filter.fromJson(json),
+        tag = Tag.fromJson(json);
 
-  Export.fromCache(Map json)
-      : uri = ExportUri.fromCache(json),
-        _filter = ExportFilter.fromCache(json),
-        tags = Tags.fromCache(json);
+  // factory Export.fromOptions(
+  //   dynamic options, {
+  //   ExportFromOptions uri = ExportUri.fromOptions,
+  // }) =>
+  //     switch (options) {
+  //       String _ => Export._(uri(options)),
+  //       Map _ => Export._(
+  //           uri(options),
+  //         ),
+  //       _ => throw ArgumentError('Must be a single URI or key-value input: $options'),
+  //     };
+
+  static Iterable<Export> fromAnnotation({
+    required String uri,
+    required String element,
+    Iterable<String> tags = const [],
+  }) =>
+      Tags.parse(tags).map(
+        (tag) => Export._(ExportUri(uri), Filter.show(element), tag),
+      );
 
   final ExportUri uri;
-  final Tags tags;
-  final ExportFilter _filter;
+  final Tag tag;
+  final Filter _filter;
 
   Export merge(Export other) {
     if (uri != other.uri) return this;
-    return Export._(uri, _filter.merge(other._filter), tags);
+    return Export._(uri, _filter.merge(other._filter), tag);
   }
 
-  Map<Tag, Export> splitByTag() =>
-      {for (final tag in tags) tag: Export._(uri, _filter, Tags.single(tag))};
-
-  Map toCache() => {...uri.toCache(), ...tags.toCache(), ..._filter.toCache()};
+  Map toJson() => {...uri.toCache(), ...tag.toJson(), ..._filter.toJson()};
 }
-
-// factory Export.fromOptions(
-//   dynamic options, {
-//   ExportFromOptions uri = ExportUri.fromOptions,
-// }) =>
-//     switch (options) {
-//       String _ => Export._(uri(options)),
-//       Map _ => Export._(
-//           uri(options),
-//         ),
-//       _ => throw ArgumentError('Must be a single URI or key-value input: $options'),
-//     };

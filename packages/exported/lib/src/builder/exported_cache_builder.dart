@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
+import 'package:collection/collection.dart';
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_cache.dart';
@@ -16,21 +17,23 @@ class ExportedCacheBuilder implements Builder {
     '.dart': [jsonExtension],
   };
 
-  Export _readExportFromAnnotation(Uri uri, AnnotatedElement annotatedElement) {
-    final elementName = annotatedElement.element.name!;
-    final tags =
-        annotatedElement.annotation.read(keys.tags).setValue.map((e) => e.toStringValue()!);
-    return Export.fromAnnotation(uri.toString(), elementName, tags);
+  // TODO[ExportedCacheBuilder]: Validate element is named/exclude directives
+  Iterable<Export> _readExportFromAnnotation(Uri uri, AnnotatedElement annotatedElement) {
+    final tagsReader = annotatedElement.annotation.read(keys.tags);
+    return Export.fromAnnotation(
+      uri: uri.toString(),
+      element: annotatedElement.element.name!,
+      tags: tagsReader.isSet
+          ? tagsReader.setValue.map((e) => e.toStringValue()!).toList()
+          : const <String>[],
+    );
   }
 
-  ExportCache _readExportsFromLibrary(Uri uri, LibraryElement library) {
-    final cache = ExportCache();
-    LibraryReader(library)
-        .annotatedWith(const TypeChecker.fromRuntime(Exported))
-        .map((annotatedElement) => _readExportFromAnnotation(uri, annotatedElement))
-        .forEach(cache.add);
-    return cache;
-  }
+  Iterable<Export> _readExportsFromLibrary(Uri uri, LibraryElement library) =>
+      LibraryReader(library)
+          .annotatedWith(const TypeChecker.fromRuntime(Exported))
+          .map((annotatedElement) => _readExportFromAnnotation(uri, annotatedElement))
+          .flattened;
 
   Future<void> _writeJsonForLibrary(BuildStep buildStep, AssetId inputId, ExportCache cache) {
     final outputId = inputId.changeExtension(jsonExtension);
@@ -45,6 +48,8 @@ class ExportedCacheBuilder implements Builder {
     if (!await resolver.isLibrary(inputId)) return;
 
     final exports = _readExportsFromLibrary(inputId.uri, await resolver.libraryFor(inputId));
-    await _writeJsonForLibrary(buildStep, inputId, exports);
+    if (exports.isEmpty) return;
+
+    await _writeJsonForLibrary(buildStep, inputId, ExportCache(exports));
   }
 }
