@@ -1,7 +1,8 @@
 import 'dart:convert';
 
+import 'package:build/build.dart';
 import 'package:build_test/build_test.dart';
-import 'package:exported/src/builder/exported_cache_builder.dart';
+import 'package:exported/builder.dart';
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_cache.dart';
 import 'package:meta/meta.dart';
@@ -9,8 +10,8 @@ import 'package:test/test.dart';
 
 void main() {
   group('ExportedCacheBuilder', () {
-    late ExportedCacheBuilder sut;
-    setUp(() => sut = ExportedCacheBuilder());
+    late Builder sut;
+    setUp(() => sut = cacheBuilder(BuilderOptions.empty));
 
     const packageName = 'foo';
     String uri(String path) => 'package:$packageName/src/$path';
@@ -29,7 +30,7 @@ void main() {
             outputs: outputs?.map(
               (path, exports) => MapEntry(
                 assetPath(path),
-                jsonEncode(ExportCache(exports).toJson()),
+                '${jsonEncode(ExportCache(exports).toJson())}\n',
               ),
             ),
             reader: await PackageAssetReader.currentIsolate(),
@@ -83,12 +84,12 @@ void main() {
       },
       outputs: {
         'foo.exported.json': [
-          ...Export.fromAnnotation(uri: uri('foo.dart'), element: 'Foo'),
-          ...Export.fromAnnotation(uri: uri('foo.dart'), element: 'foo'),
+          ...Export.fromAnnotation(uri: uri('foo.dart'), symbol: 'Foo'),
+          ...Export.fromAnnotation(uri: uri('foo.dart'), symbol: 'foo'),
         ],
         'bar.exported.json': [
-          ...Export.fromAnnotation(uri: uri('bar.dart'), element: 'Bar'),
-          ...Export.fromAnnotation(uri: uri('bar.dart'), element: 'bar'),
+          ...Export.fromAnnotation(uri: uri('bar.dart'), symbol: 'Bar'),
+          ...Export.fromAnnotation(uri: uri('bar.dart'), symbol: 'bar'),
         ],
       },
     );
@@ -109,12 +110,12 @@ void main() {
       },
       outputs: {
         'foo.exported.json': [
-          ...Export.fromAnnotation(uri: uri('foo.dart'), element: 'Foo', tags: ['foo', 'bar']),
-          ...Export.fromAnnotation(uri: uri('foo.dart'), element: 'foo', tags: ['foo']),
+          ...Export.fromAnnotation(uri: uri('foo.dart'), symbol: 'Foo', tags: ['foo', 'bar']),
+          ...Export.fromAnnotation(uri: uri('foo.dart'), symbol: 'foo', tags: ['foo']),
         ],
         'bar.exported.json': [
-          ...Export.fromAnnotation(uri: uri('bar.dart'), element: 'Bar', tags: ['foo', 'bar']),
-          ...Export.fromAnnotation(uri: uri('bar.dart'), element: 'bar', tags: ['foo']),
+          ...Export.fromAnnotation(uri: uri('bar.dart'), symbol: 'Bar', tags: ['foo', 'bar']),
+          ...Export.fromAnnotation(uri: uri('bar.dart'), symbol: 'bar', tags: ['foo']),
         ],
       },
     );

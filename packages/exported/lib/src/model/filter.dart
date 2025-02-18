@@ -3,7 +3,7 @@ import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 sealed class Filter {
   factory Filter.fromJson(Map json) => _Show.fromJson(json) ?? _Hide.fromJson(json) ?? none;
 
-  factory Filter.show(String element) = _Show.single;
+  factory Filter.show(String symbol) = _Show.single;
 
   static const Filter none = _None();
 
@@ -15,7 +15,7 @@ sealed class Filter {
 final class _Show implements Filter {
   const _Show._(this._symbols);
 
-  _Show.single(String element) : _symbols = {_Symbol(element)};
+  _Show.single(String symbol) : _symbols = {_Symbol(symbol)};
 
   static _Show? fromJson(Map json) {
     final symbols = _Symbol.fromJson(json[keys.show]);

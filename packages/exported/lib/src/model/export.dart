@@ -29,11 +29,11 @@ class Export {
 
   static Iterable<Export> fromAnnotation({
     required String uri,
-    required String element,
+    required String symbol,
     Iterable<String> tags = const [],
   }) =>
       Tags.parse(tags).map(
-        (tag) => Export._(ExportUri(uri), Filter.show(element), tag),
+        (tag) => Export._(ExportUri(uri), Filter.show(symbol), tag),
       );
 
   final ExportUri uri;
