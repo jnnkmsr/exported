@@ -3,5 +3,13 @@ builders:
     import: package:exported/builder.dart
     builder_factories: [ exportedBuilder ]
     build_extensions: { $package$: [ .stub ] }
+    required_inputs: [ .exported.json ]
+    applies_builders: [ :exported_cache ]
     auto_apply: dependents
     build_to: source
+
+  exported_cache:
+    import: package:exported/builder.dart
+    builder_factories: [ cacheBuilder ]
+    build_extensions: { .dart: [ .exported.json ] }
+    build_to: cache
