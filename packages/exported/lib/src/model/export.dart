@@ -27,14 +27,26 @@ class Export {
   //       _ => throw ArgumentError('Must be a single URI or key-value input: $options'),
   //     };
 
-  static Iterable<Export> fromAnnotation({
+  static Iterable<Export> element({
     required String uri,
-    required String symbol,
+    required String name,
     Iterable<String> tags = const [],
   }) =>
-      Tags.parse(tags).map(
-        (tag) => Export._(ExportUri(uri), Filter.show(symbol), tag),
-      );
+      _splitByTag(tags, (tag) => Export._(ExportUri(uri), Filter.show(name), tag));
+
+  static Iterable<Export> library({
+    required String uri,
+    Iterable<String> tags = const [],
+  }) {
+    // final filter = name == null ? Filter.none : Filter.show(name);
+    return _splitByTag(tags, (tag) => Export._(ExportUri(uri), Filter.none, tag));
+  }
+
+  static Iterable<Export> _splitByTag(
+    Iterable<String> tags,
+    Export Function(Tag tag) builder,
+  ) =>
+      Tags.parse(tags).map(builder);
 
   final ExportUri uri;
   final Tag tag;

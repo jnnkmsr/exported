@@ -1,6 +1,5 @@
 import 'package:meta/meta_meta.dart';
 
-// TODO[Exported]: Add support for library annotations.
 // TODO[Exported]: Add show/hide for library exports.
 
 /// Annotates a top-level dart element as an export that will be included in
@@ -14,6 +13,7 @@ const exported = Exported();
   TargetKind.extensionType,
   TargetKind.function,
   TargetKind.getter,
+  TargetKind.library,
   TargetKind.setter,
   TargetKind.topLevelVariable,
   TargetKind.type,

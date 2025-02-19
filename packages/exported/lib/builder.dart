@@ -1,5 +1,5 @@
 import 'package:build/build.dart';
-import 'package:exported/src/builder/export_cache_generator.dart';
+import 'package:exported/src/builder/cache_builder.dart';
 import 'package:exported/src/builder/exported_builder.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 

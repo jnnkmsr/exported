@@ -14,7 +14,7 @@ import 'package:source_gen/source_gen.dart';
 class CacheBuilder extends LibraryBuilder {
   CacheBuilder()
       : super(
-          CacheGenerator(),
+          _CacheGenerator(),
           generatedExtension: jsonExtension,
           allowSyntaxErrors: true,
           formatOutput: (json, _) => json,
@@ -29,26 +29,32 @@ class CacheBuilder extends LibraryBuilder {
 ///
 /// The JSON is a representation of [ExportCache], sorting and grouping exports
 /// by tag and URI.
-class CacheGenerator extends Generator {
+class _CacheGenerator extends Generator {
   static const _exportedTypeChecker = TypeChecker.fromRuntime(Exported);
 
-  Iterable<Export> _readExports(LibraryReader library) {
-    final uri = library.element.source.uri.toString();
-    return library
-        .annotatedWith(_exportedTypeChecker)
-        .map(
-          (annotatedElement) => Export.fromAnnotation(
-            uri: uri,
-            symbol: _readSymbol(annotatedElement.element),
-            tags: _readTags(annotatedElement.annotation),
-          ),
-        )
-        .flattened;
-  }
+  Iterable<Export> _readExport(String uri, AnnotatedElement annotatedElement) {
+    final element = annotatedElement.element;
+    final tags = _readTags(annotatedElement.annotation);
 
-  // TODO[ExportedCacheBuilder]: Validate element is named/exclude directives
-  String _readSymbol(Element element) {
-    return element.name!;
+    return switch (element.kind) {
+      ElementKind.IMPORT || ElementKind.EXPORT => throw InvalidGenerationSourceError(
+          'Library imports and exports cannot be exported',
+          element: element,
+        ),
+      ElementKind.PART => throw InvalidGenerationSourceError(
+          'Part files cannot be exported',
+          element: element,
+        ),
+      _ when element is LibraryElement => Export.library(
+          uri: element.identifier,
+          tags: tags,
+        ),
+      _ when element.name == null => throw InvalidGenerationSourceError(
+          'Unnamed elements cannot be exported',
+          element: element,
+        ),
+      _ => Export.element(uri: uri, name: element.name!, tags: tags),
+    };
   }
 
   Iterable<String> _readTags(ConstantReader annotation) {
@@ -58,7 +64,11 @@ class CacheGenerator extends Generator {
 
   @override
   String? generate(LibraryReader library, BuildStep buildStep) {
-    final exports = _readExports(library);
+    final uri = library.element.source.uri.toString();
+    final exports = library
+        .annotatedWith(_exportedTypeChecker)
+        .map((annotatedElement) => _readExport(uri, annotatedElement))
+        .flattened;
     return exports.isEmpty ? null : jsonEncode(ExportCache(exports).toJson());
   }
 }
