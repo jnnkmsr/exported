@@ -2,16 +2,18 @@ import 'dart:convert';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:collection/collection.dart';
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_cache.dart';
+import 'package:exported/src/model/tag.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 import 'package:source_gen/source_gen.dart';
 
+// TODO: Add show/hide to `@Exported` annotation
+
 /// Collects elements annotated with [Exported] and stores them as JSON into
 /// the build cache.
-class CacheBuilder extends LibraryBuilder {
+final class CacheBuilder extends LibraryBuilder {
   CacheBuilder()
       : super(
           _CacheGenerator(),
@@ -29,46 +31,65 @@ class CacheBuilder extends LibraryBuilder {
 ///
 /// The JSON is a representation of [ExportCache], sorting and grouping exports
 /// by tag and URI.
-class _CacheGenerator extends Generator {
+final class _CacheGenerator extends Generator {
   static const _exportedTypeChecker = TypeChecker.fromRuntime(Exported);
-
-  Iterable<Export> _readExport(String uri, AnnotatedElement annotatedElement) {
-    final element = annotatedElement.element;
-    final tags = _readTags(annotatedElement.annotation);
-
-    return switch (element.kind) {
-      ElementKind.IMPORT || ElementKind.EXPORT => throw InvalidGenerationSourceError(
-          'Library imports and exports cannot be exported',
-          element: element,
-        ),
-      ElementKind.PART => throw InvalidGenerationSourceError(
-          'Part files cannot be exported',
-          element: element,
-        ),
-      _ when element is LibraryElement => Export.library(
-          uri: element.identifier,
-          tags: tags,
-        ),
-      _ when element.name == null => throw InvalidGenerationSourceError(
-          'Unnamed elements cannot be exported',
-          element: element,
-        ),
-      _ => Export.element(uri: uri, name: element.name!, tags: tags),
-    };
-  }
-
-  Iterable<String> _readTags(ConstantReader annotation) {
-    final tagsReader = annotation.read(keys.tags);
-    return tagsReader.isSet ? tagsReader.setValue.map((e) => e.toStringValue()!) : const [];
-  }
 
   @override
   String? generate(LibraryReader library, BuildStep buildStep) {
+    final annotatedElements = library.annotatedWith(_exportedTypeChecker);
+    return annotatedElements.isNotEmpty
+        ? jsonEncode(_buildCache(library, annotatedElements).toJson())
+        : null;
+  }
+
+  ExportCache _buildCache(LibraryReader library, Iterable<AnnotatedElement> annotatedElements) {
+    final cache = ExportCache();
     final uri = library.element.source.uri.toString();
-    final exports = library
-        .annotatedWith(_exportedTypeChecker)
-        .map((annotatedElement) => _readExport(uri, annotatedElement))
-        .flattened;
-    return exports.isEmpty ? null : jsonEncode(ExportCache(exports).toJson());
+    for (final annotatedElement in annotatedElements) {
+      final tags = _readTags(annotatedElement.annotation);
+      final export = _readExport(uri, annotatedElement);
+      cache.add(export, tags);
+    }
+    return cache;
+  }
+
+  Export _readExport(String uri, AnnotatedElement annotatedElement) {
+    final element = annotatedElement.element;
+    if (element.kind case ElementKind.IMPORT || ElementKind.EXPORT || ElementKind.PART) {
+      throw InvalidGenerationSourceError(
+        'Invalid annotation on ${element.kind.displayName}',
+        element: element,
+      );
+    }
+    return element is LibraryElement
+        ? _readLibraryExport(uri, element, annotatedElement.annotation)
+        : _readNamedExport(uri, element);
+  }
+
+  Export _readLibraryExport(String uri, LibraryElement element, ConstantReader annotation) =>
+      Export.library(
+        uri: element.identifier,
+        show: annotation.readSetOrNull(keys.show),
+        hide: annotation.readSetOrNull(keys.hide),
+      );
+
+  Export _readNamedExport(String uri, Element element) {
+    if (element.name case final name?) {
+      return Export.element(uri: uri, name: name);
+    } else {
+      throw InvalidGenerationSourceError(
+        'Invalid annotation on unnamed element',
+        element: element,
+      );
+    }
+  }
+
+  Tags _readTags(ConstantReader annotation) => Tags.fromInput(annotation.readSetOrNull(keys.tags));
+}
+
+extension on ConstantReader {
+  Set<String>? readSetOrNull(String key) {
+    final reader = read(key);
+    return reader.isNull ? null : reader.setValue.map((e) => e.toStringValue()!).toSet();
   }
 }

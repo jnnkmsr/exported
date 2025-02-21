@@ -1,61 +1,59 @@
+import 'package:exported/src/model/export_filter.dart';
 import 'package:exported/src/model/export_uri.dart';
-import 'package:exported/src/model/filter.dart';
-import 'package:exported/src/model/tag.dart';
+import 'package:meta/meta.dart';
 
+@immutable
 class Export {
-  const Export._(
-    this.uri,
-    Filter? filter,
-    Tag? tag,
-  )   : _filter = filter ?? Filter.none,
-        tag = tag ?? Tag.none;
+  const Export._({
+    required this.uri,
+    required this.filter,
+  });
 
-  Export.fromJson(Map json)
-      : uri = ExportUri.fromJson(json),
-        _filter = Filter.fromJson(json),
-        tag = Tag.fromJson(json);
-
-  // factory Export.fromOptions(
-  //   dynamic options, {
-  //   ExportFromOptions uri = ExportUri.fromOptions,
-  // }) =>
-  //     switch (options) {
-  //       String _ => Export._(uri(options)),
-  //       Map _ => Export._(
-  //           uri(options),
-  //         ),
-  //       _ => throw ArgumentError('Must be a single URI or key-value input: $options'),
-  //     };
-
-  static Iterable<Export> element({
+  Export.element({
     required String uri,
     required String name,
-    Iterable<String> tags = const [],
-  }) =>
-      _splitByTag(tags, (tag) => Export._(ExportUri(uri), Filter.show(name), tag));
+  })  : uri = ExportUri(uri),
+        filter = ExportFilter.showElement(name);
 
-  static Iterable<Export> library({
+  Export.library({
     required String uri,
-    Iterable<String> tags = const [],
-  }) {
-    // final filter = name == null ? Filter.none : Filter.show(name);
-    return _splitByTag(tags, (tag) => Export._(ExportUri(uri), Filter.none, tag));
-  }
+    Set<String>? show,
+    Set<String>? hide,
+  })  : uri = ExportUri(uri),
+        filter = ExportFilter.fromInput(show: show, hide: hide);
 
-  static Iterable<Export> _splitByTag(
-    Iterable<String> tags,
-    Export Function(Tag tag) builder,
-  ) =>
-      Tags.parse(tags).map(builder);
+  factory Export.fromInput(dynamic options) => switch (options) {
+        String _ => Export._(
+            uri: ExportUri.fromInput(options),
+            filter: ExportFilter.none,
+          ),
+        Map _ => Export._(
+            uri: ExportUri.fromInput(options),
+            filter: ExportFilter.fromInput(options: options),
+          ),
+        _ => throw ArgumentError.value(options, 'options', 'Must be a string or map'),
+      };
+
+  Export.fromJson(Map<String, dynamic> json)
+      : uri = ExportUri.fromJson(json),
+        filter = ExportFilter.fromJson(json);
 
   final ExportUri uri;
-  final Tag tag;
-  final Filter _filter;
+  final ExportFilter filter;
 
-  Export merge(Export other) {
-    if (uri != other.uri) return this;
-    return Export._(uri, _filter.merge(other._filter), tag);
-  }
+  Export merge(Export other) =>
+      (uri == other.uri) ? Export._(uri: uri, filter: filter.merge(other.filter)) : this;
 
-  Map toJson() => {...uri.toCache(), ...tag.toJson(), ..._filter.toJson()};
+  Map<String, dynamic> toJson() => {...uri.toJson(), ...filter.toJson()};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Export &&
+          runtimeType == other.runtimeType &&
+          uri == other.uri &&
+          filter == other.filter;
+
+  @override
+  int get hashCode => uri.hashCode ^ filter.hashCode;
 }

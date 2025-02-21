@@ -1,46 +1,37 @@
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/non_empty_set.dart';
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
-typedef TagsFromJson = Tags Function(dynamic input);
-
-extension type const Tags._(Set<Tag> _value) implements Set<Tag> {
-  factory Tags.parse(dynamic input) {
-    try {
-      return switch (input) {
-        null => Tags.none,
-        Iterable _ => Tags._fromIterable(input.map(Tag.parse)),
-        Map _ => Tags.parse(input[keys.tags]),
-        _ => Tags.parse([input]),
-      };
-    } on ArgumentError catch (e) {
-      throw ArgumentError.value(input, keys.tags, e.message);
-    }
+extension type const Tag._(String _) implements String {
+  factory Tag.fromJson(dynamic json) {
+    final value = json as String?;
+    return value != null && value.isNotEmpty ? Tag._(value) : Tag.none;
   }
 
-  factory Tags._fromIterable(Iterable<Tag> input) {
-    final tags = input.toSet()..remove(Tag.none);
-    return tags.isEmpty ? Tags.none : Tags._(tags);
-  }
-
-  static const Tags none = Tags._({Tag.none});
-
-  bool matches(Tag tag) => _value.contains(tag);
-}
-
-extension type const Tag(String _value) implements Object {
-  factory Tag.fromJson(Map json) {
-    final value = json[keys.tags] as String?;
-    return value != null && value.isNotEmpty ? Tag(value) : Tag.none;
-  }
-
-  factory Tag.parse(dynamic input) {
+  static Tag? _fromInputOrNull(dynamic input) {
     if (input is! String?) {
-      throw ArgumentError('Tags must be string');
+      throw ArgumentError.value(input, keys.tags, 'Tags must be string');
     }
     final value = input?.trim().toLowerCase();
-    return value != null && value.isNotEmpty ? Tag(value) : Tag.none;
+    return value != null && value.isNotEmpty ? Tag._(value) : null;
   }
 
-  static const Tag none = Tag('');
+  static const Tag none = Tag._('');
 
-  Map<String, dynamic> toJson() => {keys.tags: _value};
+  bool matches(Tag other) => this == none || other == none || this == other;
+}
+
+extension type const Tags._(NonEmptySet<Tag> _) implements NonEmptySet<Tag> {
+  factory Tags.fromInput(dynamic input) {
+    if (input is Map) {
+      input = input[keys.tags];
+    }
+    final tags = NonEmptySet.fromInput(input, Tag._fromInputOrNull);
+    return tags != null ? Tags._(tags) : Tags.none;
+  }
+
+  static const Tags none = Tags._(NonEmptySet.unsafe(ISetConst({Tag.none})));
+
+  Iterable<Tag> matching(Iterable<Tag> tags) =>
+      this == none ? tags : where((tag) => tags.any(tag.matches));
 }
