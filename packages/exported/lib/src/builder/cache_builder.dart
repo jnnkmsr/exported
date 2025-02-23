@@ -9,8 +9,6 @@ import 'package:exported/src/model/tag.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 import 'package:source_gen/source_gen.dart';
 
-// TODO: Add show/hide to `@Exported` annotation
-
 /// Collects elements annotated with [Exported] and stores them as JSON into
 /// the build cache.
 final class CacheBuilder extends LibraryBuilder {
