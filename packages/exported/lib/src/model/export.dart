@@ -4,23 +4,22 @@ import 'package:meta/meta.dart';
 
 @immutable
 class Export {
-  const Export._({
-    required this.uri,
-    required this.filter,
-  });
-
   Export.element({
     required String uri,
     required String name,
-  })  : uri = ExportUri(uri),
-        filter = ExportFilter.showElement(name);
+  }) : this._(
+          uri: ExportUri(uri),
+          filter: ExportFilter.showElement(name),
+        );
 
   Export.library({
     required String uri,
     Set<String>? show,
     Set<String>? hide,
-  })  : uri = ExportUri(uri),
-        filter = ExportFilter.fromInput(show: show, hide: hide);
+  }) : this._(
+          uri: ExportUri(uri),
+          filter: ExportFilter.fromInput(show: show, hide: hide),
+        );
 
   factory Export.fromInput(dynamic options) => switch (options) {
         String _ => Export._(
@@ -35,8 +34,15 @@ class Export {
       };
 
   Export.fromJson(Map<String, dynamic> json)
-      : uri = ExportUri.fromJson(json),
-        filter = ExportFilter.fromJson(json);
+      : this._(
+          uri: ExportUri.fromJson(json),
+          filter: ExportFilter.fromJson(json),
+        );
+
+  const Export._({
+    required this.uri,
+    required this.filter,
+  });
 
   final ExportUri uri;
   final ExportFilter filter;
