@@ -1,9 +1,9 @@
 import 'package:exported/src/validation/file_path_parser.dart';
-import 'package:exported/src/validation/package_name_reader.dart';
+import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:test/test.dart';
 
 import '../helpers/option_parser_helpers.dart';
-import '../helpers/package_name_reader_doubles.dart';
+import '../helpers/fake_pubspec_reader.dart';
 
 void main() {
   late FilePathParser sut;
@@ -11,7 +11,7 @@ void main() {
   const packageName = 'foo';
 
   setUp(() {
-    PackageNameReader.$instance = FakePackageNameReader(name: packageName);
+    // PackageNameReader.instance = FakePackageNameReader(name: packageName);
     sut = const FilePathParser('file');
   });
 

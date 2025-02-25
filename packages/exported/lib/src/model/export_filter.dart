@@ -42,7 +42,7 @@ sealed class ExportFilter {
 
   /// Restores an [ExportFilter] from an internal [json] representation without
   /// any input validation.
-  factory ExportFilter.fromJson(Map<String, dynamic> json) =>
+  factory ExportFilter.fromJson(Map json) =>
       _Show.fromJson(json) ?? _Hide.fromJson(json) ?? ExportFilter.none;
 
   /// Convenience constructor for testing purposes.
@@ -60,7 +60,7 @@ sealed class ExportFilter {
 
   /// Converts this [ExportFilter] to JSON stored in the build cache.
   @nonVirtual
-  Map<String, dynamic> toJson() => switch (this) {
+  Map toJson() => switch (this) {
         final _Show show => {keys.show: show._combinators.toList()},
         final _Hide hide => {keys.hide: hide._combinators.toList()},
         _None _ => const {},
@@ -90,7 +90,7 @@ final class _Show extends ExportFilter {
     return combinators != null ? _Show._(combinators) : null;
   }
 
-  static _Show? fromJson(Map<String, dynamic> json) {
+  static _Show? fromJson(Map json) {
     final combinators = NonEmptySet.fromJson(json[keys.show], _Combinator.fromJson);
     return combinators != null ? _Show._(combinators) : null;
   }
@@ -120,7 +120,7 @@ final class _Hide extends ExportFilter {
     return combinators != null ? _Hide._(combinators) : null;
   }
 
-  static _Hide? fromJson(Map<String, dynamic> json) {
+  static _Hide? fromJson(Map json) {
     final combinators = NonEmptySet.fromJson(json[keys.hide], _Combinator.fromJson);
     return combinators != null ? _Hide._(combinators) : null;
   }

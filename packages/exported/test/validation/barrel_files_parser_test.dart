@@ -1,11 +1,11 @@
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model_legacy/barrel_file.dart';
 import 'package:exported/src/validation/barrel_files_parser.dart';
-import 'package:exported/src/validation/package_name_reader.dart';
+import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:test/test.dart';
 
 import '../helpers/option_parser_helpers.dart';
-import '../helpers/package_name_reader_doubles.dart';
+import '../helpers/fake_pubspec_reader.dart';
 
 // TODO[test/BarrelFilesParser]: Replace nested parsers with mocks.
 
@@ -13,7 +13,7 @@ void main() {
   late BarrelFilesParser sut;
 
   setUp(() {
-    PackageNameReader.$instance = FakePackageNameReader(name: 'foo');
+    // PackageNameReader.instance = FakePackageNameReader(name: 'foo');
     sut = const BarrelFilesParser(keys.barrelFiles);
   });
 

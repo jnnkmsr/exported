@@ -1,6 +1,10 @@
+import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export_filter.dart';
 import 'package:exported/src/model/export_uri.dart';
 import 'package:meta/meta.dart';
+
+// TODO[Export]: Unit tests
+// TODO[Export]: Documentation
 
 @immutable
 class Export {
@@ -30,10 +34,10 @@ class Export {
             uri: ExportUri.fromInput(options),
             filter: ExportFilter.fromInput(options: options),
           ),
-        _ => throw ArgumentError.value(options, 'options', 'Must be a string or map'),
+        _ => throw ArgumentError.value(options, keys.exports, 'Must be a string or map'),
       };
 
-  Export.fromJson(Map<String, dynamic> json)
+  Export.fromJson(Map json)
       : this._(
           uri: ExportUri.fromJson(json),
           filter: ExportFilter.fromJson(json),
@@ -50,7 +54,7 @@ class Export {
   Export merge(Export other) =>
       (uri == other.uri) ? Export._(uri: uri, filter: filter.merge(other.filter)) : this;
 
-  Map<String, dynamic> toJson() => {...uri.toJson(), ...filter.toJson()};
+  Map toJson() => {...uri.toJson(), ...filter.toJson()};
 
   @override
   bool operator ==(Object other) =>

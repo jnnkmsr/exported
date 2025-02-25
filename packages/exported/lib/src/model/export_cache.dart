@@ -2,12 +2,15 @@ import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_uri.dart';
 import 'package:exported/src/model/tag.dart';
 
+// TODO[ExportCache]: Unit tests
+// TODO[ExportCache]: Documentation
+
 class ExportCache {
   ExportCache() : _exports = {};
 
-  ExportCache.fromJson(Map<String, dynamic> json) {
+  ExportCache.fromJson(Map json) {
     final exports = json.cast<String, List>().map((tag, exportsJson) {
-      final exports = exportsJson.cast<Map<String, dynamic>>().map(Export.fromJson);
+      final exports = exportsJson.cast<Map>().map(Export.fromJson);
       return MapEntry(
         Tag.fromJson(tag),
         {for (final export in exports) export.uri: export},
@@ -36,7 +39,7 @@ class ExportCache {
         (tag, exportsByUri) => _exports.putIfAbsent(tag, () => {}).merge(exportsByUri),
       );
 
-  Map<String, dynamic> toJson() => _exports.map(
+  Map toJson() => _exports.map(
         (tag, exportsByUri) => MapEntry(
           tag,
           exportsByUri.values.map((export) => export.toJson()).toList(),

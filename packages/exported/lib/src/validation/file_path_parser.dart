@@ -1,5 +1,5 @@
 import 'package:exported/src/validation/option_parser.dart';
-import 'package:exported/src/validation/package_name_reader.dart';
+import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:exported/src/validation/validation_util.dart';
 import 'package:path/path.dart' as p;
 
@@ -20,8 +20,8 @@ class FilePathParser extends StringOptionParser {
 
   /// Reads the default package name from the `pubspec.yaml`.
   ///
-  /// In tests, set [PackageNameReader.$instance] to inject doubles.
-  static final _packageNameReader = PackageNameReader.instance();
+  /// In tests, set [PubspecReader.instance] to inject doubles.
+  static final _packageNameReader = PubspecReader.instance;
 
   /// The default `lib` directory, removed from the input if specified.
   static const _defaultDir = 'lib';

@@ -5,22 +5,18 @@ import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 /// Helper class to read the package name from the `pubspec.yaml`.
-class PackageNameReader {
-  /// Creates a [PackageNameReader] instance.
+class PubspecReader {
+  /// Creates a [PubspecReader] instance.
   ///
   /// The [fileSystem] defaults to [LocalFileSystem], but should be replaced
   /// with a [MemoryFileSystem] in tests.
   @visibleForTesting
-  PackageNameReader([
+  PubspecReader([
     FileSystem fileSystem = const LocalFileSystem(),
   ]) : _fileSystem = fileSystem;
 
-  /// Singleton instance of [PackageNameReader] using the [LocalFileSystem].
-  ///
-  /// In tests, [$instance] should be replaced with a test double.
-  factory PackageNameReader.instance() => $instance;
-  @visibleForTesting
-  static PackageNameReader $instance = PackageNameReader();
+  /// Singleton instance of [PubspecReader] using the [LocalFileSystem].
+  static final PubspecReader instance = PubspecReader();
 
   final FileSystem _fileSystem;
 

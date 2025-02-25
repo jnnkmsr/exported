@@ -2,8 +2,6 @@ import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export_filter.dart';
 import 'package:test/test.dart';
 
-import '../helpers/expect.dart';
-
 void main() {
   group('ExportFilter', () {
     group('.showElement()', () {
@@ -12,8 +10,8 @@ void main() {
       });
     });
 
-    group('.fromInput() - show/hide input', () {
-      void expectForShowAndHide(Set<String>? input, dynamic result) {
+    group('.fromInput()', () {
+      void expectOutputForShowAndHide(Set<String>? input, dynamic result) {
         if (result is ExportFilter) {
           expect(ExportFilter.fromInput(show: input), result);
           expect(ExportFilter.fromInput(hide: input), result);
@@ -24,44 +22,90 @@ void main() {
         }
       }
 
-      void expectThrowsForShowAndHide(Set<String>? input) {
-        expectArgumentError(() => ExportFilter.fromInput(show: input));
-        expectArgumentError(() => ExportFilter.fromInput(hide: input));
+      void expectThrowsForShowAndHide(Set<String>? input, [Set<String>? hide]) {
+        if (hide != null) {
+          expect(() => ExportFilter.fromInput(show: input, hide: hide), throwsArgumentError);
+        } else {
+          expect(() => ExportFilter.fromInput(show: input), throwsArgumentError);
+          expect(() => ExportFilter.fromInput(hide: input), throwsArgumentError);
+        }
+      }
+
+      void expectForOptions(dynamic input, dynamic result) {
+        if (input is Map) {
+          expect(ExportFilter.fromInput(options: input), result);
+        } else if (result is ExportFilter) {
+          expect(ExportFilter.fromInput(options: {keys.show: input}), result);
+          expect(ExportFilter.fromInput(options: {keys.hide: input}), result);
+        } else {
+          result as Set<String>;
+          expect(ExportFilter.fromInput(options: {keys.show: input}), ExportFilter.show(result));
+          expect(ExportFilter.fromInput(options: {keys.hide: input}), ExportFilter.hide(result));
+        }
+      }
+
+      void expectThrowsForOptions(dynamic input) {
+        expect(() => ExportFilter.fromInput(options: {keys.show: input}), throwsArgumentError);
+        expect(() => ExportFilter.fromInput(options: {keys.hide: input}), throwsArgumentError);
       }
 
       test('Returns a show/hide filter for show/hide input', () {
-        expectForShowAndHide(const {'foo', 'bar'}, const {'foo', 'bar'});
+        expectOutputForShowAndHide(const {'foo', 'bar'}, const {'foo', 'bar'});
+        expectForOptions(const ['foo', 'bar'], const {'foo', 'bar'});
+      });
+
+      test('Accepts single-string input for options', () {
+        expectForOptions('foo', const {'foo'});
       });
 
       test('Returns a none filter for null or empty/blank input', () {
-        expectForShowAndHide(null, ExportFilter.none);
-        expectForShowAndHide(const <String>{}, ExportFilter.none);
-        expectForShowAndHide(const {'', '   '}, ExportFilter.none);
+        expectOutputForShowAndHide(null, ExportFilter.none);
+        expectOutputForShowAndHide(const <String>{}, ExportFilter.none);
+        expectOutputForShowAndHide(const {'', '   '}, ExportFilter.none);
+
+        expectForOptions(const <dynamic, dynamic>{}, ExportFilter.none);
+        expectForOptions(null, ExportFilter.none);
+        expectForOptions(const <String>{}, ExportFilter.none);
+        expectForOptions(const {'', '   '}, ExportFilter.none);
       });
 
       test('Trims leading/trailing whitespace from all combinators', () {
-        expectForShowAndHide(const {' foo ', ' bar '}, const {'foo', 'bar'});
+        expectOutputForShowAndHide(const {' foo ', ' bar '}, const {'foo', 'bar'});
+        expectForOptions(const [' foo ', ' bar '], const {'foo', 'bar'});
       });
 
       test('Removes duplicates, ignoring leading/trailing whitespace', () {
-        expectForShowAndHide(const {' foo ', 'foo'}, const {'foo'});
+        expectOutputForShowAndHide(const {' foo ', 'foo'}, const {'foo'});
+        expectForOptions(const [' foo ', 'foo'], const {'foo'});
       });
 
       test('Is case-sensitive', () {
-        expectForShowAndHide(const {'foo', 'Foo'}, const {'foo', 'Foo'});
+        expectOutputForShowAndHide(const {'foo', 'Foo'}, const {'foo', 'Foo'});
+        expectForOptions(const ['foo', 'Foo'], const {'foo', 'Foo'});
       });
 
       test('Accepts all valid Dart identifiers', () {
-        expectForShowAndHide(const {'a'}, const {'a'});
-        expectForShowAndHide(const {'A'}, const {'A'});
-        expectForShowAndHide(const {'foo'}, const {'foo'});
-        expectForShowAndHide(const {'FooBar'}, const {'FooBar'});
-        expectForShowAndHide(const {'foo123'}, const {'foo123'});
-        expectForShowAndHide(const {'foo_bar'}, const {'foo_bar'});
-        expectForShowAndHide(const {'foo__bar'}, const {'foo__bar'});
-        expectForShowAndHide(const {r'$foo'}, const {r'$foo'});
-        expectForShowAndHide(const {r'foo$bar'}, const {r'foo$bar'});
-        expectForShowAndHide(const {'foo123_bar'}, const {'foo123_bar'});
+        expectOutputForShowAndHide(const {'a'}, const {'a'});
+        expectOutputForShowAndHide(const {'A'}, const {'A'});
+        expectOutputForShowAndHide(const {'foo'}, const {'foo'});
+        expectOutputForShowAndHide(const {'FooBar'}, const {'FooBar'});
+        expectOutputForShowAndHide(const {'foo123'}, const {'foo123'});
+        expectOutputForShowAndHide(const {'foo_bar'}, const {'foo_bar'});
+        expectOutputForShowAndHide(const {'foo__bar'}, const {'foo__bar'});
+        expectOutputForShowAndHide(const {r'$foo'}, const {r'$foo'});
+        expectOutputForShowAndHide(const {r'foo$bar'}, const {r'foo$bar'});
+        expectOutputForShowAndHide(const {'foo123_bar'}, const {'foo123_bar'});
+
+        expectForOptions('a', const {'a'});
+        expectForOptions('A', const {'A'});
+        expectForOptions('foo', const {'foo'});
+        expectForOptions('FooBar', const {'FooBar'});
+        expectForOptions('foo123', const {'foo123'});
+        expectForOptions('foo_bar', const {'foo_bar'});
+        expectForOptions('foo__bar', const {'foo__bar'});
+        expectForOptions(r'$foo', const {r'$foo'});
+        expectForOptions(r'foo$bar', const {r'foo$bar'});
+        expectForOptions('foo123_bar', const {'foo123_bar'});
       });
 
       test('Throws for invalid Dart identifiers', () {
@@ -74,110 +118,35 @@ void main() {
         expectThrowsForShowAndHide(const {'für'});
         expectThrowsForShowAndHide(const {'привет'});
         expectThrowsForShowAndHide(const {'こんにちは'});
+
+        expectThrowsForOptions('_foo');
+        expectThrowsForOptions('1foo');
+        expectThrowsForOptions('foo bar');
+        expectThrowsForOptions('foo-bar');
+        expectThrowsForOptions('foo@bar');
+        expectThrowsForOptions('#foo');
+        expectThrowsForOptions('für');
+        expectThrowsForOptions('привет');
+        expectThrowsForOptions('こんにちは');
+      });
+
+      test('Throws for invalid options types', () {
+        expectThrowsForOptions(123);
+        expectThrowsForOptions(true);
+        expectThrowsForOptions(const ['foo', 123]);
       });
 
       test('Throws for non-null show and hide input', () {
-        expectArgumentError(
-          () => ExportFilter.fromInput(show: const {'foo'}, hide: const {'bar'}),
-        );
-        expectArgumentError(
-          () => ExportFilter.fromInput(show: const <String>{}, hide: const <String>{}),
-        );
-      });
-    });
-
-    group('.fromInput() - options input', () {
-      void expectForShowAndHide(dynamic input, dynamic result) {
-        if (result is ExportFilter) {
-          expect(ExportFilter.fromInput(show: input), result);
-          expect(ExportFilter.fromInput(hide: input), result);
-        } else {
-          result as Set<String>;
-          expect(ExportFilter.fromInput(show: input), ExportFilter.show(result));
-          expect(ExportFilter.fromInput(hide: input), ExportFilter.hide(result));
-        }
-      }
-
-      void expectThrows(dynamic input) {
-        expectArgumentError(() => ExportFilter.fromInput(options: {keys.show: input}));
-        expectArgumentError(() => ExportFilter.fromInput(options: {keys.hide: input}));
-      }
-
-      test('Returns a show/hide filter for show/hide input', () {
-        expectForShowAndHide(const ['foo', 'bar'], const {'foo', 'bar'});
-      });
-
-      test('Accepts single-string input', () {
-        expectForShowAndHide('foo', const {'foo'});
-      });
-
-      test('Returns a none filter for no show/hide keys or null/empty/blank input', () {
-        expect(ExportFilter.fromInput(options: const {}), ExportFilter.none);
-        expectForShowAndHide(null, ExportFilter.none);
-        expectForShowAndHide(const <String>{}, ExportFilter.none);
-        expectForShowAndHide(const {'', '   '}, ExportFilter.none);
-      });
-
-      test('Trims leading/trailing whitespace from all combinators', () {
-        expectForShowAndHide(const [' foo ', ' bar '], const {'foo', 'bar'});
-      });
-
-      test('Removes duplicates, ignoring leading/trailing whitespace', () {
-        expectForShowAndHide(const [' foo ', 'foo'], const {'foo'});
-      });
-
-      test('Is case-sensitive', () {
-        expectForShowAndHide(const ['foo', 'Foo'], const {'foo', 'Foo'});
-      });
-
-      test('Accepts all valid Dart identifiers', () {
-        expectForShowAndHide('a', const {'a'});
-        expectForShowAndHide('A', const {'A'});
-        expectForShowAndHide('foo', const {'foo'});
-        expectForShowAndHide('FooBar', const {'FooBar'});
-        expectForShowAndHide('foo123', const {'foo123'});
-        expectForShowAndHide('foo_bar', const {'foo_bar'});
-        expectForShowAndHide('foo__bar', const {'foo__bar'});
-        expectForShowAndHide(r'$foo', const {r'$foo'});
-        expectForShowAndHide(r'foo$bar', const {r'foo$bar'});
-        expectForShowAndHide('foo123_bar', const {'foo123_bar'});
-      });
-
-      test('Throws for invalid Dart identifiers', () {
-        expectThrows('_foo');
-        expectThrows('1foo');
-        expectThrows('foo bar');
-        expectThrows('foo-bar');
-        expectThrows('foo@bar');
-        expectThrows('#foo');
-        expectThrows('für');
-        expectThrows('привет');
-        expectThrows('こんにちは');
-      });
-
-      test('Throws for invalid types', () {
-        expectThrows(123);
-        expectThrows(true);
-        expectThrows(const ['foo', 123]);
-      });
-
-      test('Throws for non-null show and hide input', () {
-        expectArgumentError(
-          () => ExportFilter.fromInput(
-            options: const {
-              keys.show: ['foo'],
-              keys.hide: ['bar'],
-            },
-          ),
-        );
-        expectArgumentError(
-          () => ExportFilter.fromInput(
-            options: const {
-              keys.show: <String>[],
-              keys.hide: <String>[],
-            },
-          ),
-        );
+        expectThrowsForShowAndHide(const {'foo'}, const {'bar'});
+        expectThrowsForShowAndHide(const <String>{}, const <String>{});
+        expectThrowsForOptions(const {
+          keys.show: ['foo'],
+          keys.hide: ['bar'],
+        });
+        expectThrowsForOptions(const {
+          keys.show: <String>[],
+          keys.hide: <String>[],
+        });
       });
     });
 

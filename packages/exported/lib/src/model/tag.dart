@@ -2,6 +2,9 @@ import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/non_empty_set.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
+// TODO[Tag/Tags]: Unit tests
+// TODO[Tag/Tags]: Documentation
+
 extension type const Tag._(String _) implements String {
   factory Tag.fromJson(dynamic json) {
     final value = json as String?;
