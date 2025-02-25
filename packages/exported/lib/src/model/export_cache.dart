@@ -2,7 +2,6 @@ import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_uri.dart';
 import 'package:exported/src/model/tag.dart';
 
-// TODO[ExportCache]: Unit tests
 // TODO[ExportCache]: Documentation
 
 class ExportCache {

@@ -3,7 +3,6 @@ import 'package:exported/src/model/export_filter.dart';
 import 'package:exported/src/model/export_uri.dart';
 import 'package:meta/meta.dart';
 
-// TODO[Export]: Unit tests
 // TODO[Export]: Documentation
 
 @immutable

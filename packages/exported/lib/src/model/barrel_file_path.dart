@@ -10,8 +10,8 @@ extension type const BarrelFilePath(String _) implements String {
   factory BarrelFilePath.packageNamed([PubspecReader? pubspecReader]) =>
       BarrelFilePath(_defaultFile(pubspecReader));
 
-  /// Creates a [BarrelFilePath] from a builder options input, which may be either
-  /// a string or a map containing a `path` key.
+  /// Creates a [BarrelFilePath] from a builder options input, which may be
+  /// either a [String] or a [Map] containing a `path` key.
   ///
   /// Input validation/sanitization:
   /// - Trims leading/trailing whitespace.
@@ -21,20 +21,23 @@ extension type const BarrelFilePath(String _) implements String {
   /// - If the input is null, blank, or a directory, the default barrel file
   ///   (`'$package.dart'`) is used, reading `package` from `pubspec.yaml`.
   ///
-  /// Throws an [ArgumentError] if the input is not a string or map, or not a
-  /// valid relative barrel-file path.
+  /// Throws an [ArgumentError] if the [input] or [Map] value is not a [String]
+  /// that can be sanitized to a valid relative barrel-file path.
   factory BarrelFilePath.fromInput(dynamic input, [PubspecReader? pubspecReader]) {
-    final path = _validateInput(input);
-    if (path == null) {
-      return BarrelFilePath(_defaultFile(pubspecReader));
+    try {
+      final path = _validateInput(input);
+      if (path == null) return BarrelFilePath(_defaultFile(pubspecReader));
+
+      final (file, dir) = _validatePath(path);
+      return BarrelFilePath(
+        p.posix.joinAll([
+          if (dir != null) dir,
+          if (file != null) file else _defaultFile(pubspecReader),
+        ]),
+      );
+    } on ArgumentError catch (e) {
+      throw ArgumentError.value(input, keys.path, e.message);
     }
-    final (file, dir) = _validatePath(path);
-    return BarrelFilePath(
-      p.posix.joinAll([
-        if (dir != null) dir,
-        if (file != null) file else _defaultFile(pubspecReader),
-      ]),
-    );
   }
 
   /// Restores a [BarrelFilePath] from internal [json] without any validation.
@@ -86,9 +89,8 @@ extension type const BarrelFilePath(String _) implements String {
     }
     final file = fileName != null ? '$fileName.dart' : null;
 
-    final dirSegments = isDirectory
-        ? pathSegments
-        : pathSegments.sublist(0, pathSegments.length - 1);
+    final dirSegments =
+        isDirectory ? pathSegments : pathSegments.sublist(0, pathSegments.length - 1);
 
     // Remove a leading 'lib' or `.` if present.
     final firstDir = dirSegments.firstOrNull;

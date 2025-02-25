@@ -2,14 +2,14 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:meta/meta.dart';
 
 /// An immutable set that is guaranteed to have at least one element.
-extension type const NonEmptySet<E>.unsafe(ISet<E> _value) implements ISet<E> {
+extension type const NonEmptySet<E extends String>.unsafe(ISet<E> _value) implements ISet<E> {
   /// Parses a [NonEmptySet] from either [Iterable] or single-value [input],
   /// calling [elementFromInput] to restore each element.
   ///
-  /// Elements where [elementFromInput] returns `null` are ignored.
+  /// Elements where [elementFromInput] returns `null` are removed.
   ///
   /// Returns `null` if the [input] is `null` or the parsed set would be empty.
-  static NonEmptySet<E>? fromInput<E extends Object>(
+  static NonEmptySet<E>? fromInput<E extends String>(
     dynamic input,
     E? Function(dynamic) elementFromInput,
   ) =>
@@ -23,7 +23,7 @@ extension type const NonEmptySet<E>.unsafe(ISet<E> _value) implements ISet<E> {
   /// [elementFromJson] to restore each element.
   ///
   /// Returns `null` if [json] is `null` or an empty list.
-  static NonEmptySet<E>? fromJson<E extends Object>(
+  static NonEmptySet<E>? fromJson<E extends String>(
     dynamic json,
     E Function(dynamic) elementFromJson,
   ) =>
@@ -48,7 +48,7 @@ extension type const NonEmptySet<E>.unsafe(ISet<E> _value) implements ISet<E> {
   }
 }
 
-extension NonEmptySetExtension<E> on Iterable<E> {
+extension NonEmptySetExtension<E extends String> on Iterable<E> {
   /// Converts this [Iterable] into a [NonEmptySet] or `null` if the resultant
   /// set would be empty.
   NonEmptySet<E>? get nonEmptySet {

@@ -1,6 +1,5 @@
 import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/barrel_file_path.dart';
-import 'package:exported/src/model/export_uri.dart';
 import 'package:test/test.dart';
 
 import '../helpers/fake_pubspec_reader.dart';
