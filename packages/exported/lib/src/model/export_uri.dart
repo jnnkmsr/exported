@@ -4,28 +4,26 @@ import 'package:path/path.dart' as p;
 
 /// Represents the URI of a Dart `export` directive.
 extension type const ExportUri(String _) implements String {
-
   /// Creates an [ExportUri] from builder options string or map [input],
   /// validating and sanitizing input.
   ///
-  /// Throws an [ArgumentError] if the input is null or empty, not a string, if
-  /// map input does not contain a `uri` key with a non-empty string value, or
-  /// the URI cannot be sanitized to a valid `package:` or `dart:` URI.
-  ///
-  /// **Input validation/sanitization:**
-  ///
+  /// Input validation/sanitization:
   /// - Trims leading/trailing whitespace.
   /// - Ensures the URI path is not a directory and not absolute.
-  /// - Normalizes the URI path, ensuring snake-case.
-  /// - Adds missing `.dart` extensions and `package:` prefixes.
-  /// - Converts a single package or library name to a URI of the form
-  ///   `'package:$package/$package.dart'`.
-  /// - Converts a `lib/` path to a package path using the package name from
-  ///   [pubspecReader].
-  factory ExportUri.fromInput(
-    dynamic input, [
-    PubspecReader? pubspecReader,
-  ]) {
+  /// - Normalizes the URI path and ensures snake-case.
+  /// - Ensures the file extension is `.dart` or adds it if missing.
+  /// - Ensures the URI scheme is either `dart` or `package` and adds `package:`
+  ///   if missing.
+  /// - Ensures the path is a single library name for `dart:` URIs.
+  /// - Converts a package or library to `'package:$package/$package.dart'`,
+  ///   reading `package` from `pubspec.yaml`.
+  /// - Converts a `lib/` path to `'package:$package/$path'`, reading `package`
+  ///   from `pubspec.yaml`.
+  ///
+  /// Throws an [ArgumentError] if the input is null or blank, not a string, if
+  /// map input does not contain a `uri` key with a non-empty string value, or
+  /// the URI cannot be sanitized to a valid `package:` or `dart:` URI.
+  factory ExportUri.fromInput(dynamic input, [PubspecReader? pubspecReader]) {
     try {
       final (scheme, path, extension) = _validateInput(input);
       _validatePath(path, extension);
@@ -41,11 +39,10 @@ extension type const ExportUri(String _) implements String {
     }
   }
 
-  /// Restores an [ExportUri] from an internal [json] representation without
-  /// any input validation.
+  /// Restores an [ExportUri] from internal [json] without any validation.
   factory ExportUri.fromJson(Map json) => ExportUri(json[keys.uri] as String);
 
-  /// Converts this [ExportUri] to JSON stored in the build cache.
+  /// Converts this [ExportUri] to JSON for storage in the build cache.
   Map toJson() => {keys.uri: this as String};
 
   /// Validates [input] is either a non-empty [String] or a [Map] containing a
@@ -105,12 +102,12 @@ extension type const ExportUri(String _) implements String {
 
     final segments = p.posix.split(path);
     for (final segment in segments) {
-      if (!_validSegmentPattern.hasMatch(segment)) {
-        throw ArgumentError('Path is not snake-case: "$segment"');
+      if (!_validPathSegmentPattern.hasMatch(segment)) {
+        throw ArgumentError('Path segment "$segment" contains invalid characters');
       }
     }
   }
 
   static final _schemePattern = RegExp(r'^(?:(\w+):)?(.*)$');
-  static final _validSegmentPattern = RegExp(r'^(?!\d)[a-z0-9_]+$');
+  static final _validPathSegmentPattern = RegExp(r'^(?!\d)[a-z0-9_]+$');
 }

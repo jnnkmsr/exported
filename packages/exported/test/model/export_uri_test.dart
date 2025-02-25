@@ -70,6 +70,10 @@ void main() {
         expectThrows('   ');
       });
 
+      test('Throws for invalid input types', () {
+        expectThrows(42);
+      });
+
       test('Throws for an absolute path', () {
         expectThrows('/foo.dart');
         expectThrows('/foo/bar.dart');
