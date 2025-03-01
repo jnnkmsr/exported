@@ -4,11 +4,6 @@ description: >
   Merges a pull request with admin privileges. Currently, this will always do
   a rebase merge.
 
-# TODO: Add input for merge method (merge/rebase).
-# TODO: Use --auto merge flag when repository is public
-#   https://github.com/dependabot/fetch-metadata?tab=readme-ov-file#enabling-auto-merge
-#   https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#about-auto-merge
-
 inputs:
   pull-request-url:
     description: URL of the pull request to merge.

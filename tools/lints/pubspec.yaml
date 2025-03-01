@@ -1,5 +1,5 @@
-name: barreled_lints
-description: Static-analysis lints for all barreled packages.
+name: exported_lints
+description: "Shared static-analysis configuration for all `exported` packages."
 version: 0.1.0
 publish_to: none
 

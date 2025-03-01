@@ -1,0 +1,7 @@
+targets:
+  $default:
+    builders:
+      exported:
+        options:
+          exports:
+            - uri: meta

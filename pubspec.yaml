@@ -1,19 +1,20 @@
-name: barreled_workspace
+name: exported_workspace
 publish_to: none
 
 environment:
   sdk: ^3.6.1
 
 workspace:
-  - packages/barreled_annotation
-  - packages/barreled_generator
+  - packages/exported
+  - packages/exported/example
+  - packages/exported_annotation
   - tools/lints
 
 dev_dependencies:
   melos: ^7.0.0-dev.7
 
 melos:
-  repository: https://github.com/jnnkmsr/barreled
+  repository: https://github.com/jnnkmsr/exported
   sdkPath: auto
   ide:
     intellij:
@@ -38,7 +39,22 @@ melos:
       environment:
         sdk: ^3.6.1
       dependencies:
+        analyzer: ">=6.0.0 <8.0.0"
+        build: ^2.4.2
+        collection: ^1.19.0             # Pinned by flutter_test.
+        dart_style: ^3.0.1
+        fast_immutable_collections: ^11.0.3
+        file: ^7.0.1
+        glob: ^2.1.3
+        meta: ^1.15.0                   # Pinned by flutter_test.
+        path: ^1.9.0                    # Pinned by flutter_test
+        source_gen: ^2.0.0
+        yaml: ^3.1.3
       dev_dependencies:
+        build_runner: ^2.4.14
+        build_test: ^2.2.3
+        mocktail: ^1.0.4
+        test: ^1.25.8                   # Pinned by flutter_test.
         very_good_analysis: ^7.0.0
 
   # Semantic prefixes and icons:
@@ -53,14 +69,13 @@ melos:
   #   🧪 test - Running unit, integration, and UI tests.
   #   🛠️ tools - Other utility scripts not fitting elsewhere.
   scripts:
-    clean:build_runner_cache:
+    clean:build_runner:
       description: |
         🧹 Clean the `build_runner` cache for a selected package.
       exec: |
         dart run build_runner clean
       packageFilters:
         dependsOn: build_runner
-
     generate:build_runner:
       description: |
         🏗️ Run `build_runner` for a selected package.
