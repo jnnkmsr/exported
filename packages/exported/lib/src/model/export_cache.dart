@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_uri.dart';
 import 'package:exported/src/model/tag.dart';
@@ -5,7 +6,13 @@ import 'package:exported/src/model/tag.dart';
 // TODO[ExportCache]: Documentation
 
 class ExportCache {
-  ExportCache() : _exports = {};
+  ExportCache(Iterable<Export> exports) : _exports = {} {
+    add(exports);
+  }
+
+  ExportCache.merged(Iterable<ExportCache> caches) : _exports = {} {
+    caches.forEach(merge);
+  }
 
   ExportCache.fromJson(Map json) {
     final exports = json.cast<String, List>().map((tag, exportsJson) {
@@ -20,17 +27,19 @@ class ExportCache {
 
   late final Map<Tag, Map<ExportUri, Export>> _exports;
 
-  Iterable<Export> operator [](Tags tags) {
+  Iterable<Export> matching(Tags tags) {
     final exports = <ExportUri, Export>{};
     for (final tag in tags.matching(_exports.keys)) {
       exports.merge(_exports[tag]);
     }
-    return exports.values;
+    return exports.values.sorted();
   }
 
-  void add(Export export, Tags tags) {
-    for (final tag in tags) {
-      _exports.putIfAbsent(tag, () => {}).add(export);
+  void add(Iterable<Export> exports) {
+    for (final export in exports) {
+      for (final tag in export.tags) {
+        _exports.putIfAbsent(tag, () => {}).add(export);
+      }
     }
   }
 

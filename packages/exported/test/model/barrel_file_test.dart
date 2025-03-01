@@ -3,7 +3,7 @@ import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/option_collections.dart';
 import 'package:test/test.dart';
 
-import '../helpers/fake_pubspec_reader.dart';
+import '../util/fake_pubspec_reader.dart';
 
 void main() {
   group('BarrelFile', () {

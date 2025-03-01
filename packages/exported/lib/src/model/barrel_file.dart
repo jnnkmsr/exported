@@ -19,7 +19,7 @@ class BarrelFile {
   BarrelFile({
     required String path,
     Set<String>? tags,
-  }) : this._(BarrelFilePath(path), tags?.toTags() ?? Tags.none);
+  }) : this._(path.asBarrelFilePath, tags?.asTags ?? Tags.none);
 
   /// Creates the default [BarrelFile] for the targeted package.
   ///
@@ -78,8 +78,8 @@ class BarrelFile {
   /// Specifies the relative location in the target package’s `lib` directory.
   final BarrelFilePath path;
 
-  /// Allow selective inclusion of exports with matching tags. Defaults to
-  /// [Tags.none], which includes all exports.
+  /// Optional tags for selective inclusion of exports with matching tags.
+  /// Defaults to [Tags.none], which includes all exports.
   final Tags tags;
 
   @override

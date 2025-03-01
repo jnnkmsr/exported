@@ -1,7 +1,9 @@
+import 'package:exported/src/model/export_cache.dart';
 import 'package:exported/src/model/export_filter.dart';
 import 'package:exported/src/model/export_uri.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/option_collections.dart';
+import 'package:exported/src/model/tag.dart';
 import 'package:meta/meta.dart';
 
 /// Represents an export directive to be written into a generated barrel file.
@@ -11,12 +13,26 @@ import 'package:meta/meta.dart';
 /// `exports` builder options.
 ///
 /// The [uri] specifies the full `package:` or `dart:` URI of the exported
-/// library, and [filter] specifies `show` or `hide` combinators.
+/// library, [filter] specifies `show` or `hide` combinators, and [tags] allow
+/// selective inclusion of into matching barrel files.
 @immutable
-class Export {
+class Export implements Comparable<Export> {
+  @visibleForTesting
+  Export({
+    required String uri,
+    Set<String>? show,
+    Set<String>? hide,
+    Set<String>? tags,
+  }) : this._(
+          uri.asExportUri,
+          show?.asShow ?? hide?.asHide ?? ExportFilter.none,
+          tags?.asTags ?? Tags.none,
+        );
+
   const Export._(
     this.uri, [
     this.filter = ExportFilter.none,
+    this.tags = Tags.none,
   ]);
 
   /// Creates an [Export] for an annotated named element.
@@ -26,10 +42,14 @@ class Export {
   ///
   /// The resulting [Export] will have a [filter] with a single `show`
   /// combinator for the [name].
+  ///
+  /// Optional [tags] should be obtained from the annotation and are validated
+  /// and sanitized by [Tags.fromInput].
   Export.element({
     required String uri,
     required String name,
-  }) : this._(ExportUri(uri), ExportFilter.showSingle(name));
+    Set<String>? tags,
+  }) : this._(uri.asExportUri, ExportFilter.showSingle(name), Tags.fromInput(tags));
 
   /// Creates an [Export] for an annotated library.
   ///
@@ -39,11 +59,19 @@ class Export {
   /// Optional [show] or [hide] sets can be provided to create a [filter]. If
   /// not provided, the resulting [Export] will have no filter, exporting the
   /// entire library.
+  ///
+  /// Optional [tags] should be obtained from the annotation and are validated
+  /// and sanitized by [Tags.fromInput].
   Export.library({
     required String uri,
     Set<String>? show,
     Set<String>? hide,
-  }) : this._(ExportUri(uri), ExportFilter.fromInput(show: show, hide: hide));
+    Set<String>? tags,
+  }) : this._(
+          uri.asExportUri,
+          ExportFilter.fromInput(show: show, hide: hide),
+          Tags.fromInput(tags),
+        );
 
   /// Creates a list of [Export]s from the `exports` builder options [input].
   ///
@@ -63,18 +91,20 @@ class Export {
   static OptionList<Export> fromInput(dynamic input) => OptionList.fromInput(
         input,
         (element) => parseInputMap(
-          input,
-          parentKey: keys.barrelFiles,
+          element,
+          parentKey: keys.exports,
           validKeys: const {keys.uri, keys.show, keys.hide, keys.tags},
-          parseMap: (input) => Export._(
-            ExportUri.fromInput(input),
-            ExportFilter.fromInput(options: input),
+          parseMap: (export) => Export._(
+            ExportUri.fromInput(export),
+            ExportFilter.fromInput(options: export),
+            Tags.fromInput(export),
           ),
           parseString: (input) => Export._(ExportUri.fromInput(input)),
         ),
       );
 
-  /// Restores an [Export] from internal [json] without any validation.
+  /// Restores an [Export] from internal [json] without any validation. Does
+  /// not restore [tags], which are not stored in the build cache.
   Export.fromJson(Map json) : this._(ExportUri.fromJson(json), ExportFilter.fromJson(json));
 
   /// Specifies the full `package:` or `dart:` URI of the exported library.
@@ -84,15 +114,35 @@ class Export {
   /// to [ExportFilter.none], exporting the entire library.
   final ExportFilter filter;
 
+  /// Optional tags for selective inclusion of the export into matching barrel
+  /// files. Defaults to [Tags.none], exporting to all barrel files.
+  final Tags tags;
+
   /// Returns an [Export] with a merged [filter] if the [uri] matches, or
   /// returns this instance unchanged.
   ///
+  /// This instance's [tags] will be preserved. Tags do not matter anymore once
+  /// exports are decided to be merged.
+  ///
   /// See [ExportFilter.merge] for merging behavior.
   Export merge(Export other) =>
-      (uri == other.uri) ? Export._(uri, filter.merge(other.filter)) : this;
+      (uri == other.uri) ? Export._(uri, filter.merge(other.filter), tags) : this;
 
-  /// Converts this [Export] to JSON for storage in the build cache.
+  /// Converts this [Export] to JSON for storage in the build cache. Tags won't
+  /// be stored, as the [ExportCache] will already group exports by tags.
   Map toJson() => {...uri.toJson(), ...filter.toJson()};
+
+  /// Converts this [Export] to a Dart `export` directive string.
+  String toDart() {
+    final buffer = StringBuffer()
+      ..write("export '$uri'")
+      ..write(filter.toDart())
+      ..write(';');
+    return buffer.toString();
+  }
+
+  @override
+  int compareTo(Export other) => uri.compareTo(other.uri);
 
   @override
   bool operator ==(Object other) =>

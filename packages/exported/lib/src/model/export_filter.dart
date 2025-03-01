@@ -1,8 +1,10 @@
+import 'package:collection/collection.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/option_collections.dart';
 import 'package:meta/meta.dart';
 
-// TODO[ExportFilter]: Split fromInput into show-/hide- and map-input methods
+// TODO[ExportFilter]: split fromInput into show-/hide- and map-input methods
+// TODO[ExportFilter]: unit test toDart()
 
 /// Represents a `show`/`hide` filter in an `export` directive.
 @immutable
@@ -34,8 +36,6 @@ sealed class ExportFilter {
     if (options != null) {
       return parseInputMap(
         options,
-        parentKey: keys.exports,
-        validKeys: const {keys.show, keys.hide},
         parseMap: (_) => ExportFilter.fromInput(
           show: options[keys.show],
           hide: options[keys.hide],
@@ -59,24 +59,14 @@ sealed class ExportFilter {
   factory ExportFilter.fromJson(Map json) =>
       _Show.fromJson(json) ?? _Hide.fromJson(json) ?? ExportFilter.none;
 
-  /// Convenience constructor for testing purposes.
-  @visibleForTesting
-  factory ExportFilter.show(Set<String> combinators) =>
-      _Show._(combinators.map(_Combinator.new).stringOptionSet!);
-
-  /// Convenience constructor for testing purposes.
-  @visibleForTesting
-  factory ExportFilter.hide(Set<String> combinators) =>
-      _Hide._(combinators.map(_Combinator.new).stringOptionSet!);
-
   /// An empty filter comprising all non-private symbols of a library.
   static const ExportFilter none = _None();
 
   /// Converts this [ExportFilter] to JSON stored in the build cache.
   @nonVirtual
   Map toJson() => switch (this) {
-        final _Show show => {keys.show: show._combinators.toList()},
-        final _Hide hide => {keys.hide: hide._combinators.toList()},
+        final _Show show => {keys.show: show.combinators},
+        final _Hide hide => {keys.hide: hide.combinators},
         _None _ => const {},
       };
 
@@ -91,6 +81,15 @@ sealed class ExportFilter {
   ///   a `hide` filter without the combinators that are in the `show` filter,
   ///   or `none` if there are none left.
   ExportFilter merge(ExportFilter other);
+
+  /// Converts this [ExportFilter] to a Dart string for use in an export
+  /// directive.
+  @nonVirtual
+  String toDart() => switch (this) {
+        final _Show show => ' show ${show.combinators.sorted().join(', ')}',
+        final _Hide hide => ' hide ${hide.combinators.sorted().join(', ')}',
+        _None _ => '',
+      };
 
   @nonVirtual
   @override
@@ -139,6 +138,7 @@ final class _Show extends ExportFilter {
     return combinators != null ? _Show._(combinators) : null;
   }
 
+  List<String> get combinators => _combinators.toList();
   final StringOptionSet<_Combinator> _combinators;
 
   @override
@@ -163,6 +163,7 @@ final class _Hide extends ExportFilter {
     return combinators != null ? _Hide._(combinators) : null;
   }
 
+  List<String> get combinators => _combinators.toList();
   final StringOptionSet<_Combinator> _combinators;
 
   @override
@@ -209,4 +210,12 @@ extension type const _Combinator(String _) implements String {
   }
 
   static final _validPattern = RegExp(r'^[A-Za-z\$][A-Za-z0-9\$_]*$');
+}
+
+extension ExportFilterIterableExtension on Iterable<String> {
+  @visibleForTesting
+  ExportFilter get asShow => _Show._(map(_Combinator.new).stringOptionSet!);
+
+  @visibleForTesting
+  ExportFilter get asHide => _Hide._(map(_Combinator.new).stringOptionSet!);
 }

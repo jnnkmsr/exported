@@ -1,4 +1,4 @@
-import 'package:exported/src/validation/option_parser.dart';
+import 'package:exported/src/_legacy/option_parser.dart';
 
 /// Validates and sanitizes barrel-file or export tag input.
 ///

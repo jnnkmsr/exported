@@ -1,12 +1,12 @@
-import 'package:exported/src/builder/legacy_barrel_file_writer.dart';
-import 'package:exported/src/model_legacy/export.dart';
+import 'package:exported/src/builder/barrel_file_writer.dart';
+import 'package:exported/src/model/export.dart';
 import 'package:test/test.dart';
 
 void main() {
-  late LegacyBarrelFileWriter sut;
+  late BarrelFileWriter sut;
 
   setUp(() {
-    sut = LegacyBarrelFileWriter();
+    sut = BarrelFileWriter();
   });
 
   group('write()', () {
@@ -15,12 +15,12 @@ void main() {
     });
 
     test('writes formatted code with all export directives', () {
-      const exports = [
+      final exports = [
         Export(
           uri: 'package:foo/src/a.dart',
-          show: {'Bar', 'Baz', 'Corge', 'Foo', 'Garply', 'Grault', 'Qux', 'Waldo'},
+          show: const {'Bar', 'Baz', 'Corge', 'Foo', 'Garply', 'Grault', 'Qux', 'Waldo'},
         ),
-        Export(uri: 'package:foo/src/b.dart', show: {'bar', 'foo'}),
+        Export(uri: 'package:foo/src/b.dart', show: const {'bar', 'foo'}),
         Export(uri: 'package:foo/src/c.dart'),
       ];
       const output = '// GENERATED CODE - DO NOT MODIFY BY HAND\n\n'

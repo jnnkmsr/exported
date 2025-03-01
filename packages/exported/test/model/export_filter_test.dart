@@ -6,7 +6,7 @@ void main() {
   group('ExportFilter', () {
     group('.showSingle()', () {
       test('Returns a show filter with a single combinator', () {
-        expect(ExportFilter.showSingle('foo'), ExportFilter.show(const {'foo'}));
+        expect(ExportFilter.showSingle('foo'), {'foo'}.asShow);
       });
     });
 
@@ -17,8 +17,8 @@ void main() {
           expect(ExportFilter.fromInput(hide: input), result);
         } else {
           result as Set<String>;
-          expect(ExportFilter.fromInput(show: input), ExportFilter.show(result));
-          expect(ExportFilter.fromInput(hide: input), ExportFilter.hide(result));
+          expect(ExportFilter.fromInput(show: input), result.asShow);
+          expect(ExportFilter.fromInput(hide: input), result.asHide);
         }
       }
 
@@ -39,8 +39,8 @@ void main() {
           expect(ExportFilter.fromInput(options: {keys.hide: input}), result);
         } else {
           result as Set<String>;
-          expect(ExportFilter.fromInput(options: {keys.show: input}), ExportFilter.show(result));
-          expect(ExportFilter.fromInput(options: {keys.hide: input}), ExportFilter.hide(result));
+          expect(ExportFilter.fromInput(options: {keys.show: input}), result.asShow);
+          expect(ExportFilter.fromInput(options: {keys.hide: input}), result.asHide);
         }
       }
 
@@ -156,7 +156,7 @@ void main() {
           ExportFilter.fromJson(const {
             keys.show: ['foo', 'bar'],
           }),
-          ExportFilter.show(const {'foo', 'bar'}),
+          {'foo', 'bar'}.asShow,
         );
       });
 
@@ -165,7 +165,7 @@ void main() {
           ExportFilter.fromJson(const {
             keys.hide: ['foo', 'bar'],
           }),
-          ExportFilter.hide(const {'foo', 'bar'}),
+          {'foo', 'bar'}.asHide,
         );
       });
 
@@ -176,13 +176,13 @@ void main() {
 
     group('.toJson()', () {
       test('Returns a JSON representation of a show filter', () {
-        expect(ExportFilter.show(const {'foo', 'bar'}).toJson(), {
+        expect({'foo', 'bar'}.asShow.toJson(), {
           keys.show: ['foo', 'bar'],
         });
       });
 
       test('Returns a JSON representation of a hide filter', () {
-        expect(ExportFilter.hide(const {'foo', 'bar'}).toJson(), {
+        expect({'foo', 'bar'}.asHide.toJson(), {
           keys.hide: ['foo', 'bar'],
         });
       });
@@ -199,102 +199,57 @@ void main() {
       }
 
       test('Returns a none filter if either filter is none', () {
-        expectMerge(ExportFilter.none, ExportFilter.show(const {'foo'}), ExportFilter.none);
-        expectMerge(ExportFilter.none, ExportFilter.hide(const {'foo'}), ExportFilter.none);
+        expectMerge(ExportFilter.none, {'foo'}.asShow, ExportFilter.none);
+        expectMerge(ExportFilter.none, {'foo'}.asHide, ExportFilter.none);
         expectMerge(ExportFilter.none, ExportFilter.none, ExportFilter.none);
       });
 
       test('Combines the combinators of two show filters', () {
-        expectMerge(
-          ExportFilter.show(const {'foo', 'bar'}),
-          ExportFilter.show(const {'bar', 'baz'}),
-          ExportFilter.show(const {'foo', 'bar', 'baz'}),
-        );
+        expectMerge({'foo', 'bar'}.asShow, {'bar', 'baz'}.asShow, {'foo', 'bar', 'baz'}.asShow);
       });
 
       test('Keeps only the common combinators of two hide filter', () {
-        expectMerge(
-          ExportFilter.hide(const {'foo', 'bar'}),
-          ExportFilter.hide(const {'bar', 'baz'}),
-          ExportFilter.hide(const {'bar'}),
-        );
+        expectMerge({'foo', 'bar'}.asHide, {'bar', 'baz'}.asHide, {'bar'}.asHide);
       });
 
       test('Returns a none filter if two hide filters have no common combinators', () {
-        expectMerge(
-          ExportFilter.hide(const {'foo', 'bar'}),
-          ExportFilter.hide(const {'baz'}),
-          ExportFilter.none,
-        );
+        expectMerge({'foo', 'bar'}.asHide, {'baz'}.asHide, ExportFilter.none);
       });
 
       test('Keeps only the non-conflicting combinators of a show and a hide filter', () {
-        expectMerge(
-          ExportFilter.show(const {'foo', 'bar'}),
-          ExportFilter.hide(const {'bar', 'baz'}),
-          ExportFilter.hide(const {'baz'}),
-        );
+        expectMerge({'foo', 'bar'}.asShow, {'bar', 'baz'}.asHide, {'baz'}.asHide);
       });
 
       test('Returns a none filter for a show and hide filter with the same combinators', () {
-        expectMerge(
-          ExportFilter.show(const {'foo', 'bar'}),
-          ExportFilter.hide(const {'foo', 'bar'}),
-          ExportFilter.none,
-        );
+        expectMerge({'foo', 'bar'}.asShow, {'foo', 'bar'}.asHide, ExportFilter.none);
       });
 
       test('Keeps only the entire hide filter if there are no conflicting show combinators', () {
-        expectMerge(
-          ExportFilter.show(const {'foo'}),
-          ExportFilter.hide(const {'bar', 'baz'}),
-          ExportFilter.hide(const {'bar', 'baz'}),
-        );
+        expectMerge({'foo'}.asShow, {'bar', 'baz'}.asHide, {'bar', 'baz'}.asHide);
       });
     });
 
     group('.==()', () {
       test('Returns true for equal-type filters with the same combinators', () {
-        expect(
-          ExportFilter.show(const {'foo', 'bar'}),
-          equals(ExportFilter.show(const {'foo', 'bar'})),
-        );
-        expect(
-          ExportFilter.hide(const {'foo', 'bar'}),
-          equals(ExportFilter.hide(const {'foo', 'bar'})),
-        );
+        expect({'foo', 'bar'}.asShow, equals({'foo', 'bar'}.asShow));
+        expect({'foo', 'bar'}.asHide, equals({'foo', 'bar'}.asHide));
         expect(ExportFilter.none, equals(ExportFilter.none));
       });
 
       test('Returns true for the same combinators with different order', () {
-        expect(
-          ExportFilter.show(const {'foo', 'bar'}),
-          equals(ExportFilter.show(const {'bar', 'foo'})),
-        );
-        expect(
-          ExportFilter.hide(const {'foo', 'bar'}),
-          equals(ExportFilter.hide(const {'bar', 'foo'})),
-        );
+        expect({'foo', 'bar'}.asShow, equals({'bar', 'foo'}.asShow));
+        expect({'foo', 'bar'}.asHide, equals({'bar', 'foo'}.asHide));
       });
 
       test('Returns false for equal-type filters with different combinators', () {
-        expect(
-          ExportFilter.show(const {'foo', 'bar'}),
-          isNot(ExportFilter.show(const {'foo', 'baz'})),
-        );
-        expect(
-          ExportFilter.hide(const {'foo', 'bar'}),
-          isNot(ExportFilter.hide(const {'foo', 'baz'})),
-        );
+        expect({'foo', 'bar'}.asShow, isNot({'foo', 'baz'}.asShow));
+        expect({'foo', 'bar'}.asHide, isNot({'foo', 'baz'}.asHide));
       });
 
       test('Returns false for a filters of different type', () {
-        expect(
-          ExportFilter.show(const {'foo', 'bar'}),
-          isNot(ExportFilter.hide(const {'foo', 'bar'})),
-        );
-        expect(ExportFilter.show(const {'foo', 'bar'}), isNot(ExportFilter.none));
-        expect(ExportFilter.hide(const {'foo', 'bar'}), isNot(ExportFilter.none));
+        expect({'foo', 'bar'}.asShow, isNot({'foo', 'bar'}.asHide));
+        expect({'foo', 'bar'}.asShow, isNot(ExportFilter.none));
+        expect({'foo', 'bar'}.asHide, isNot(ExportFilter.none));
       });
     });
   });

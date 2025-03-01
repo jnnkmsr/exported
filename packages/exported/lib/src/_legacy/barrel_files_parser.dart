@@ -1,5 +1,5 @@
-import 'package:exported/src/model_legacy/barrel_file.dart';
-import 'package:exported/src/validation/option_parser.dart';
+import 'package:exported/src/_legacy/barrel_file.dart';
+import 'package:exported/src/_legacy/option_parser.dart';
 
 /// Validates and sanitizes a list of `barrel_files` builder options.
 ///

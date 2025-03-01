@@ -5,7 +5,6 @@ import 'package:build/build.dart';
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_cache.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
-import 'package:exported/src/model/tag.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -41,14 +40,8 @@ final class _CacheGenerator extends Generator {
   }
 
   ExportCache _buildCache(LibraryReader library, Iterable<AnnotatedElement> annotatedElements) {
-    final cache = ExportCache();
     final uri = library.element.source.uri.toString();
-    for (final annotatedElement in annotatedElements) {
-      final tags = _readTags(annotatedElement.annotation);
-      final export = _readExport(uri, annotatedElement);
-      cache.add(export, tags);
-    }
-    return cache;
+    return ExportCache(annotatedElements.map((e) => _readExport(uri, e)));
   }
 
   Export _readExport(String uri, AnnotatedElement annotatedElement) {
@@ -61,19 +54,32 @@ final class _CacheGenerator extends Generator {
     }
     return element is LibraryElement
         ? _readLibraryExport(uri, element, annotatedElement.annotation)
-        : _readNamedExport(uri, element);
+        : _readNamedExport(uri, element, annotatedElement.annotation);
   }
 
-  Export _readLibraryExport(String uri, LibraryElement element, ConstantReader annotation) =>
+  Export _readLibraryExport(
+    String uri,
+    LibraryElement element,
+    ConstantReader annotation,
+  ) =>
       Export.library(
         uri: element.identifier,
         show: annotation.readSetOrNull(keys.show),
         hide: annotation.readSetOrNull(keys.hide),
+        tags: annotation.readSetOrNull(keys.tags),
       );
 
-  Export _readNamedExport(String uri, Element element) {
+  Export _readNamedExport(
+    String uri,
+    Element element,
+    ConstantReader annotation,
+  ) {
     if (element.name case final name?) {
-      return Export.element(uri: uri, name: name);
+      return Export.element(
+        uri: uri,
+        name: name,
+        tags: annotation.readSetOrNull(keys.tags),
+      );
     } else {
       throw InvalidGenerationSourceError(
         'Invalid annotation on unnamed element',
@@ -81,8 +87,6 @@ final class _CacheGenerator extends Generator {
       );
     }
   }
-
-  Tags _readTags(ConstantReader annotation) => Tags.fromInput(annotation.readSetOrNull(keys.tags));
 }
 
 extension on ConstantReader {

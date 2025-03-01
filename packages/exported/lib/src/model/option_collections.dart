@@ -6,13 +6,13 @@ import 'package:meta/meta.dart';
 /// An optional [parseString] function can be provided to parse single-string
 /// input.
 ///
-/// If the input is not a map (or string), or if it contains any key not in
-/// [validKeys], an [ArgumentError] will be thrown, using the [parentKey] for
-/// error-message context.
+/// If [validKeys] is provided, the input map will be validated to contain only
+/// keys from this set, throwing an [ArgumentError] if any key is invalid. The
+/// [parentKey] is used for error-message context.
 T parseInputMap<T>(
   dynamic input, {
-  required String parentKey,
-  required Set<String> validKeys,
+  String? parentKey,
+  Set<String>? validKeys,
   required T Function(Map) parseMap,
   T Function(String)? parseString,
 }) =>
@@ -23,10 +23,12 @@ T parseInputMap<T>(
     };
 
 /// Helper function for [parseInputMap] for map [input].
-T _parseInputMap<T>(Map input, String parentKey, Set<String> validKeys, T Function(Map) parse) {
-  final invalidKeys = input.keys.toSet().difference(validKeys);
-  if (invalidKeys.isNotEmpty) {
-    throw ArgumentError.value(invalidKeys.first, parentKey, 'Invalid option');
+T _parseInputMap<T>(Map input, String? parentKey, Set<String>? validKeys, T Function(Map) parse) {
+  if (validKeys != null) {
+    final invalidKeys = input.keys.toSet().difference(validKeys);
+    if (invalidKeys.isNotEmpty) {
+      throw ArgumentError.value(invalidKeys.first, parentKey, 'Invalid option');
+    }
   }
   return parse(input);
 }

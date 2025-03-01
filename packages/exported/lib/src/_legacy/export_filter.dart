@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
+import 'package:exported/src/_legacy/parser_helpers.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
-import 'package:exported/src/model_legacy/parser_helpers.dart';
 import 'package:meta/meta.dart';
 
 extension type const Show._(Set<ExportFilterName> _) implements ExportFilter {

@@ -2,7 +2,7 @@ import 'package:exported/src/model/export_uri.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:test/test.dart';
 
-import '../helpers/fake_pubspec_reader.dart';
+import '../util/fake_pubspec_reader.dart';
 
 void main() {
   group('ExportUri', () {
@@ -122,7 +122,7 @@ void main() {
     group('.toJson()', () {
       test('Converts to a JSON object', () {
         expect(
-          const ExportUri('package:foo/foo.dart').toJson(),
+          'package:foo/foo.dart'.asExportUri.toJson(),
           {keys.uri: 'package:foo/foo.dart'},
         );
       });

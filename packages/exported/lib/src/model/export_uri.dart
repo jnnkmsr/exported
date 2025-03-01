@@ -6,7 +6,7 @@ import 'package:path/path.dart' as p;
 ///
 /// **Note:** The unnamed constructor will not validate the input and should
 /// only be used for testing or when the input is known to be valid.
-extension type const ExportUri(String _) implements String {
+extension type const ExportUri._(String _) implements String {
   /// Creates an [ExportUri] from builder options string or map [input],
   /// validating and sanitizing input.
   ///
@@ -36,14 +36,14 @@ extension type const ExportUri(String _) implements String {
         'package' || null => _parsePackageUri(path, pubspecReader),
         final scheme => throw ArgumentError('Invalid scheme "$scheme"'),
       };
-      return ExportUri(uri);
+      return ExportUri._(uri);
     } on ArgumentError catch (e) {
       throw ArgumentError.value(input, keys.uri, e.message);
     }
   }
 
   /// Restores an [ExportUri] from internal [json] without any validation.
-  factory ExportUri.fromJson(Map json) => ExportUri(json[keys.uri] as String);
+  factory ExportUri.fromJson(Map json) => ExportUri._(json[keys.uri] as String);
 
   /// Converts this [ExportUri] to JSON for storage in the build cache.
   Map toJson() => {keys.uri: this as String};
@@ -113,4 +113,9 @@ extension type const ExportUri(String _) implements String {
 
   static final _schemePattern = RegExp(r'^(?:(\w+):)?(.*)$');
   static final _validPathSegmentPattern = RegExp(r'^(?!\d)[a-z0-9_]+$');
+}
+
+extension ExportUriStringExtension on String {
+  /// Converts this string to an [ExportUri] instance without any validation.
+  ExportUri get asExportUri => ExportUri._(this);
 }

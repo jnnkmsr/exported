@@ -4,11 +4,11 @@ import 'package:path/path.dart' as p;
 
 /// Represents the relative path of a barrel file within the target package's
 /// `lib/` directory.
-extension type const BarrelFilePath(String _) implements String {
+extension type const BarrelFilePath._(String _) implements String {
   /// Creates the default [BarrelFilePath] for the target package, that is
   /// `'$package.dart'`, reading `package` from `pubspec.yaml`.
   factory BarrelFilePath.packageNamed([PubspecReader? pubspecReader]) =>
-      BarrelFilePath(_defaultFile(pubspecReader));
+      BarrelFilePath._(_defaultFile(pubspecReader));
 
   /// Creates a [BarrelFilePath] from a builder options input, which may be
   /// either a [String] or a [Map] containing a `path` key.
@@ -26,10 +26,10 @@ extension type const BarrelFilePath(String _) implements String {
   factory BarrelFilePath.fromInput(dynamic input, [PubspecReader? pubspecReader]) {
     try {
       final path = _validateInput(input);
-      if (path == null) return BarrelFilePath(_defaultFile(pubspecReader));
+      if (path == null) return BarrelFilePath._(_defaultFile(pubspecReader));
 
       final (file, dir) = _validatePath(path);
-      return BarrelFilePath(
+      return BarrelFilePath._(
         p.posix.joinAll([
           if (dir != null) dir,
           if (file != null) file else _defaultFile(pubspecReader),
@@ -41,7 +41,7 @@ extension type const BarrelFilePath(String _) implements String {
   }
 
   /// Restores a [BarrelFilePath] from internal [json] without any validation.
-  factory BarrelFilePath.fromJson(Map json) => BarrelFilePath(json[keys.path] as String);
+  factory BarrelFilePath.fromJson(Map json) => BarrelFilePath._(json[keys.path] as String);
 
   /// Converts this [BarrelFilePath] to JSON for storage in the build cache.
   Map<String, dynamic> toJson() => {keys.path: this as String};
@@ -108,4 +108,8 @@ extension type const BarrelFilePath(String _) implements String {
   }
 
   static final _validPathSegmentPattern = RegExp(r'^(?!\d)[a-z0-9_]+$');
+}
+
+extension BarrelFilePathStringExtension on String {
+  BarrelFilePath get asBarrelFilePath => BarrelFilePath._(this);
 }

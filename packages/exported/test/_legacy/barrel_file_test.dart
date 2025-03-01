@@ -1,9 +1,9 @@
+import 'package:exported/src/_legacy/barrel_file.dart';
+import 'package:exported/src/_legacy/export.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
-import 'package:exported/src/model_legacy/barrel_file.dart';
-import 'package:exported/src/model_legacy/export.dart';
 import 'package:test/test.dart';
 
-import '../helpers/option_parser_doubles.dart';
+import 'option_parser_doubles.dart';
 
 void main() {
   late BarrelFile sut;

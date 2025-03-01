@@ -1,15 +1,14 @@
 import 'package:dart_style/dart_style.dart';
-import 'package:exported/src/model_legacy/export.dart';
+import 'package:exported/src/model/export.dart';
 
 /// Helper class for writing the contents of a barrel file.
-@Deprecated('Use `BarrelFileWriter` instead.')
-class LegacyBarrelFileWriter {
+class BarrelFileWriter {
   static const _header = '// GENERATED CODE - DO NOT MODIFY BY HAND';
   static final _formatter = DartFormatter(
     languageVersion: DartFormatter.latestLanguageVersion,
   );
 
-  static StringBuffer _createBuffer() => StringBuffer()
+  late final StringBuffer _buffer = StringBuffer()
     ..writeln(_header)
     ..writeln();
 
@@ -19,11 +18,10 @@ class LegacyBarrelFileWriter {
   /// ```dart
   /// // GENERATED CODE - DO NOT MODIFY BY HAND
   /// ```
-  String write(List<Export> exports) {
-    final buffer = _createBuffer();
+  String write(Iterable<Export> exports) {
     for (final export in exports) {
-      buffer.writeln(export.toDart());
+      _buffer.writeln(export.toDart());
     }
-    return _formatter.format(buffer.toString());
+    return _formatter.format(_buffer.toString());
   }
 }

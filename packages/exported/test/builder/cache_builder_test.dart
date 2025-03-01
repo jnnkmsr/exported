@@ -6,7 +6,7 @@ import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/tag.dart';
 import 'package:meta/meta.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide Tags;
 
 void main() {
   group('CacheBuilder', () {
@@ -128,21 +128,40 @@ void main() {
         output: {
           'foo.exported.json': {
             'foo': [
-              Export.library(uri: packageUri('foo.dart'), show: const {'foo', 'Foo'}),
+              Export.library(
+                uri: packageUri('foo.dart'),
+                show: const {'foo', 'Foo'},
+                tags: const {'foo'},
+              ),
             ],
             'bar': [
-              Export.library(uri: packageUri('foo.dart'), show: const {'Foo'}),
+              Export.library(
+                uri: packageUri('foo.dart'),
+                show: const {'Foo'},
+                tags: const {'bar'},
+              ),
             ],
             Tag.none: [
-              Export.library(uri: packageUri('foo.dart'), show: const {'FOO'}),
+              Export.library(
+                uri: packageUri('foo.dart'),
+                show: const {'FOO'},
+              ),
             ],
           },
           'bar.exported.json': {
             'foo': [
-              Export.library(uri: packageUri('bar.dart'), show: const {'bar', 'Bar'}),
+              Export.library(
+                uri: packageUri('bar.dart'),
+                show: const {'bar', 'Bar'},
+                tags: const {'foo'},
+              ),
             ],
             'bar': [
-              Export.library(uri: packageUri('bar.dart'), show: const {'Bar'}),
+              Export.library(
+                uri: packageUri('bar.dart'),
+                show: const {'Bar'},
+                tags: const {'bar'},
+              ),
             ],
             Tag.none: [
               Export.library(uri: packageUri('bar.dart'), show: const {'BAR'}),
@@ -168,19 +187,28 @@ void main() {
         },
         output: {
           'foo.exported.json': {
-            Tag.none: [
-              Export.library(uri: packageUri('foo.dart')),
-            ],
+            Tag.none: [Export.library(uri: packageUri('foo.dart'))],
           },
           'bar.exported.json': {
             Tag.none: [
-              Export.library(uri: packageUri('bar.dart'), show: const {'baz', 'foo'}),
+              Export.library(
+                uri: packageUri('bar.dart'),
+                show: const {'baz', 'foo'},
+              ),
             ],
             'foo': [
-              Export.library(uri: packageUri('bar.dart'), show: const {'foo'}),
+              Export.library(
+                uri: packageUri('bar.dart'),
+                show: const {'foo'},
+                tags: const {'foo'},
+              ),
             ],
             'bar': [
-              Export.library(uri: packageUri('bar.dart'), show: const {'bar'}),
+              Export.library(
+                uri: packageUri('bar.dart'),
+                show: const {'bar'},
+                tags: const {'bar'},
+              ),
             ],
           },
         },

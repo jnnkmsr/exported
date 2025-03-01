@@ -1,9 +1,9 @@
+import 'package:exported/src/_legacy/export.dart';
+import 'package:exported/src/_legacy/exports_parser.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
-import 'package:exported/src/model_legacy/export.dart';
-import 'package:exported/src/validation/exports_parser.dart';
 import 'package:test/test.dart';
 
-import '../helpers/option_parser_helpers.dart';
+import 'option_parser_helpers.dart';
 
 // TODO[test/ExportsParser]: Replace nested parsers with mocks.
 

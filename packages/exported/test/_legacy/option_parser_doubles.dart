@@ -1,12 +1,12 @@
-import 'package:exported/src/model_legacy/barrel_file.dart';
-import 'package:exported/src/model_legacy/export.dart';
-import 'package:exported/src/validation/barrel_files_parser.dart';
-import 'package:exported/src/validation/exports_parser.dart';
-import 'package:exported/src/validation/file_path_parser.dart';
-import 'package:exported/src/validation/option_parser.dart';
-import 'package:exported/src/validation/show_hide_parser.dart';
-import 'package:exported/src/validation/tags_parser.dart';
-import 'package:exported/src/validation/uri_parser.dart';
+import 'package:exported/src/_legacy/barrel_file.dart';
+import 'package:exported/src/_legacy/barrel_files_parser.dart';
+import 'package:exported/src/_legacy/export.dart';
+import 'package:exported/src/_legacy/exports_parser.dart';
+import 'package:exported/src/_legacy/file_path_parser.dart';
+import 'package:exported/src/_legacy/option_parser.dart';
+import 'package:exported/src/_legacy/show_hide_parser.dart';
+import 'package:exported/src/_legacy/tags_parser.dart';
+import 'package:exported/src/_legacy/uri_parser.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockBarrelFilesParser extends MockOptionParser<List<BarrelFile>>

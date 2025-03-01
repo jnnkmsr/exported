@@ -74,5 +74,5 @@ extension type const Tags._(StringOptionSet<Tag> _) implements StringOptionSet<T
 extension TagsIterableExtension on Iterable<String> {
   /// Converts an [Iterable] of [String] to a [Tags] set.
   @visibleForTesting
-  Tags toTags() => Tags._(StringOptionSet(map(Tag._).toISet()));
+  Tags get asTags => Tags._(StringOptionSet(map(Tag._).toISet()));
 }

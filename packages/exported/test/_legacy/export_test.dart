@@ -1,11 +1,11 @@
 import 'package:build/build.dart';
+import 'package:exported/src/_legacy/export.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
-import 'package:exported/src/model_legacy/export.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
-import '../helpers/annotated_element_doubles.dart';
-import '../helpers/option_parser_doubles.dart';
+import 'annotated_element_doubles.dart';
+import 'option_parser_doubles.dart';
 
 void main() {
   late Export sut;
