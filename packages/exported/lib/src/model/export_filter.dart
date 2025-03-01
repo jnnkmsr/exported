@@ -1,6 +1,8 @@
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
-import 'package:exported/src/model/non_empty_set.dart';
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/option_collections.dart';
 import 'package:meta/meta.dart';
+
+// TODO[ExportFilter]: Split fromInput into show-/hide- and map-input methods
 
 /// Represents a `show`/`hide` filter in an `export` directive.
 @immutable
@@ -9,7 +11,7 @@ sealed class ExportFilter {
 
   /// Creates a `show` filter with a single combinator matching the given
   /// [elementName], without any input validation.
-  factory ExportFilter.showElement(String elementName) = _Show.element;
+  factory ExportFilter.showSingle(String elementName) = _Show.element;
 
   /// Creates an [ExportFilter] from [show]/[hide] input or builder [options],
   /// validating and sanitizing input.
@@ -28,17 +30,29 @@ sealed class ExportFilter {
   /// - Empty/blank strings and duplicates are removed.
   /// - Throws an [ArgumentError] if any combinator is not a valid public Dart
   ///   identifier (only letter/numbers/underscores, starting with a letter).
-  factory ExportFilter.fromInput({dynamic show, dynamic hide, Map? options}) =>
-      switch ((show ?? options?[keys.show], hide ?? options?[keys.hide])) {
-        (null, null) => ExportFilter.none,
-        (final input?, null) => _Show.fromInput(input) ?? ExportFilter.none,
-        (null, final input?) => _Hide.fromInput(input) ?? ExportFilter.none,
-        (_?, _?) => throw ArgumentError.value(
-            options ?? {keys.show: show, keys.hide: hide},
-            keys.hide,
-            'Cannot provide both show and hide filters',
-          ),
-      };
+  factory ExportFilter.fromInput({dynamic show, dynamic hide, Map? options}) {
+    if (options != null) {
+      return parseInputMap(
+        options,
+        parentKey: keys.exports,
+        validKeys: const {keys.show, keys.hide},
+        parseMap: (_) => ExportFilter.fromInput(
+          show: options[keys.show],
+          hide: options[keys.hide],
+        ),
+      );
+    }
+    return switch ((show, hide)) {
+      (null, null) => ExportFilter.none,
+      (final _?, null) => _Show.fromInput(show) ?? ExportFilter.none,
+      (null, final _?) => _Hide.fromInput(hide) ?? ExportFilter.none,
+      (_?, _?) => throw ArgumentError.value(
+          keys.hide,
+          keys.exports,
+          'Cannot provide both show and hide filters',
+        ),
+    };
+  }
 
   /// Restores an [ExportFilter] from an internal [json] representation without
   /// any input validation.
@@ -48,12 +62,12 @@ sealed class ExportFilter {
   /// Convenience constructor for testing purposes.
   @visibleForTesting
   factory ExportFilter.show(Set<String> combinators) =>
-      _Show._(combinators.map(_Combinator.new).nonEmptySet!);
+      _Show._(combinators.map(_Combinator.new).stringOptionSet!);
 
   /// Convenience constructor for testing purposes.
   @visibleForTesting
   factory ExportFilter.hide(Set<String> combinators) =>
-      _Hide._(combinators.map(_Combinator.new).nonEmptySet!);
+      _Hide._(combinators.map(_Combinator.new).stringOptionSet!);
 
   /// An empty filter comprising all non-private symbols of a library.
   static const ExportFilter none = _None();
@@ -77,38 +91,61 @@ sealed class ExportFilter {
   ///   a `hide` filter without the combinators that are in the `show` filter,
   ///   or `none` if there are none left.
   ExportFilter merge(ExportFilter other);
+
+  @nonVirtual
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      switch (this) {
+        final _Show show => other is _Show && other._combinators == show._combinators,
+        final _Hide hide => other is _Hide && other._combinators == hide._combinators,
+        _ => false,
+      };
+
+  @nonVirtual
+  @override
+  int get hashCode => Object.hash(
+        runtimeType,
+        switch (this) {
+          final _Show show => show._combinators,
+          final _Hide hide => hide._combinators,
+          _None _ => 0,
+        },
+      );
+
+  @nonVirtual
+  @override
+  String toString() => switch (this) {
+        final _Show show => '$ExportFilter.show{${show._combinators}}',
+        final _Hide hide => '$ExportFilter.hide{${hide._combinators}}',
+        _None _ => '$ExportFilter.none',
+      };
 }
 
 /// A `show` filter in an `export` directive.
 final class _Show extends ExportFilter {
   const _Show._(this._combinators) : super._();
 
-  factory _Show.element(String elementName) => _Show._({_Combinator(elementName)}.nonEmptySet!);
+  factory _Show.element(String elementName) => _Show._({_Combinator(elementName)}.stringOptionSet!);
 
   static _Show? fromInput(dynamic input) {
-    final combinators = NonEmptySet.fromInput(input, (e) => _Combinator.fromInput(e, keys.show));
+    final combinators =
+        StringOptionSet.fromInput(input, (e) => _Combinator.fromInput(e, keys.show));
     return combinators != null ? _Show._(combinators) : null;
   }
 
   static _Show? fromJson(Map json) {
-    final combinators = NonEmptySet.fromJson(json[keys.show], _Combinator.fromJson);
+    final combinators = StringOptionSet.fromJson(json[keys.show], _Combinator.fromJson);
     return combinators != null ? _Show._(combinators) : null;
   }
 
-  final NonEmptySet<_Combinator> _combinators;
+  final StringOptionSet<_Combinator> _combinators;
 
   @override
   ExportFilter merge(ExportFilter other) => switch (other) {
         _Show _ => _Show._(_combinators.union(other._combinators)),
         _ => other.merge(this),
       };
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is _Show && _combinators == other._combinators;
-
-  @override
-  int get hashCode => _combinators.hashCode;
 }
 
 /// A `hide` filter in an export directive.
@@ -116,16 +153,17 @@ final class _Hide extends ExportFilter {
   const _Hide._(this._combinators) : super._();
 
   static _Hide? fromInput(dynamic input) {
-    final combinators = NonEmptySet.fromInput(input, (e) => _Combinator.fromInput(e, keys.hide));
+    final combinators =
+        StringOptionSet.fromInput(input, (e) => _Combinator.fromInput(e, keys.hide));
     return combinators != null ? _Hide._(combinators) : null;
   }
 
   static _Hide? fromJson(Map json) {
-    final combinators = NonEmptySet.fromJson(json[keys.hide], _Combinator.fromJson);
+    final combinators = StringOptionSet.fromJson(json[keys.hide], _Combinator.fromJson);
     return combinators != null ? _Hide._(combinators) : null;
   }
 
-  final NonEmptySet<_Combinator> _combinators;
+  final StringOptionSet<_Combinator> _combinators;
 
   @override
   ExportFilter merge(ExportFilter other) {
@@ -136,13 +174,6 @@ final class _Hide extends ExportFilter {
     };
     return combinators != null ? _Hide._(combinators) : ExportFilter.none;
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is _Hide && _combinators == other._combinators;
-
-  @override
-  int get hashCode => _combinators.hashCode;
 }
 
 /// An empty filter comprising all non-private symbols of a library.

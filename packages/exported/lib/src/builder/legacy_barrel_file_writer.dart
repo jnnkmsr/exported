@@ -2,7 +2,8 @@ import 'package:dart_style/dart_style.dart';
 import 'package:exported/src/model_legacy/export.dart';
 
 /// Helper class for writing the contents of a barrel file.
-class BarrelFileWriter {
+@Deprecated('Use `BarrelFileWriter` instead.')
+class LegacyBarrelFileWriter {
   static const _header = '// GENERATED CODE - DO NOT MODIFY BY HAND';
   static final _formatter = DartFormatter(
     languageVersion: DartFormatter.latestLanguageVersion,

@@ -1,12 +1,12 @@
-import 'package:exported/src/builder/barrel_file_writer.dart';
+import 'package:exported/src/builder/legacy_barrel_file_writer.dart';
 import 'package:exported/src/model_legacy/export.dart';
 import 'package:test/test.dart';
 
 void main() {
-  late BarrelFileWriter sut;
+  late LegacyBarrelFileWriter sut;
 
   setUp(() {
-    sut = BarrelFileWriter();
+    sut = LegacyBarrelFileWriter();
   });
 
   group('write()', () {

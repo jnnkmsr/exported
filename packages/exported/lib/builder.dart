@@ -1,6 +1,6 @@
 import 'package:build/build.dart';
 import 'package:exported/src/builder/cache_builder.dart';
-import 'package:exported/src/builder/exported_builder.dart';
+import 'package:exported/src/builder/legacy_exported_builder.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 
 /// Reads intermediate JSON containing elements annotated with [Exported] and
@@ -8,7 +8,7 @@ import 'package:exported_annotation/exported_annotation.dart';
 ///
 /// Needs [cacheBuilder] to be run first to generate the intermediate JSON into
 /// the build cache.
-Builder exportedBuilder(BuilderOptions options) => ExportedBuilder(options);
+Builder exportedBuilder(BuilderOptions options) => LegacyExportedBuilder(options);
 
 /// Collects elements annotated with [Exported] and stores them as JSON into
 /// the build cache.

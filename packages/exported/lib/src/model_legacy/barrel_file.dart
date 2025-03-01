@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model_legacy/equals_util.dart';
 import 'package:exported/src/model_legacy/export.dart';
 import 'package:exported/src/validation/file_path_parser.dart';

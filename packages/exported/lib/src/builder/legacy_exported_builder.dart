@@ -1,6 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:exported/src/builder/barrel_file_writer.dart';
+import 'package:exported/src/builder/legacy_barrel_file_writer.dart';
 import 'package:exported/src/model_legacy/barrel_file.dart';
 import 'package:exported/src/model_legacy/export.dart';
 import 'package:exported/src/model_legacy/exported_options.dart';
@@ -11,9 +11,11 @@ import 'package:path/path.dart' as p;
 import 'package:source_gen/source_gen.dart';
 
 /// Generates Dart barrel files from annotated elements and builder options.
-class ExportedBuilder implements Builder {
+@Deprecated('Use ExportedBuilder instead.')
+class LegacyExportedBuilder implements Builder {
   /// Creates a builder instance with the provided [options].
-  ExportedBuilder(BuilderOptions options) {
+  @Deprecated('Use ExportedBuilder instead.')
+  LegacyExportedBuilder(BuilderOptions options) {
     final exportedOptions = ExportedOptions.fromOptions(options);
     _barrelFiles = exportedOptions.barrelFiles;
     _exports = exportedOptions.exports;
@@ -27,7 +29,7 @@ class ExportedBuilder implements Builder {
       {r'$lib$': _barrelFiles.map((file) => file.path).toList()};
 
   @visibleForTesting
-  static BarrelFileWriter writer = BarrelFileWriter();
+  static LegacyBarrelFileWriter writer = LegacyBarrelFileWriter();
 
   @override
   Future<void> build(BuildStep buildStep) async {

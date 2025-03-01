@@ -1,12 +1,12 @@
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export_filter.dart';
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:test/test.dart';
 
 void main() {
   group('ExportFilter', () {
-    group('.showElement()', () {
+    group('.showSingle()', () {
       test('Returns a show filter with a single combinator', () {
-        expect(ExportFilter.showElement('foo'), ExportFilter.show(const {'foo'}));
+        expect(ExportFilter.showSingle('foo'), ExportFilter.show(const {'foo'}));
       });
     });
 

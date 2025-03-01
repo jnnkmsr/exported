@@ -1,4 +1,4 @@
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:path/path.dart' as p;
 

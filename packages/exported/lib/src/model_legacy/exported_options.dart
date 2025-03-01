@@ -1,5 +1,5 @@
 import 'package:build/build.dart';
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model_legacy/barrel_file.dart';
 import 'package:exported/src/model_legacy/export.dart';
 import 'package:exported/src/validation/barrel_files_parser.dart';
@@ -18,6 +18,7 @@ class ExportedOptions {
   /// exports that have the same path/URI but conflicting configuration.
   ///
   /// Missing or empty sections are treated as empty lists.
+  ///
   ///
   /// Validates and sanitizes every [BarrelFile] and [Export] input and throws
   /// an [ArgumentError] for any invalid input or option keys.

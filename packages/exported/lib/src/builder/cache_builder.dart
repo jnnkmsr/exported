@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:exported/src/builder/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_cache.dart';
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/tag.dart';
 import 'package:exported_annotation/exported_annotation.dart';
 import 'package:source_gen/source_gen.dart';
