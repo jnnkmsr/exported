@@ -1,5 +1,5 @@
 name: exported
-description: Code generator for Dart-package barrel files.
+description: Code generation of barrel files for Dart packages.
 version: 0.1.0
 publish_to: none
 

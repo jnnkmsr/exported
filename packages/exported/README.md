@@ -1,3 +1,3 @@
-# exported
+Provides [Dart builders][build] for generating barrel files for Dart packages.
 
-Code generator for Dart-package barrel files.
+[build]: https://github.com/dart-lang/build

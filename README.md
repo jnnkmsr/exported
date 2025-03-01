@@ -1,3 +1,1 @@
-# exported
-
-Code generator for Dart-package barrel files.
+packages/exported/README.md
