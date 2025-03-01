@@ -1,5 +1,5 @@
 name: exported_lints
-description: "Static-analysis lints for all `exported` packages."
+description: "Shared static-analysis configuration for all `exported` packages."
 version: 0.1.0
 publish_to: none
 
