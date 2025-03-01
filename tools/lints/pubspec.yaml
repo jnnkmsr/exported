@@ -1,6 +1,6 @@
 name: exported_lints
 description: "Shared static-analysis configuration for all `exported` packages."
-version: 0.1.0
+version: 0.0.1
 publish_to: none
 
 environment:
