@@ -1,7 +1,8 @@
 name: exported_annotation
 description: Annotations for exported.
 version: 0.1.0
-publish_to: none
+repository: https://github.com/jnnkmsr/exported/tree/master/packages/exported_annotation
+issue_tracker: https://github.com/jnnkmsr/exported/issues
 
 resolution: workspace
 
@@ -12,4 +13,10 @@ dependencies:
   meta: ^1.15.0
 
 dev_dependencies:
+  cider: ^0.2.8
   exported_lints:
+
+cider:
+  link_template:
+    tag: https://github.com/jnnkmsr/exported/releases/tag/%tag%
+    diff: https://github.com/jnnkmsr/exported/compare/%from%...%to%
