@@ -1,12 +1,12 @@
 name: >
   🤖 Auto-merge pull request
 run-name: >
-  🤖 Auto-merge pull request #${{ github.event.pull_request.number }}
+  🤖 Auto-merge #${{ github.event.pull_request.number }}
 
 on:
   pull_request:
     types: [opened]
-    branches: [develop]
+    branches: [master]
 
 jobs:
   # Merges any automated pull request to `develop` opened by a CI bot.

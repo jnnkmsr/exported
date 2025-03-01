@@ -1,30 +1,30 @@
 name: >
   Set up workflow environment
 description: >
-  Configures the environment for a GitHub Action workflow, setting up tokens,
+  Configure the environment for a GitHub Action workflow, setting up tokens,
   GitHub bot authentication, and an optional Flutter environment.
 
 inputs:
   flutter:
     description: Whether to set up a Flutter environment.
     required: false
-    default: false
+    default: "false"
   bot:
     description: Whether to authenticate as a GitHub bot app.
     required: false
-    default: false
+    default: "false"
   bot-id:
     description: App ID of the GitHub bot app.
     required: false
-    default: 
+    default: ""
   bot-name:
     description: Name of the GitHub bot app for Git commits.
     required: false
-    default: 
+    default: ""
   bot-key:
     description: Private key of the GitHub bot app.
     required: false
-    default:
+    default: ""
   github-token:
     description: Default GitHub access token.
     required: true

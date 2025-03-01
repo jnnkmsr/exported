@@ -1,11 +1,11 @@
 name: >
   🏷️ Push version tags
 run-name: >
-  🏷️ Push tags after automated versioning
+  🏷️ Push version tags
 
 on:
   push:
-    branches: [develop]
+    branches: [master]
 
 jobs:
   # Pushes version tags to the repository after an automated pull request has

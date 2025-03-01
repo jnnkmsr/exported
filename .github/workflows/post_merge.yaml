@@ -1,14 +1,11 @@
 name: >
   📦 Post-merge checks & versioning
 run-name: >
-  📦 Post-merge into `develop`
-description: >
-  Workflow triggered by a push to `develop`. Runs automated versioning of all
-  packages in the workspace and creates a PR with the new versions.
+  📦 Post-merge
 
 on:
   push:
-    branches: [develop]
+    branches: [master]
 
 jobs:
   # Runs Melos versioning and creates a pull request with the new versions.

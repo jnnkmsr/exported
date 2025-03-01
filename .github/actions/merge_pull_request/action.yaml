@@ -1,7 +1,7 @@
 name: >
   Merge pull request
 description: >
-  Merges a pull request with admin privileges. Currently, this will always do
+  Merge a pull request with admin privileges. Currently, this will always do
   a rebase merge.
 
 inputs:

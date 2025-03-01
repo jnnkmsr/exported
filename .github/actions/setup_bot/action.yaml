@@ -1,7 +1,7 @@
 name: >
-  Authenticate GitHub bot app
+  Authenticate GitHub bot
 description: >
-  Authenticates a GitHub bot app by creating an access token, exporting it as 
+  Authenticate a GitHub bot app by creating an access token, exporting it as 
   `GITHUB_TOKEN`, re-checking out the repository, and setting up credentials 
   for bot-based commits.
 
