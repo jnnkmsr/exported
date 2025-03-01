@@ -1,7 +1,7 @@
 name: >
-  Set up a Flutter environment
+  Set up Flutter
 description: >
-  Sets up a Flutter environment for use in GitHub Actions, including setup of
+  Set up a Flutter environment for use in GitHub Actions, including setup of
   `melos`.
 
 runs:

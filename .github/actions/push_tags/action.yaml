@@ -1,7 +1,7 @@
 name: >
   Push version tags
 description: >
-  Generates and pushes version tags for each updated package.
+  Generate and push version tags for each updated package.
 
 runs:
   using: composite

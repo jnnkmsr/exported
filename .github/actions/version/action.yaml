@@ -1,23 +1,23 @@
 name: >
-  Version all workflow packages and create a PR
+  Automated versioning
 description: >
-  Versions all packages in the workspace and create a PR with the new versions.
+  Versions all workspace packages create a pull request with the new versions.
 
 runs:
   using: composite
   steps:
     - name: Run melos version
       run: |
-        melos version --all --yes --no-git-tag-version
+        melos version --all --yes --no-git-tag-version --no-changelog
       shell: bash
 
     - name: Create pull request
       uses: peter-evans/create-pull-request@v7
       with:
         title: |
-          chore(version): automatic versioning
+          chore: automated versioning
         body: |
-          Incremented all package versions.
+          Increment package versions.
         branch: version-${{ github.run_id }}
         delete-branch: true
         token: ${{ env.GITHUB_TOKEN }}
