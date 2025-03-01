@@ -17,19 +17,18 @@ class ExportCache {
   ExportCache.fromJson(Map json) {
     final exports = json.cast<String, List>().map((tag, exportsJson) {
       final exports = exportsJson.cast<Map>().map(Export.fromJson);
-      return MapEntry(
-        Tag.fromJson(tag),
-        {for (final export in exports) export.uri: export},
-      );
+      return MapEntry(tag, {for (final export in exports) export.uri: export});
     });
     _exports = exports;
   }
 
-  late final Map<Tag, Map<ExportUri, Export>> _exports;
+  late final Map<String, Map<ExportUri, Export>> _exports;
+  Tags get _exportTags => _exports.keys.asTags;
 
   Iterable<Export> matching(Tags tags) {
     final exports = <ExportUri, Export>{};
-    for (final tag in tags.matching(_exports.keys)) {
+    final exportTags = _exportTags;
+    for (final tag in tags.matching(exportTags)) {
       exports.merge(_exports[tag]);
     }
     return exports.values.sorted();

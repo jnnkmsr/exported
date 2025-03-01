@@ -1,6 +1,11 @@
-// TODO[ExportCache]: Unit tests
+import 'package:test/test.dart';
+
+// TODO[ExportCache]: Unit test
 
 void main() {
+  group('ExportCache', () {});
+}
+
 //   group('ExportCache', () {
 //     late ExportCache sut;
 //
@@ -29,10 +34,8 @@ void main() {
 //
 //         sut.add({foo, bar});
 //
-//         // TODO: Test show filter
 //         final result = sut[Tags.none].single;
 //         expect(result.uri, 'package:a/a.dart');
 //       });
 //     });
 //   });
-}

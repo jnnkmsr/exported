@@ -1,3 +1,7 @@
+import 'package:test/test.dart';
+
 // TODO[Export]: Unit test
 
-void main() {}
+void main() {
+  group('Export', () {});
+}

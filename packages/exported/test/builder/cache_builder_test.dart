@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:build_test/build_test.dart';
 import 'package:exported/src/builder/cache_builder.dart';
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/model/tag.dart';
 import 'package:meta/meta.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart' hide Tags;
@@ -97,12 +96,12 @@ void main() {
         },
         output: {
           'foo.exported.json': {
-            Tag.none: [
+            '': [
               Export.library(uri: packageUri('foo.dart'), show: const {'foo', 'Foo'}),
             ],
           },
           'bar.exported.json': {
-            Tag.none: [
+            '': [
               Export.library(uri: packageUri('bar.dart'), show: const {'bar', 'Bar'}),
             ],
           },
@@ -141,7 +140,7 @@ void main() {
                 tags: const {'bar'},
               ),
             ],
-            Tag.none: [
+            '': [
               Export.library(
                 uri: packageUri('foo.dart'),
                 show: const {'FOO'},
@@ -163,7 +162,7 @@ void main() {
                 tags: const {'bar'},
               ),
             ],
-            Tag.none: [
+            '': [
               Export.library(uri: packageUri('bar.dart'), show: const {'BAR'}),
             ],
           },
@@ -187,10 +186,10 @@ void main() {
         },
         output: {
           'foo.exported.json': {
-            Tag.none: [Export.library(uri: packageUri('foo.dart'))],
+            '': [Export.library(uri: packageUri('foo.dart'))],
           },
           'bar.exported.json': {
-            Tag.none: [
+            '': [
               Export.library(
                 uri: packageUri('bar.dart'),
                 show: const {'baz', 'foo'},
