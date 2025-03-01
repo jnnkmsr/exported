@@ -50,15 +50,15 @@ class BarrelFile {
   ]) {
     final files = OptionList.fromInput(
       input,
-      (element) => parseInputMap(
+      (element) => fromInputMapOrString(
         element,
         parentKey: keys.barrelFiles,
         validKeys: const {keys.path, keys.tags},
-        parseMap: (Map input) => BarrelFile._(
+        fromMap: (Map input) => BarrelFile._(
           BarrelFilePath.fromInput(input, pubspecReader),
           Tags.fromInput(input),
         ),
-        parseString: (String input) => BarrelFile._(BarrelFilePath.fromInput(input, pubspecReader)),
+        fromString: (String input) => BarrelFile._(BarrelFilePath.fromInput(input, pubspecReader)),
       ),
     );
     final paths = <String>{};

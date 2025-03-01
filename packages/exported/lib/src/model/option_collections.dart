@@ -1,36 +1,37 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:meta/meta.dart';
 
-/// Parses an map option [input] using the provided [parseMap] function.
+/// Parses an map option [input] using the provided [fromMap] function.
 ///
-/// An optional [parseString] function can be provided to parse single-string
+/// An optional [fromString] function can be provided to parse single-string
 /// input.
 ///
 /// If [validKeys] is provided, the input map will be validated to contain only
 /// keys from this set, throwing an [ArgumentError] if any key is invalid. The
 /// [parentKey] is used for error-message context.
-T parseInputMap<T>(
+T fromInputMapOrString<T>(
   dynamic input, {
   String? parentKey,
   Set<String>? validKeys,
-  required T Function(Map) parseMap,
-  T Function(String)? parseString,
+  required T Function(Map) fromMap,
+  T Function(String)? fromString,
 }) =>
     switch (input) {
-      String _ when parseString != null => parseString(input),
-      Map _ => _parseInputMap(input, parentKey, validKeys, parseMap),
+      String _ when fromString != null => fromString(input),
+      Map _ => fromMap(input..validateKeys(parentKey, validKeys)),
       _ => throw ArgumentError.value(input, parentKey, 'Invalid input type'),
     };
 
-/// Helper function for [parseInputMap] for map [input].
-T _parseInputMap<T>(Map input, String? parentKey, Set<String>? validKeys, T Function(Map) parse) {
-  if (validKeys != null) {
-    final invalidKeys = input.keys.toSet().difference(validKeys);
+extension on Map {
+  /// Validates that this map contains only keys from [validKeys], throwing an
+  /// [ArgumentError] with [parentKey] context otherwise.
+  void validateKeys(String? parentKey, Set<String>? validKeys) {
+    if (validKeys == null) return;
+    final invalidKeys = keys.toSet().difference(validKeys);
     if (invalidKeys.isNotEmpty) {
       throw ArgumentError.value(invalidKeys.first, parentKey, 'Invalid option');
     }
   }
-  return parse(input);
 }
 
 /// An immutable list of options.

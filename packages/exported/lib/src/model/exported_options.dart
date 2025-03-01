@@ -31,11 +31,11 @@ class ExportedOptions {
     Map options, [
     PubspecReader? pubspecReader,
   ]) =>
-      parseInputMap(
+      fromInputMapOrString(
         options,
         parentKey: 'exported',
         validKeys: const {keys.barrelFiles, keys.exports},
-        parseMap: (options) => ExportedOptions._(
+        fromMap: (options) => ExportedOptions._(
           BarrelFile.fromInput(options[keys.barrelFiles], pubspecReader),
           Export.fromInput(options[keys.exports]),
         ),

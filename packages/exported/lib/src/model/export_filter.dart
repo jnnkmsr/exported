@@ -34,9 +34,9 @@ sealed class ExportFilter {
   ///   identifier (only letter/numbers/underscores, starting with a letter).
   factory ExportFilter.fromInput({dynamic show, dynamic hide, Map? options}) {
     if (options != null) {
-      return parseInputMap(
+      return fromInputMapOrString(
         options,
-        parseMap: (_) => ExportFilter.fromInput(
+        fromMap: (_) => ExportFilter.fromInput(
           show: options[keys.show],
           hide: options[keys.hide],
         ),
