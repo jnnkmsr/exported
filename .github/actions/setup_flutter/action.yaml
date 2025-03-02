@@ -23,8 +23,9 @@ runs:
 
     # Activates the `melos` CLI and bootstraps project dependencies across all
     # packages in the workspace.
-    - name: Set up Melos CLI
+    - name: Set up Melos and Cider CLI
       run: |
         dart pub global activate melos
+        dart pub global activate cider
         melos bootstrap
       shell: bash
