@@ -70,17 +70,27 @@ melos:
   #   🧪 test - Running unit, integration, and UI tests.
   #   🛠️ tools - Other utility scripts not fitting elsewhere.
   scripts:
-    clean:build_runner:
+    build:clean:
       description: |
-        🧹 Clean the `build_runner` cache for a selected package.
+        🧹 Clean the build_runner cache for a selected package.
       exec: |
         dart run build_runner clean
       packageFilters:
         dependsOn: build_runner
-    generate:build_runner:
+
+    build:run:
       description: |
-        🏗️ Run `build_runner` for a selected package.
+        🏗️ Run build_runner for a selected package.
       exec: |
         dart run build_runner build -d
       packageFilters:
         dependsOn: build_runner
+
+    release:build-changelog:
+      description: |
+        🏷️️ Write changes from changelog.yaml into CHANGELOG.md.
+      run: MELOS_ROOT_PATH/tools/scripts/build_changelog.sh
+      exec:
+        concurrency: 1
+      packageFilters:
+        dependsOn: cider
