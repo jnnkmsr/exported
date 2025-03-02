@@ -63,11 +63,6 @@ extension type const Tags._(StringOptionSet<Tag> _) implements StringOptionSet<T
 
   /// Represents the untagged state, containing only [Tag.none].
   static const Tags none = Tags._(StringOptionSet(ISetConst({Tag.none})));
-
-  /// Returns all elements from [tags] that match this set of tags based on
-  /// [Tag.matches].
-  Iterable<Tag> matching(Iterable<Tag> tags) =>
-      this == none ? tags : where((tag) => tags.any(tag.matches));
 }
 
 extension TagsIterableExtension on Iterable<String> {

@@ -6,30 +6,33 @@ import 'package:exported/src/model/tag.dart';
 // TODO[ExportCache]: Documentation
 
 class ExportCache {
-  ExportCache(Iterable<Export> exports) : _exports = {} {
+  ExportCache(Iterable<Export> exports) : _exportsByTag = {} {
     add(exports);
   }
 
-  ExportCache.merged(Iterable<ExportCache> caches) : _exports = {} {
+  ExportCache.merged(Iterable<ExportCache> caches) : _exportsByTag = {} {
     caches.forEach(merge);
   }
 
   ExportCache.fromJson(Map json) {
     final exports = json.cast<String, List>().map((tag, exportsJson) {
       final exports = exportsJson.cast<Map>().map(Export.fromJson);
-      return MapEntry(tag, {for (final export in exports) export.uri: export});
+      return MapEntry(tag.asTag, {for (final export in exports) export.uri: export});
     });
-    _exports = exports;
+    _exportsByTag = exports;
   }
 
-  late final Map<String, Map<ExportUri, Export>> _exports;
-  Tags get _exportTags => _exports.keys.asTags;
+  late final Map<Tag, Map<ExportUri, Export>> _exportsByTag;
 
   Iterable<Export> matching(Tags tags) {
     final exports = <ExportUri, Export>{};
-    final exportTags = _exportTags;
-    for (final tag in tags.matching(exportTags)) {
-      exports.merge(_exports[tag]);
+    final matchingTags = tags == Tags.none
+        ? _exportsByTag.keys
+        : tags.where(
+            (tag) => _exportsByTag.keys.any(tag.matches),
+          );
+    for (final tag in matchingTags) {
+      exports.merge(_exportsByTag[tag]);
     }
     return exports.values.sorted();
   }
@@ -37,16 +40,16 @@ class ExportCache {
   void add(Iterable<Export> exports) {
     for (final export in exports) {
       for (final tag in export.tags) {
-        _exports.putIfAbsent(tag, () => {}).add(export);
+        _exportsByTag.putIfAbsent(tag, () => {}).add(export);
       }
     }
   }
 
-  void merge(ExportCache other) => other._exports.forEach(
-        (tag, exportsByUri) => _exports.putIfAbsent(tag, () => {}).merge(exportsByUri),
+  void merge(ExportCache other) => other._exportsByTag.forEach(
+        (tag, exportsByUri) => _exportsByTag.putIfAbsent(tag, () => {}).merge(exportsByUri),
       );
 
-  Map toJson() => _exports.map(
+  Map toJson() => _exportsByTag.map(
         (tag, exportsByUri) => MapEntry(
           tag,
           exportsByUri.values.map((export) => export.toJson()).toList(),
