@@ -94,3 +94,12 @@ melos:
         concurrency: 1
       packageFilters:
         dependsOn: cider
+
+    release:release-changelog:
+      description: |
+        🏷️️ Moves unreleased changes from CHANGELOG.md to the latest release.
+      run: MELOS_ROOT_PATH/tools/scripts/release_changelog.sh
+      exec:
+        concurrency: 1
+      packageFilters:
+        dependsOn: cider

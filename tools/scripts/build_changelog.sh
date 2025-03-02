@@ -67,7 +67,7 @@ while IFS=": " read -r type description; do
 
   # Run cider log to write into the "Unreleased" section of CHANGELOG.md.
   echo -e "     - ${RED}$type${END_COLOR}: ${GRAY}$description${END_COLOR}"
-  cider --project-root="$MELOS_PACKAGE_PATH" log "$type" "$description"
+  cider --project-root="$PACKAGE_PATH" log "$type" "$description"
 done <<< "$entries"
 
 # Clear/rewrite the `changelog.yaml` file with the header.
