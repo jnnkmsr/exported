@@ -21,11 +21,10 @@ void main() {
 
     group('.fromInput()', () {
       void expectOutput(dynamic input, List<BarrelFile> expected) =>
-          expect(BarrelFile.fromInput(input, fakePubspecReader), expected.optionList);
+          expect(BarrelFile.fromInput(input, fakePubspecReader), expected.asOptionList);
 
-      void expectThrows(dynamic input) {
-        expect(() => BarrelFile.fromInput(input, fakePubspecReader), throwsArgumentError);
-      }
+      void expectThrows(dynamic input) =>
+          expect(() => BarrelFile.fromInput(input, fakePubspecReader), throwsArgumentError);
 
       test('Parses a list of barrel-file maps', () {
         expectOutput([
@@ -137,9 +136,9 @@ void main() {
       });
 
       test('Throws for invalid input keys', () {
-        expectThrows({keys.uri: 'bar'});
+        expectThrows({keys.uri: 'foo'});
         expectThrows([
-          {keys.uri: 'bar'},
+          {keys.uri: 'foo'},
         ]);
       });
     });
