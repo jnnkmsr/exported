@@ -1,6 +1,7 @@
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/option_collections.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:meta/meta.dart';
 
 /// Represents a unique tag for selective inclusion of exports in barrel files.
 extension type const Tag._(String _) implements String {
@@ -63,6 +64,12 @@ extension type const Tags._(StringOptionSet<Tag> _) implements StringOptionSet<T
 
   /// Represents the untagged state, containing only [Tag.none].
   static const Tags none = Tags._(StringOptionSet(ISetConst({Tag.none})));
+}
+
+extension TagStringExtension on String {
+  /// Converts a [String] to a [Tag].
+  @visibleForTesting
+  Tag get asTag => Tag._(this);
 }
 
 extension TagsIterableExtension on Iterable<String> {
