@@ -17,7 +17,7 @@
 # To process, run release:build-changelog through the Melos CLI.
 
  - added: test ci
-# - changed:
+ - changed: another change
 # - deprecated:
 # - fixed:
 # - removed:
