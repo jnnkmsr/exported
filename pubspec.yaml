@@ -24,12 +24,13 @@ melos:
   command:
     version:
       branch: master
-      includeScopes: false
-      workspaceChangelog: false
       message: |
         chore: automated versioning
         
         {new_package_versions}
+      hooks:
+        preCommit: |
+          melos run release:release-changelog --no-select
 
     bootstrap:
       runPubGetInParallel: true
@@ -71,35 +72,33 @@ melos:
   #   🛠️ tools - Other utility scripts not fitting elsewhere.
   scripts:
     build:clean:
-      description: |
-        🧹 Clean the build_runner cache for a selected package.
-      exec: |
-        dart run build_runner clean
+      description: 🧹 Clean the build_runner cache for a selected package.
+      exec: dart run build_runner clean
       packageFilters:
         dependsOn: build_runner
 
     build:run:
-      description: |
-        🏗️ Run build_runner for a selected package.
-      exec: |
-        dart run build_runner build -d
+      description: 🏗️ Run build_runner for a selected package.
+      exec: dart run build_runner build -d
       packageFilters:
         dependsOn: build_runner
 
     release:build-changelog:
-      description: |
-        🏷️️ Write changes from changelog.yaml into CHANGELOG.md.
-      run: MELOS_ROOT_PATH/tools/scripts/build_changelog.sh
+      description: 🏷️️ Write changes from changelog.yaml into CHANGELOG.md.
+      run: MELOS_ROOT_PATH/tools/scripts/changelog/build_changelog.sh
       exec:
         concurrency: 1
       packageFilters:
         dependsOn: cider
 
     release:release-changelog:
-      description: |
-        🏷️️ Moves unreleased changes from CHANGELOG.md to the latest release.
-      run: MELOS_ROOT_PATH/tools/scripts/release_changelog.sh
+      description: 🏷️️ Moves unreleased changes from CHANGELOG.md to the latest release.
+      run: MELOS_ROOT_PATH/tools/scripts/changelog/release_changelog.sh
       exec:
         concurrency: 1
       packageFilters:
         dependsOn: cider
+
+    setup:git-hooks:
+      description: ⚙️️ Installs all git hooks into .git/hooks.
+      run: MELOS_ROOT_PATH/tools/scripts/hooks/install_hooks.sh

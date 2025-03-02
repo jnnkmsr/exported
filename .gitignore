@@ -21,6 +21,9 @@ pubspec_overrides.yaml
 /.reports/coverage/
 /.reports/test/
 
+### PROJECT-SPECIFIC FILES ###
+# Changelog generation
+changelog.yaml
 
 ### PLATFORM-SPECIFIC BUILD FILES ###
 # General Build Outputs (applies to all apps and modules)
