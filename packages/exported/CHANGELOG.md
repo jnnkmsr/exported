@@ -1,3 +1,7 @@
+## 0.1.1
+
+ - **FEAT**: test ci. ([d54b833b](https://github.com/jnnkmsr/exported/commit/d54b833b58be7db0904a27c69c2b51f20e6caf5b))
+
 # Changelog
 All notable changes to `exported` will be documented in this file.
 

@@ -15,3 +15,4 @@ dev_dependencies:
   build_runner: ^2.4.14
   exported:
   exported_lints:
+version: 0.1.0
