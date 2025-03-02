@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Skip this pre-commit hook on merge or rebase commits
+(git rev-parse -q --verify MERGE_HEAD || git rev-parse -q --verify REBASE_HEAD) && exit 0
+echo "Running pre-commit hook..."
+
+# Write changes from all changelog.yaml into the respective CHANGELOG.md.
+echo "Processing changelogs..."
+melos run release:build-changelog --no-select
+
+exit 0
