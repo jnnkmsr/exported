@@ -11,6 +11,12 @@ runs:
         melos version --all --yes --no-git-tag-version --no-changelog
       shell: bash
 
+    - name: Build changelogs
+      run: |
+        melos run release:build-changelog --no-select
+        melos run release:release-changelog --no-select
+      shell: bash
+
     - name: Create pull request
       uses: peter-evans/create-pull-request@v7
       with:

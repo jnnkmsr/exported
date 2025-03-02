@@ -5,7 +5,7 @@ run-name: >
 
 on:
   push:
-    branches: [master]
+    branches: [test]
 
 jobs:
   # Runs Melos versioning and creates a pull request with the new versions.
