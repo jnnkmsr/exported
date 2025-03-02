@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:build/build.dart';
-import 'package:exported/src/builder/barrel_file_writer.dart';
+import 'package:dart_style/dart_style.dart';
 import 'package:exported/src/builder/cache_builder.dart';
+import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_cache.dart';
 import 'package:exported/src/model/exported_options.dart';
 import 'package:exported/src/util/pubspec_reader.dart';
@@ -47,8 +48,33 @@ class ExportedBuilder extends Builder {
     for (final file in options.barrelFiles) {
       await buildStep.writeAsString(
         AssetId(buildStep.inputId.package, path.join('lib', file.path)),
-        BarrelFileWriter().write(cache.matchingExports(file)),
+        _BarrelFileWriter().write(cache.matchingExports(file)),
       );
     }
+  }
+}
+
+/// Helper class for writing the contents of a barrel file.
+class _BarrelFileWriter {
+  static const _header = '// GENERATED CODE - DO NOT MODIFY BY HAND';
+  static final _formatter = DartFormatter(
+    languageVersion: DartFormatter.latestLanguageVersion,
+  );
+
+  late final StringBuffer _buffer = StringBuffer()
+    ..writeln(_header)
+    ..writeln();
+
+  /// Returns formatted Dart code with directives for all given [exports].
+  ///
+  /// Adds a header comment of the form:
+  /// ```dart
+  /// // GENERATED CODE - DO NOT MODIFY BY HAND
+  /// ```
+  String write(Iterable<Export> exports) {
+    for (final export in exports) {
+      _buffer.writeln(export.toDart());
+    }
+    return _formatter.format(_buffer.toString());
   }
 }
