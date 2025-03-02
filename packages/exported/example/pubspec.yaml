@@ -1,6 +1,5 @@
 name: exported_example
-description: Example library using barreled.
-version: 0.1.0
+description: Example library using exported.
 publish_to: none
 
 resolution: workspace

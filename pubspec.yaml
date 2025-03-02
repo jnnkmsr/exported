@@ -1,4 +1,4 @@
-name: exported_workspace
+name: exported_packages
 publish_to: none
 
 environment:
@@ -11,7 +11,6 @@ workspace:
   - tools/lints
 
 dev_dependencies:
-  cider: ^0.2.8
   melos: ^7.0.0-dev.7
 
 melos:
@@ -71,17 +70,36 @@ melos:
   #   🧪 test - Running unit, integration, and UI tests.
   #   🛠️ tools - Other utility scripts not fitting elsewhere.
   scripts:
-    clean:build_runner:
+    build:clean:
       description: |
-        🧹 Clean the `build_runner` cache for a selected package.
+        🧹 Clean the build_runner cache for a selected package.
       exec: |
         dart run build_runner clean
       packageFilters:
         dependsOn: build_runner
-    generate:build_runner:
+
+    build:run:
       description: |
-        🏗️ Run `build_runner` for a selected package.
+        🏗️ Run build_runner for a selected package.
       exec: |
         dart run build_runner build -d
       packageFilters:
         dependsOn: build_runner
+
+    release:build-changelog:
+      description: |
+        🏷️️ Write changes from changelog.yaml into CHANGELOG.md.
+      run: MELOS_ROOT_PATH/tools/scripts/build_changelog.sh
+      exec:
+        concurrency: 1
+      packageFilters:
+        dependsOn: cider
+
+    release:release-changelog:
+      description: |
+        🏷️️ Moves unreleased changes from CHANGELOG.md to the latest release.
+      run: MELOS_ROOT_PATH/tools/scripts/release_changelog.sh
+      exec:
+        concurrency: 1
+      packageFilters:
+        dependsOn: cider

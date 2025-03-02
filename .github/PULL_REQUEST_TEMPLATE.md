@@ -12,3 +12,7 @@
 - [ ] 📝 Documentation
 - [ ] 🗑️ Chore/Cleanup
 - [ ] 🛠️ Tooling
+
+Refs: #<issue_number>
+
+Closes: #<issue_number>
