@@ -24,8 +24,9 @@ melos:
   command:
     version:
       branch: master
-      includeScopes: false
-      workspaceChangelog: false
+      changelogs:
+        packageFilters:
+          scope: foo # Makes sure melos will never modify changelogs.
       message: |
         chore: automated versioning
         
