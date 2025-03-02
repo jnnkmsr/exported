@@ -8,7 +8,8 @@ import 'package:meta/meta.dart';
 /// Configuration options for the `exported` builder.
 @immutable
 class ExportedOptions {
-  const ExportedOptions._(
+  @visibleForTesting
+  const ExportedOptions(
     this.barrelFiles,
     this.exports,
   );
@@ -35,7 +36,7 @@ class ExportedOptions {
         options,
         parentKey: 'exported',
         validKeys: const {keys.barrelFiles, keys.exports},
-        fromMap: (options) => ExportedOptions._(
+        fromMap: (options) => ExportedOptions(
           BarrelFile.fromInput(options[keys.barrelFiles], pubspecReader),
           Export.fromInput(options[keys.exports]),
         ),
