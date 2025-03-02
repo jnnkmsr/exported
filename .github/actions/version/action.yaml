@@ -11,8 +11,9 @@ runs:
         melos version --all --yes --no-git-tag-version --no-changelog
       shell: bash
 
-    - name: Stage and commit changelog updates
+    - name: Update changelogs
       run: |
+        melos run release:release-changelog --no-select
         git add .
         git commit -m "chore: update changelogs after versioning" || echo "No changes to commit"
       shell: bash

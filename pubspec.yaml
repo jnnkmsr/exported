@@ -28,9 +28,6 @@ melos:
         chore: automated versioning
         
         {new_package_versions}
-      hooks:
-        preCommit: |
-          melos run release:release-changelog --no-select
 
     bootstrap:
       runPubGetInParallel: true
