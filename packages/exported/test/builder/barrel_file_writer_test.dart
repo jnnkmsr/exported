@@ -1,5 +1,7 @@
 import 'package:exported/src/builder/barrel_file_writer.dart';
 import 'package:exported/src/model/export.dart';
+import 'package:exported/src/model/export_filter.dart';
+import 'package:exported/src/model/export_uri.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -16,11 +18,12 @@ void main() {
       test('writes formatted code with all export directives', () {
         final exports = [
           Export(
-            uri: 'package:foo/src/a.dart',
-            show: const {'Bar', 'Baz', 'Corge', 'Foo', 'Garply', 'Grault', 'Qux', 'Waldo'},
+            'package:foo/src/a.dart'.asExportUri,
+            {'Bar', 'Baz', 'Corge', 'Foo', 'Garply', 'Grault', 'Qux', 'Waldo'}.asShow,
           ),
-          Export(uri: 'package:foo/src/b.dart', show: const {'bar', 'foo'}),
-          Export(uri: 'package:foo/src/c.dart'),
+
+          Export('package:foo/src/b.dart'.asExportUri, {'bar', 'foo'}.asShow),
+          Export('package:foo/src/c.dart'.asExportUri),
         ];
         const output = '// GENERATED CODE - DO NOT MODIFY BY HAND\n\n'
             "export 'package:foo/src/a.dart'\n"
