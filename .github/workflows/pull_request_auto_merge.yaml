@@ -12,7 +12,7 @@ jobs:
   # Merges any automated pull request to `develop` opened by a CI bot.
   merge:
     name: Merge pull request
-    if: ${{ contains(fromJson(vars.BOT_ACTORS), github.actor) }}
+    if: false #${{ contains(fromJson(vars.BOT_ACTORS), github.actor) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
