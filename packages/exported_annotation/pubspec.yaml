@@ -18,5 +18,5 @@ dev_dependencies:
 
 cider:
   link_template:
-    tag: https://github.com/jnnkmsr/exported/releases/tag/%tag%
-    diff: https://github.com/jnnkmsr/exported/compare/%from%...%to%
+    tag: https://github.com/jnnkmsr/exported/releases/tag/exported_annotation-v%tag%
+    diff: https://github.com/jnnkmsr/exported/compare/exported_annotation-v%from%...exported_annotation-v%to%
