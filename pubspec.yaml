@@ -89,7 +89,7 @@ melos:
     release:build-changelog:
       description: |
         🏷️️ Write changes from changelog.yaml into CHANGELOG.md.
-      run: MELOS_ROOT_PATH/tools/scripts/build_changelog.sh
+      run: MELOS_ROOT_PATH/tools/scripts/changelog/build_changelog.sh
       exec:
         concurrency: 1
       packageFilters:
@@ -98,7 +98,7 @@ melos:
     release:release-changelog:
       description: |
         🏷️️ Moves unreleased changes from CHANGELOG.md to the latest release.
-      run: MELOS_ROOT_PATH/tools/scripts/release_changelog.sh
+      run: MELOS_ROOT_PATH/tools/scripts/changelog/release_changelog.sh
       exec:
         concurrency: 1
       packageFilters:
