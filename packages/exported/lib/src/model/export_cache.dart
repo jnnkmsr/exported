@@ -24,11 +24,11 @@ class ExportCache {
 
   late final Map<Tag, Map<ExportUri, Export>> _exportsByTag;
 
-  Iterable<Export> matching(Tags tags) {
+  Iterable<Export> matchingExports(BarrelFile file) {
     final exports = <ExportUri, Export>{};
-    final matchingTags = tags == Tags.none
+    final matchingTags = file.tags == Tags.none
         ? _exportsByTag.keys
-        : tags.where(
+        : file.tags.where(
             (tag) => _exportsByTag.keys.any(tag.matches),
           );
     for (final tag in matchingTags) {

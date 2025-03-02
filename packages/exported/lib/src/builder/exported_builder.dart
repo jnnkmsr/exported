@@ -32,22 +32,22 @@ class ExportedBuilder extends Builder {
   /// Reads all JSON [ExportCache] files written into the build cache by
   /// [CacheBuilder] and merges them together with the exports from the builder
   /// [options].
-  Future<ExportCache> _readExports(BuildStep buildStep) async {
-    final libraryCaches = await buildStep
+  Future<ExportCache> _readExportsFromJson(BuildStep buildStep) async {
+    final cachesPerLibrary = await buildStep
         .findAssets(Glob('**${CacheBuilder.jsonExtension}'))
         .asyncMap(buildStep.readAsString)
         .map((json) => ExportCache.fromJson(jsonDecode(json) as Map))
         .toList();
-    return ExportCache.merged(libraryCaches)..add(options.exports);
+    return ExportCache.merged(cachesPerLibrary);
   }
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    final exports = await _readExports(buildStep);
+    final cache = await _readExportsFromJson(buildStep)..add(options.exports);
     for (final file in options.barrelFiles) {
       await buildStep.writeAsString(
         AssetId(buildStep.inputId.package, path.join('lib', file.path)),
-        BarrelFileWriter().write(exports.matching(file.tags)),
+        BarrelFileWriter().write(cache.matchingExports(file)),
       );
     }
   }
