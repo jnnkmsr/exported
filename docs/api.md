@@ -10,12 +10,23 @@ For grouping, use tags that are defined via the `build.yaml` configuration.
 
 ### Usage:
 ```dart
-@Exported(tags: ['core']) // Added to barrel files with 'core' tag.
+// Adds the entire library to barrel files with 'core' tag or untagged files.
+@Exported(tags: {'core'})
 library;
 
-@exported // Default, added to all barrel files.
+// Adds a library with show combinators.
+@Exported(tags: {'core'}, show: {'Foo'})
+library;
+
+// Adds a library with show combinators.
+@Exported(tags: {'core'}, hide: {'Bar'})
+library;
+
+/// Adds a single element from a library to all barrel files.
+@exported
 class MyClass {}
 
+// Adds a single element to matching barrel files.
 @Exported(tags: ['models'])
 void myFunction() {}
 
@@ -35,15 +46,15 @@ targets:
       exported:
         options:
           barrel_files:
-            - tags: ['core'] # no path -> lib/<package>.dart
-            - path: core.dart # lib/core.dart
-              tags: ['core']
-            - path: models/ # lib/models/<package>.dart
-              # no tags -> added to all barrel files
-            - path: models/models.dart # lib/models/models.dart
+            # Custom barrel file 'lib/my_barrel_file.dart' including all
+            # exports ('lib/' can be omitted)..
+            - my_barrel_file.dart 
+            # Default barrel file 'lib/$package.dart' including exports with
+            # 'core' tag and untagged exports.
+            - tags: 'core'
+            # Custom barrel file 'lib/models/models.dart' with two tags. lib/models/models.dart with two tags
+            - path: models/models.dart
               tags: ['core', 'models']
-            - path: lib/utils.dart # lib/utils.dart
-              tags: ['core', 'utils']
 ```
 
 ### `exports`
@@ -55,17 +66,21 @@ Supports optional `show` and `hide` parameters to include or exclude specific
 elements from the export.
 ```yaml
           exports:
-            # Includes all elements from package_a in all barrel files.
-            - uri: package_a
-            # Includes shown elements from package_a in all barrel files.
-            - uri: package_a
-              show: ['MyClass', 'myFunction']
-            # Includes all but the hidden elements from package_a in all barrel
-            # files.
-            - uri: package_a
-              hide: ['myConstant']
-            # Includes export in barrel files with `core`  or 'utils' tag.
-            - uri: package_b
+            # Includes export of 'package:meta/meta.dart' in all barrel files.
+            - foo
+            # Includes export of 'package:$package/src/my_library.dart'.
+            - lib/src/my_library.dart
+            # Includes export of 'dart:async'.
+            - dart:async
+            # Includes export of 'package:bar/bar.dart' wth show combinators.
+            - uri: bar
+              show: ['Foo', 'bar']
+            # Includes export of 'package:baz/baz.dart' wth hide combinators.
+            - uri: baz
+              hide: ['Baz']
+            # Includes export in barrel files with `core`  or 'utils' tag or in
+            # untagged barrel files.
+            - uri: qux
               tags: ['core', 'utils']
 ```
 ___
