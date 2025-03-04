@@ -16,22 +16,27 @@ barrel files, ensuring your public API stays up-to-date with minimal effort.
 ### Key Features
 
 - **Annotation-Based Exports**: Use the `@Exported` annotation on library
-    directives, classes, functions, or other top-level elements to include them
-    in barrel files.
+  directives, classes, functions, or other top-level elements to include them
+  in barrel files.
 - **Option-Based Exports**: Include additional exports (e.g., symbols from
-    other packages) via the `build.yaml` configuration.
+  other packages) via the `build.yaml` configuration.
 - **Multiple Barrel Files**: Generate multiple barrel files for different parts 
-    of your package.
+  of your package.
 - **Export Tagging**: Easily organize exports using tags for grouping and 
-    mapping them to specific barrel files.
+  mapping them to specific barrel files.
 
 
 ## Contents
 
 - [Installation](#installation)
+- [Run the Generator](#run-the-generator)
 - [Quick Start](#quick-start)
   - [Option 1: Annotating Individual Symbols](#option-1-annotating-individual-symbols)
   - [Option 2: Annotating a Library](#option-2-annotating-a-library)
+- [Additional Configuration](#additional-configuration)
+  - [Multiple Barrel Files & Tagging](#multiple-barrel-files--tagging)
+  - [Adding Exports from the Builder Options](#adding-exports-from-the-builder-options)
+  - [Configuration Example](#configuration-example)
 
 
 ## Installation
@@ -45,10 +50,13 @@ dart pub add exported_annotation
 ```
 This installs three packages:
 - [build_runner][build_runner]: The tool that runs code generation (see:
-    [Getting started with build_runner][build_runner_getting_started]).
+  [Getting started with build_runner][build_runner_getting_started]).
 - [exported][exported]: Provides the builders for generating barrel files.
 - [exported_annotation][exported_annotation]: Contains the `@Exported` 
-    annotation for marking elements for inclusion in barrel files.
+  annotation for marking elements for inclusion in barrel files.
+
+  
+## Run the Generator
 
 To run the code generator, execute a one-time build in your project directory:
 ```shell
@@ -71,14 +79,22 @@ generate a file `lib/$package.dart` including all annotated symbols.
 
 ### Option 1: Annotating Individual Symbols
 
-Use `@exported` on individual classes, top-level functions, or constants:
+Use `@exported` on individual classes (or any other public top-level element):
 ```dart
 import 'package:exported_annotation/exported_annotation.dart';
 
 @exported
-class MyClass {
-  // Class definition
-}
+class User {}
+
+@exported
+class Order {}
+
+class Payment {}
+```
+The generated barrel file (e.g., `lib/ecommerce.dart`) will export `User` and
+`Order`:
+```dart
+export 'package:ecommerce/src/models.dart' show User, Order;
 ```
 
 ### Option 2: Annotating a Library
@@ -86,29 +102,152 @@ class MyClass {
 Use `@exported` on an entire library to include all contained public symbols:
 ```dart
 @exported
-library my_library;
+library;
+
+class User {}
+class Order {}
+class Payment {}
 ```
+This will generate an export directive of the entire library:
+```dart
+export 'package:ecommerce/src/models.dart';
+```
+
+#### Show and Hide Combinators
+
 You can control which symbols to include by using the `show` and `hide`
 arguments of the annotation:
 ```dart
-@Exported(show: {'MyClass'})
-library my_library;
+@Exported(show: {'User', 'Order'})
+library;
 
-class MyClass {}
-class MyOtherClass {}
+class User {}
+class Order {}
+class Payment {}
 ```
-In this example, the export directive that will be written into the barrel file
-will only include `MyClass`:
+Which generates:
 ```dart
-export 'package:$package/$path_to/my_library.dart' show MyClass;
+export 'package:ecommerce/src/models.dart' show User, Order;
 ```
+Similarly, use `hide`:
+```dart
+@Exported(hide: {'Payment'})
+library;
+
+class User {}
+class Order {}
+class Payment {}
+```
+Generating:
+```dart
+export 'package:ecommerce/src/models.dart' hide Payment;
+```
+
+## Additional Configuration
+
+Exported uses the [`build.yaml` configuration file][build_yaml] to customize
+how barrel files are generated, including:
+- **Configuring multiple barrel files** and using **tags** to control which
+  exports go into each file.
+- **Adding additional exports** of external packages or libraries within your 
+  package.
+
+The `build.yaml` file should be placed at the root of your package, alongside
+`pubspec.yaml`:
+```
+my_package/
+  lib/
+  build.yaml
+  pubspec.yaml
+```
+Configure the `exported` builder options by following the standard structure
+used by Dart's build system:
+```yaml
+targets:
+  $default:
+    builders:
+      exported:
+        options:
+          # Configuration options
+```
+
+### Adding Exports from the Builder Options
+
+In addition to annotating elements with `@exported`, you can specify additional
+exports in the `exports` section of the builder options. This is primarily
+useful for exporting symbols from external packages, but can also include
+libraries from within your package.
+
+#### External Package Exports
+
+External libraries can be either `dart:` or `package:` libraries. You can
+specify full URIs or simply use a package name:
+```yaml
+options:
+  exports:
+    - dart:async
+    - package:uuid/uuid.dart
+    - ecommerce_helpers # Resolves to package:ecommerce_helpers/ecommerce_helpers.dart
+```
+You can also use the `show` and `hide` arguments to filter which symbols to
+include:
+```yaml
+options:
+  exports:
+    - dart:async
+    - uri: package:uuid/uuid.dart
+      show: ['Uuid']
+    - uri: ecommerce_helpers
+      hide: ['LegacyUserHelper', 'LegacyOrderHelper']
+```
+This example will generate:
+```dart
+export 'dart:async';
+export 'package:uuid/uuid.dart' show Uuid;
+export 'package:ecommerce_helpers/ecommerce_helpers.dart' hide LegacyUserHelper, LegacyOrderHelper;
+```
+
+#### Internal Library Exports
+
+To include symbols from libraries within your own package, use the `uri`
+argument with a relative path starting with `lib/`:
+```yaml
+options:
+  exports:
+    - lib/src/api.dart
+    - uri: lib/src/models/user.dart
+      show: ['User']
+```
+Which generates:
+```dart
+export 'package:ecommerce/src/api.dart';
+export 'package:ecommerce/src/models/user.dart' show User;
+```
+
+
+### Multiple Barrel Files & Tagging
+
+[//]: # (Explain how to configure multiple barrel files using tags.)
+
+[//]: # (Demonstrate how to assign different exports to specific barrel files)
+[//]: # (using tags.)
+
+[//]: # (Provide an example of a build.yaml configuration with multiple barrel )
+[//]: # (files and their corresponding tags.)
+
+### Configuration Example
+
+[//]: # (Provide a complete example of a build.yaml configuration file, including)
+[//]: # (multiple barrel files, tagging, and external package exports. This will)
+[//]: # (give users a clear template to work with.)
 
 
 [barrel_files]: https://engineering.verygood.ventures/architecture/barrel_files/
 [build_runner]: https://pub.dev/packages/build_runner
 [build_runner_docs]: https://pub.dev/packages/build_runner#docs
-[build_runner_getting_started]: https://pub.dev/packages/build_runner
+[build_runner_getting_started]: https://github.com/dart-lang/build/blob/master/docs/getting_started.md
 [build_system]: https://github.com/dart-lang/build
+[build_yaml]: https://github.com/dart-lang/build/blob/master/docs/build_yaml_format.md
 [exported]: https://pub.dev/packages/exported
 [exported_annotation]: https://pub.dev/packages/exported_annotation
 [packages]: https://dart.dev/tools/pub/packages
@@ -123,6 +262,3 @@ export 'package:$package/$path_to/my_library.dart' show MyClass;
 [//]: # ()
 [//]: # (How others can contribute to the project.)
 [//]: # ()
-[//]: # (## License)
-[//]: # ()
-[//]: # (How others can contribute to the project.)
