@@ -13,7 +13,7 @@ on annotations and configuration. Simply annotate top-level elements with
 `@Exported`, and [build_runner][build_runner] will generate the appropriate
 barrel files, ensuring your public API stays up-to-date with minimal effort. 
 
-### Key Features
+### Features
 
 - **Annotation-Based Exports**: Use the `@Exported` annotation on library
   directives, classes, functions, or other top-level elements to include them
@@ -33,9 +33,9 @@ barrel files, ensuring your public API stays up-to-date with minimal effort.
 - [Quick Start](#quick-start)
   - [Option 1: Annotating Individual Symbols](#option-1-annotating-individual-symbols)
   - [Option 2: Annotating a Library](#option-2-annotating-a-library)
-- [Additional Configuration](#additional-configuration)
-  - [Multiple Barrel Files & Tagging](#multiple-barrel-files--tagging)
+- [Further Configuration](#further-configuration)
   - [Adding Exports from the Builder Options](#adding-exports-from-the-builder-options)
+  - [Multiple Barrel Files & Tagging](#multiple-barrel-files--tagging)
   - [Configuration Example](#configuration-example)
 
 
@@ -143,14 +143,14 @@ Generating:
 export 'package:ecommerce/src/models.dart' hide Payment;
 ```
 
-## Additional Configuration
+## Further Configuration
 
 Exported uses the [`build.yaml` configuration file][build_yaml] to customize
 how barrel files are generated, including:
-- **Configuring multiple barrel files** and using **tags** to control which
-  exports go into each file.
 - **Adding additional exports** of external packages or libraries within your 
   package.
+- **Configuring multiple barrel files** and using **tags** to control which
+  exports go into each file.
 
 The `build.yaml` file should be placed at the root of your package, alongside
 `pubspec.yaml`:
@@ -170,6 +170,7 @@ targets:
         options:
           # Configuration options
 ```
+
 
 ### Adding Exports from the Builder Options
 
@@ -224,6 +225,13 @@ export 'package:ecommerce/src/api.dart';
 export 'package:ecommerce/src/models/user.dart' show User;
 ```
 
+> [!WARNING]
+> When duplicate export URIs are configured for a barrel file (via annotations
+> and/or builder options), show/hide filters will be merged cumulatively.
+> - An export of the entire library will override any show/hide filters.
+> - A hide filter that shows everything besides the hidden elements will
+>   override a show filter that only shows specific elements.
+> - If an element is both shown and hidden, it will be shown.
 
 ### Multiple Barrel Files & Tagging
 
@@ -234,6 +242,7 @@ export 'package:ecommerce/src/models/user.dart' show User;
 
 [//]: # (Provide an example of a build.yaml configuration with multiple barrel )
 [//]: # (files and their corresponding tags.)
+
 
 ### Configuration Example
 
