@@ -271,7 +271,7 @@ In this example, three barrel files will be generated:
 - `lib/core.dart` will contain exports tagged with `core`.
 - `lib/models.dart` will contain exports tagged with `models`.
 
-> [!INFO]
+> [!NOTE]
 > If the `path` is omitted, the default barrel-file path `lib/$package.dart`
 > will be used for that file.
 
