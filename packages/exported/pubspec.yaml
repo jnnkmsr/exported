@@ -1,6 +1,6 @@
 name: exported
 description: Code generation of barrel files for Dart packages.
-version: 0.1.0
+version: 0.1.0+1
 repository: https://github.com/jnnkmsr/exported/tree/master/packages/exported
 issue_tracker: https://github.com/jnnkmsr/exported/issues
 
