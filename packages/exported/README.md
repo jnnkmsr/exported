@@ -1,5 +1,5 @@
-[//]: # (TODO: Add badges - pub, build, coverage, etc.)
-[//]: # (TODO: Add links to API, e.g., for @Exported)
+[![pub.dev][pub_badge]][exported]
+![License][license_badge]
 
 [Exported][exported] is a code generator that automates the creation and 
 maintenance of barrel files using the [Dart build system][build_system].
@@ -323,4 +323,6 @@ options:
 [build_yaml]: https://github.com/dart-lang/build/blob/master/docs/build_yaml_format.md
 [exported]: https://pub.dev/packages/exported
 [exported_annotation]: https://pub.dev/packages/exported_annotation
+[license_badge]: https://img.shields.io/github/license/jnnkmsr/exported?style=for-the-badge
 [packages]: https://dart.dev/tools/pub/packages
+[pub_badge]: https://img.shields.io/pub/v/exported?style=for-the-badge
