@@ -104,6 +104,8 @@ Use `@exported` on an entire library to include all contained public symbols:
 @exported
 library;
 
+import 'package:exported_annotation/exported_annotation.dart';
+
 class User {}
 class Order {}
 class Payment {}
@@ -122,6 +124,8 @@ arguments of the annotation:
 @Exported(show: {'User', 'Order'})
 library;
 
+import 'package:exported_annotation/exported_annotation.dart';
+
 class User {}
 class Order {}
 class Payment {}
@@ -134,6 +138,8 @@ Similarly, use `hide`:
 ```dart
 @Exported(hide: {'Payment'})
 library;
+
+import 'package:exported_annotation/exported_annotation.dart';
 
 class User {}
 class Order {}
