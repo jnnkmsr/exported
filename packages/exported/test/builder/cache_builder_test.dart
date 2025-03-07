@@ -1,263 +1,294 @@
 import 'dart:convert';
 
+import 'package:build/build.dart';
 import 'package:build_test/build_test.dart';
+import 'package:dart_style/dart_style.dart';
+import 'package:exported/builder.dart';
 import 'package:exported/src/builder/cache_builder.dart';
-import 'package:exported/src/model/export.dart';
-import 'package:meta/meta.dart';
+import 'package:exported/src/model/exported_option_keys.dart' as keys;
+import 'package:exported/src/model/tag.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:test/test.dart' hide Tags;
+import 'package:test/test.dart';
 
 void main() {
   group('CacheBuilder', () {
     const packageName = 'foo';
-    String packageUri(String path) => 'package:$packageName/src/$path';
-    String packageAsset(String path) => '$packageName|lib/src/$path';
+    String libraryUri(String library) => 'package:$packageName/src/$library.dart';
+    String dartAsset(String library) => '$packageName|lib/src/$library.dart';
+    String jsonAsset(String library) =>
+        '$packageName|lib/src/$library${CacheBuilder.jsonExtension}';
 
-    @isTest
-    void runTest(
-      String message, {
-      required Map<String, List<String>> source,
-      Map<String, Map<String, List<Export>>>? output,
-      Object? throws,
-    }) {
-      final sourceAssets =
-          source.map((path, lines) => MapEntry(packageAsset(path), lines.join('\n')));
-      final outputAssets = output?.map((path, exportsByTag) {
-        final json = exportsByTag.map(
-          (tag, exports) => MapEntry(
-            tag,
-            exports.map((export) => export.toJson()).toList(),
+    Future<dynamic> expectOutput(
+      Map<String, String> sources,
+      Map<String, Map<String, Map<String, dynamic>>>? outputs,
+    ) async {
+      final dartFormatter = DartFormatter(languageVersion: DartFormatter.latestLanguageVersion);
+      return testBuilder(
+        cacheBuilder(BuilderOptions.empty),
+        sources.map(
+          (path, content) => MapEntry(
+            dartAsset(path),
+            dartFormatter.format(content),
           ),
-        );
-        return MapEntry(
-          packageAsset(path),
-          '${jsonEncode(json)}\n',
-        );
-      });
-
-      test(message, () async {
-        final test = testBuilder(
-          CacheBuilder(),
-          sourceAssets,
-          outputs: outputAssets,
-          reader: await PackageAssetReader.currentIsolate(),
-        );
-        await (throws != null ? expectLater(test, throwsA(throws)) : test);
-      });
+        ),
+        outputs: outputs?.map(
+          (path, json) => MapEntry(
+            jsonAsset(path),
+            '${jsonEncode(json.map((tag, export) => MapEntry(tag, [export])))}\n',
+          ),
+        ),
+        reader: await PackageAssetReader.currentIsolate(),
+      );
     }
 
-    group('No annotated elements', () {
-      runTest(
-        'Generates no output if no Dart libraries are present',
-        source: {},
-        output: {},
-      );
+    Future<dynamic> expectNoOutput(Map<String, String> sources) => expectOutput(sources, null);
 
-      runTest(
-        'Generates no output if Dart libraries are empty',
-        source: {
-          'foo.dart': [''],
-          'bar.dart': [''],
-        },
-        output: {},
-      );
+    Future<dynamic> expectThrows<T>(Map<String, String> sources) =>
+        expectLater(expectOutput(sources, null), throwsA(isA<T>()));
 
-      runTest(
-        'Generates no output if Dart libraries have no annotated elements',
-        source: {
-          'foo.dart': [
-            'class Foo {}',
-            'void foo() {}',
-          ],
-          'bar.dart': [
-            'class Bar {}',
-            'void bar() {}',
-          ],
-        },
-        output: {},
-      );
+    group('Library-level annotations', () {
+      test('Generates JSON for annotated library element', () async {
+        await expectOutput({
+          'foo': '''
+            @exported
+            library;
+            import 'package:exported_annotation/exported_annotation.dart';
+            class Foo {}
+            void foo() {}
+          ''',
+          'bar': '''
+            @exported
+            library;
+            import 'package:exported_annotation/exported_annotation.dart';
+            class Bar {}
+            void bar() {}
+          ''',
+        }, {
+          'foo': {
+            Tag.none: {keys.uri: libraryUri('foo')},
+          },
+          'bar': {
+            Tag.none: {keys.uri: libraryUri('bar')},
+          },
+        });
+      });
+
+      test('Generates JSON for library-element annotations with show/hide filters', () async {
+        await expectOutput({
+          'foo': '''
+            @Exported(show: {'Foo'})
+            library;
+            import 'package:exported_annotation/exported_annotation.dart';
+            class Foo {}
+            void foo() {}
+          ''',
+          'bar': '''
+            @Exported(hide: {'bar'})
+            library;
+            import 'package:exported_annotation/exported_annotation.dart';
+            class Bar {}
+            void bar() {}
+          ''',
+        }, {
+          'foo': {
+            Tag.none: {
+              keys.uri: libraryUri('foo'),
+              keys.show: ['Foo'],
+            },
+          },
+          'bar': {
+            Tag.none: {
+              keys.uri: libraryUri('bar'),
+              keys.hide: ['bar'],
+            },
+          },
+        });
+      });
+
+      test('Throws for an annotation with show and hide filters', () async {
+        await expectThrows<ArgumentError>({
+          'foo': '''
+            @Exported(show: {'Foo'}, hide: {'foo'})
+            library;
+            import 'package:exported_annotation/exported_annotation.dart';
+            class Foo {}
+            void foo() {}
+          ''',
+        });
+      });
     });
 
-    group('Valid annotated elements', () {
-      runTest(
-        'Generates JSON for Dart libraries with annotated exports',
-        source: {
-          'foo.dart': [
-            "import 'package:exported_annotation/exported_annotation.dart';",
-            '@exported class Foo {}',
-            '@exported void foo() {}',
-          ],
-          'bar.dart': [
-            "import 'package:exported_annotation/exported_annotation.dart';",
-            '@exported class Bar {}',
-            '@exported void bar() {}',
-          ],
-          'baz.dart': [],
-        },
-        output: {
-          'foo.exported.json': {
-            '': [
-              Export.library(uri: packageUri('foo.dart'), show: const {'foo', 'Foo'}),
-            ],
+    group('Element-level annotations', () {
+      test('Generates JSON for libraries with annotated elements', () async {
+        await expectOutput({
+          'foo': '''
+            import 'package:exported_annotation/exported_annotation.dart';
+            @exported
+            class Foo {}
+            void foo() {}
+          ''',
+          'bar': '''
+            import 'package:exported_annotation/exported_annotation.dart';
+            @exported
+            class Bar {}
+            @exported
+            void bar() {}
+          ''',
+        }, {
+          'foo': {
+            Tag.none: {
+              keys.uri: libraryUri('foo'),
+              keys.show: ['Foo'],
+            },
           },
-          'bar.exported.json': {
-            '': [
-              Export.library(uri: packageUri('bar.dart'), show: const {'bar', 'Bar'}),
-            ],
+          'bar': {
+            // Function elements will be traversed first, thus the order.
+            Tag.none: {
+              keys.uri: libraryUri('bar'),
+              keys.show: ['bar', 'Bar'],
+            },
           },
-        },
-      );
+        });
+      });
 
-      runTest(
-        'Generates JSON for Dart libraries with annotated exports with tags',
-        source: {
-          'foo.dart': [
-            "import 'package:exported_annotation/exported_annotation.dart';",
-            "@Exported(tags: {'foo', 'bar'}) class Foo {}",
-            "@Exported(tags: {'foo'}) void foo() {}",
-            '@exported const FOO = 42;',
-          ],
-          'bar.dart': [
-            "import 'package:exported_annotation/exported_annotation.dart';",
-            "@Exported(tags: {'foo', 'bar'}) class Bar {}",
-            "@Exported(tags: {'foo'}) void bar() {}",
-            '@exported const BAR = 42;',
-          ],
-        },
-        output: {
-          'foo.exported.json': {
-            'foo': [
-              Export.library(
-                uri: packageUri('foo.dart'),
-                show: const {'foo', 'Foo'},
-                tags: const {'foo'},
-              ),
-            ],
-            'bar': [
-              Export.library(
-                uri: packageUri('foo.dart'),
-                show: const {'Foo'},
-                tags: const {'bar'},
-              ),
-            ],
-            '': [
-              Export.library(
-                uri: packageUri('foo.dart'),
-                show: const {'FOO'},
-              ),
-            ],
+      test('Merges library annotation with annotated elements', () async {
+        await expectOutput({
+          'foo': '''
+            @exported
+            library;
+            import 'package:exported_annotation/exported_annotation.dart';
+            @exported
+            class Foo {}
+            void foo() {}
+          ''',
+          'bar': '''
+            @Exported(show: {'Bar'})
+            library;
+            import 'package:exported_annotation/exported_annotation.dart';
+            class Bar {}
+            @exported
+            void bar() {}
+          ''',
+          'baz': '''
+            @Exported(hide: {'baz'})
+            library;
+            import 'package:exported_annotation/exported_annotation.dart';
+            class Baz {}
+            @exported
+            void baz() {}
+          ''',
+        }, {
+          'foo': {
+            Tag.none: {keys.uri: libraryUri('foo')},
           },
-          'bar.exported.json': {
-            'foo': [
-              Export.library(
-                uri: packageUri('bar.dart'),
-                show: const {'bar', 'Bar'},
-                tags: const {'foo'},
-              ),
-            ],
-            'bar': [
-              Export.library(
-                uri: packageUri('bar.dart'),
-                show: const {'Bar'},
-                tags: const {'bar'},
-              ),
-            ],
-            '': [
-              Export.library(uri: packageUri('bar.dart'), show: const {'BAR'}),
-            ],
+          'bar': {
+            // Function elements will be traversed first, thus the order.
+            Tag.none: {
+              keys.uri: libraryUri('bar'),
+              keys.show: ['bar', 'Bar'],
+            },
           },
-        },
-      );
+          'baz': {
+            Tag.none: {keys.uri: libraryUri('baz')},
+          },
+        });
+      });
 
-      runTest(
-        'Generates JSON for Dart libraries with annotated library elements',
-        source: {
-          'foo.dart': [
-            "import 'package:exported_annotation/exported_annotation.dart';",
-            '@exported library;',
-          ],
-          'bar.dart': [
-            "import 'package:exported_annotation/exported_annotation.dart';",
-            "@Exported(show: {'foo'}) library;",
-            "@Exported(tags: {'foo'}) void foo() {}",
-            "@Exported(tags: {'bar'}) void bar() {}",
-            '@exported void baz() {}',
-          ],
-        },
-        output: {
-          'foo.exported.json': {
-            '': [Export.library(uri: packageUri('foo.dart'))],
-          },
-          'bar.exported.json': {
-            '': [
-              Export.library(
-                uri: packageUri('bar.dart'),
-                show: const {'baz', 'foo'},
-              ),
-            ],
-            'foo': [
-              Export.library(
-                uri: packageUri('bar.dart'),
-                show: const {'foo'},
-                tags: const {'foo'},
-              ),
-            ],
-            'bar': [
-              Export.library(
-                uri: packageUri('bar.dart'),
-                show: const {'bar'},
-                tags: const {'bar'},
-              ),
-            ],
-          },
-        },
-      );
+      test('Throws for an annotated unnamed element', () async {
+        await expectThrows<InvalidGenerationSourceError>({
+          'foo': '''
+            import 'package:exported_annotation/exported_annotation.dart';
+            @exported
+            extension on String {}
+          ''',
+        });
+      });
     });
 
-    group('Invalid annotated elements', () {
-      runTest(
-        'Throws for annotated imports',
-        source: {
-          'foo.dart': [
-            "import 'package:exported_annotation/exported_annotation.dart';",
-            "@exported import 'bar.dart';",
-          ],
-        },
-        throws: isA<InvalidGenerationSourceError>(),
-      );
+    group('Annotations with tags', () {
+      test('Groups exports by single tag', () async {
+        await expectOutput({
+          'foo': '''
+            @Exported(tags: {'foo', 'bar'})
+            library;
+            import 'package:exported_annotation/exported_annotation.dart';
+            class Foo {}
+            @exported
+            void foo() {}
+          ''',
+        }, {
+          'foo': {
+            'foo': {keys.uri: libraryUri('foo')},
+            'bar': {keys.uri: libraryUri('foo')},
+            Tag.none: {
+              keys.uri: libraryUri('foo'),
+              keys.show: ['foo'],
+            },
+          },
+        });
+      });
 
-      runTest(
-        'Throws for annotated exports',
-        source: {
-          'foo.dart': [
-            "import 'package:exported_annotation/exported_annotation.dart';",
-            "@exported export 'bar.dart';",
-          ],
-        },
-        throws: isA<InvalidGenerationSourceError>(),
-      );
+      test('Merges exports by tag', () async {
+        await expectOutput({
+          'foo': '''
+            @Exported(show: {'Foo'}, tags: {'foo'})
+            library;
+            import 'package:exported_annotation/exported_annotation.dart';
+            @exported
+            class Foo {}
+            @exported
+            void bar() {}
+            @Exported(tags: {'foo'})
+            const baz = 42;
+          ''',
+        }, {
+          'foo': {
+            'foo': {
+              keys.uri: libraryUri('foo'),
+              keys.show: ['baz', 'Foo'],
+            },
+            Tag.none: {
+              keys.uri: libraryUri('foo'),
+              keys.show: ['bar', 'Foo'],
+            },
+          },
+        });
+      });
 
-      runTest(
-        'Throws for annotated part elements',
-        source: {
-          'foo.dart': [
-            "import 'package:exported_annotation/exported_annotation.dart';",
-            "@exported part 'bar.dart';",
-          ],
-        },
-        throws: isA<InvalidGenerationSourceError>(),
-      );
+      test('Sanitizes tag input', () async {
+        await expectOutput({
+          'foo': '''
+            @Exported(tags: {'FOO', '  bar  ', '  Baz'})
+            library;
+            import 'package:exported_annotation/exported_annotation.dart';
+          ''',
+        }, {
+          'foo': {
+            'foo': {keys.uri: libraryUri('foo')},
+            'bar': {keys.uri: libraryUri('foo')},
+            'baz': {keys.uri: libraryUri('foo')},
+          },
+        });
+      });
+    });
 
-      runTest(
-        'Throws for annotated unnamed extension',
-        source: {
-          'foo.dart': [
-            "import 'package:exported_annotation/exported_annotation.dart';",
-            '@exported extension on String {}',
-          ],
-        },
-        throws: isA<InvalidGenerationSourceError>(),
-      );
+    group('No annotations', () {
+      test('Generates no output if there are no libraries', () async {
+        await expectNoOutput({});
+      });
+
+      test('Generates no output for empty libraries', () async {
+        await expectNoOutput({'foo': ''});
+      });
+
+      test('Generates no output for libraries without annotations', () async {
+        await expectNoOutput({
+          'foo': '''
+            class Foo {}
+            void foo() {}
+          ''',
+        });
+      });
     });
   });
 }
