@@ -8,15 +8,16 @@ import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_cache.dart';
 import 'package:exported/src/model/exported_options.dart';
 import 'package:exported/src/util/pubspec_reader.dart';
+import 'package:exported_annotation/exported_annotation.dart';
 import 'package:glob/glob.dart';
 import 'package:path/path.dart' as path;
+import 'package:source_gen/source_gen.dart';
 
+/// Reads intermediate JSON containing elements annotated with [Exported] and
+/// generates the barrel files, taking into account the builder [options].
 class ExportedBuilder extends Builder {
   /// Creates an [ExportedBuilder], parsing and validating builder [options]
   /// into [ExportedOptions].
-  ///
-  /// In tests, provide a fake [pubspecReader] to override the default instance
-  /// for reading `pubspec.yaml` files.
   ExportedBuilder(
     BuilderOptions options, {
     PubspecReader? pubspecReader,
@@ -37,9 +38,19 @@ class ExportedBuilder extends Builder {
     final cachesPerLibrary = await buildStep
         .findAssets(Glob('**${CacheBuilder.jsonExtension}'))
         .asyncMap(buildStep.readAsString)
-        .map((json) => ExportCache.fromJson(jsonDecode(json) as Map))
-        .toList();
+        .map(_readExportCacheJson).toList();
     return ExportCache.merged(cachesPerLibrary);
+  }
+
+  /// Restores a single [ExportCache] from [json].
+  ///
+  /// Throws an [InvalidGenerationSourceError] if the JSON is invalid.
+  ExportCache _readExportCacheJson(String json) {
+    try {
+      return ExportCache.fromJson(jsonDecode(json) as Map);
+    } catch (e) {
+      throw InvalidGenerationSourceError('Error reading JSON exports from cache: $e');
+    }
   }
 
   @override
