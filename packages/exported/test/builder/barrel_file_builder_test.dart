@@ -262,7 +262,7 @@ Future<dynamic> testExportedBuilder({
     sourceAssets,
     outputs: outputs,
     rootPackage: packageName,
-    reader: await PackageAssetReader.currentIsolate(rootPackage: packageName),
+    reader: await PackageAssetReader.currentIsolate(),
   );
   return throws == null ? test : expectLater(test, throwsA(throws));
 }
