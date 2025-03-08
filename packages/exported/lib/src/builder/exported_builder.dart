@@ -9,36 +9,46 @@ import 'package:exported/src/model/export_cache.dart';
 import 'package:exported/src/model/exported_options.dart';
 import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:exported_annotation/exported_annotation.dart';
+import 'package:file/file.dart';
+import 'package:file/local.dart';
+import 'package:file/memory.dart';
 import 'package:glob/glob.dart';
 import 'package:path/path.dart' as path;
 import 'package:source_gen/source_gen.dart';
 
 /// Reads intermediate JSON containing elements annotated with [Exported] and
-/// generates the barrel files, taking into account the builder [options].
+/// generates the barrel files, taking into account the builder [_options].
 class ExportedBuilder extends Builder {
   /// Creates an [ExportedBuilder], parsing and validating builder [options]
   /// into [ExportedOptions].
+  ///
+  /// Uses the [fileSystem] to read the package name from the `pubspec.yaml`,
+  /// defaulting to [LocalFileSystem]. Provide a [MemoryFileSystem] in tests.
   ExportedBuilder(
-    BuilderOptions options, {
-    PubspecReader? pubspecReader,
-  }) : options = ExportedOptions.fromInput(options.config, pubspecReader);
+    BuilderOptions options, [
+    FileSystem? fileSystem,
+  ]) : _options = ExportedOptions.fromInput(
+          options.config,
+          package: PubspecReader(fileSystem).name,
+        );
 
   /// Barrel-file and exports options parsed from the builder options.
-  final ExportedOptions options;
+  final ExportedOptions _options;
 
   @override
   Map<String, List<String>> get buildExtensions => {
-        r'$lib$': options.barrelFiles.map((file) => file.path).toList(),
+        r'$lib$': _options.barrelFiles.map((file) => file.path).toList(),
       };
 
   /// Reads all JSON [ExportCache] files written into the build cache by
   /// [CacheBuilder] and merges them together with the exports from the builder
-  /// [options].
+  /// [_options].
   Future<ExportCache> _readExportsFromJson(BuildStep buildStep) async {
     final cachesPerLibrary = await buildStep
         .findAssets(Glob('**${CacheBuilder.jsonExtension}'))
         .asyncMap(buildStep.readAsString)
-        .map(_readExportCacheJson).toList();
+        .map(_readExportCacheJson)
+        .toList();
     return ExportCache.merged(cachesPerLibrary);
   }
 
@@ -55,13 +65,17 @@ class ExportedBuilder extends Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    final cache = await _readExportsFromJson(buildStep)..add(options.exports);
-    for (final file in options.barrelFiles) {
-      await buildStep.writeAsString(
-        AssetId(buildStep.inputId.package, path.join('lib', file.path)),
-        _BarrelFileWriter().write(cache.matchingExports(file)),
-      );
-    }
+    final cache = await _readExportsFromJson(buildStep)
+      ..add(_options.exports);
+    final package = buildStep.inputId.package;
+    await Future.wait(
+      _options.barrelFiles.map(
+        (file) => buildStep.writeAsString(
+          AssetId(package, path.join('lib', file.path)),
+          _BarrelFileWriter().write(cache.matchingExports(file)),
+        ),
+      ),
+    );
   }
 }
 

@@ -2,7 +2,6 @@ import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/option_collections.dart';
-import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:meta/meta.dart';
 
 /// Configuration options for the `exported` builder.
@@ -25,20 +24,20 @@ class ExportedOptions {
   ///   an [ArgumentError] for any invalid input or option keys.
   /// - Treats missing or empty sections as empty lists, using defaults. For an
   ///   empty `barrel_files` list, a single barrel file will be generated, named
-  ///   after the package, reading from the provided [pubspecReader].
+  ///   after the [package].
   /// - Throws an [ArgumentError] if input validation/sanitization fails for
   ///   any nested [BarrelFile] or [Export].
   factory ExportedOptions.fromInput(
-    Map options, [
-    PubspecReader? pubspecReader,
-  ]) =>
+    Map options, {
+    required String package,
+  }) =>
       fromInputMapOrString(
         options,
         parentKey: 'exported',
         validKeys: const {keys.barrelFiles, keys.exports},
         fromMap: (options) => ExportedOptions(
-          BarrelFile.fromInput(options[keys.barrelFiles], pubspecReader),
-          Export.fromInput(options[keys.exports]),
+          BarrelFile.fromInput(options[keys.barrelFiles], package: package),
+          Export.fromInput(options[keys.exports], package: package),
         ),
       );
 

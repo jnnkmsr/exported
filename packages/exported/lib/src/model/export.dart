@@ -77,18 +77,24 @@ class Export implements Comparable<Export> {
   ///
   /// See [ExportUri.fromInput] and [ExportFilter.fromInput] for input
   /// validation and sanitization of [uri] and [filter].
-  static OptionList<Export> fromInput(dynamic input) => OptionList.fromInput(
+  static OptionList<Export> fromInput(
+    dynamic input, {
+    required String package,
+  }) =>
+      OptionList.fromInput(
         input,
         (element) => fromInputMapOrString(
           element,
           parentKey: keys.exports,
           validKeys: const {keys.uri, keys.show, keys.hide, keys.tags},
           fromMap: (export) => Export(
-            ExportUri.fromInput(export),
+            ExportUri.fromInput(export, package: package),
             ExportFilter.fromInput(options: export),
             Tags.fromInput(export),
           ),
-          fromString: (input) => Export(ExportUri.fromInput(input)),
+          fromString: (input) => Export(
+            ExportUri.fromInput(input, package: package),
+          ),
         ),
       );
 

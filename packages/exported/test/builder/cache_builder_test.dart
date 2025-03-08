@@ -12,39 +12,16 @@ import 'package:test/test.dart';
 
 void main() {
   group('CacheBuilder', () {
-    const packageName = 'foo';
-    String libraryUri(String library) => 'package:$packageName/src/$library.dart';
-    String dartAsset(String library) => '$packageName|lib/src/$library.dart';
-    String jsonAsset(String library) =>
-        '$packageName|lib/src/$library${CacheBuilder.jsonExtension}';
-
     Future<dynamic> expectOutput(
       Map<String, String> sources,
       Map<String, Map<String, Map<String, dynamic>>>? outputs,
-    ) async {
-      final dartFormatter = DartFormatter(languageVersion: DartFormatter.latestLanguageVersion);
-      return testBuilder(
-        cacheBuilder(BuilderOptions.empty),
-        sources.map(
-          (path, content) => MapEntry(
-            dartAsset(path),
-            dartFormatter.format(content),
-          ),
-        ),
-        outputs: outputs?.map(
-          (path, json) => MapEntry(
-            jsonAsset(path),
-            '${jsonEncode(json.map((tag, export) => MapEntry(tag, [export])))}\n',
-          ),
-        ),
-        reader: await PackageAssetReader.currentIsolate(),
-      );
-    }
+    ) =>
+        testCacheBuilder(sources, outputs);
 
-    Future<dynamic> expectNoOutput(Map<String, String> sources) => expectOutput(sources, null);
+    Future<dynamic> expectNoOutput(Map<String, String> sources) => testCacheBuilder(sources, null);
 
     Future<dynamic> expectThrows<T>(Map<String, String> sources) =>
-        expectLater(expectOutput(sources, null), throwsA(isA<T>()));
+        expectLater(testCacheBuilder(sources, null), throwsA(isA<T>()));
 
     group('Library-level annotations', () {
       test('Generates JSON for annotated library element', () async {
@@ -291,4 +268,33 @@ void main() {
       });
     });
   });
+}
+
+const packageName = 'foo';
+String libraryUri(String library) => 'package:$packageName/src/$library.dart';
+String packageAsset(String path) => '$packageName|$path';
+String dartAsset(String library) => packageAsset('lib/src/$library.dart');
+String jsonAsset(String library) => packageAsset('lib/src/$library${CacheBuilder.jsonExtension}');
+
+Future<dynamic> testCacheBuilder(
+  Map<String, String> sources,
+  Map<String, Map<String, Map<String, dynamic>>>? outputs,
+) async {
+  final dartFormatter = DartFormatter(languageVersion: DartFormatter.latestLanguageVersion);
+  return testBuilder(
+    cacheBuilder(BuilderOptions.empty),
+    sources.map(
+      (path, content) => MapEntry(
+        dartAsset(path),
+        dartFormatter.format(content),
+      ),
+    ),
+    outputs: outputs?.map(
+      (path, json) => MapEntry(
+        jsonAsset(path),
+        '${jsonEncode(json.map((tag, export) => MapEntry(tag, [export])))}\n',
+      ),
+    ),
+    reader: await PackageAssetReader.currentIsolate(),
+  );
 }

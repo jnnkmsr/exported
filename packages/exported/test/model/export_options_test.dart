@@ -8,21 +8,30 @@ void main() {
     group('.fromInput()', () {
       test('Parses `barrel_files` and `exports` options', () {
         const barrelFiles = [
-          {'path': 'foo.dart', 'tags': ['foo', 'bar']},
+          {
+            'path': 'foo.dart',
+            'tags': ['foo', 'bar'],
+          },
           'bar.dart',
         ];
         const exports = [
-          {'uri': 'foo', 'tags': ['foo', 'bar']},
+          {
+            'uri': 'foo',
+            'tags': ['foo', 'bar'],
+          },
           'bar',
         ];
         expect(
-          ExportedOptions.fromInput(const {
+          ExportedOptions.fromInput(
+            const {
               'barrel_files': barrelFiles,
               'exports': exports,
-            }),
+            },
+            package: 'foo',
+          ),
           ExportedOptions(
-            BarrelFile.fromInput(barrelFiles),
-            Export.fromInput(exports),
+            BarrelFile.fromInput(barrelFiles, package: 'foo'),
+            Export.fromInput(exports, package: 'foo'),
           ),
         );
       });

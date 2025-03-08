@@ -1,7 +1,6 @@
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
-import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 /// Helper class to read the package name from the `pubspec.yaml`.
@@ -10,19 +9,15 @@ class PubspecReader {
   ///
   /// The [fileSystem] defaults to [LocalFileSystem], but should be replaced
   /// with a [MemoryFileSystem] in tests.
-  @visibleForTesting
   PubspecReader([
-    FileSystem fileSystem = const LocalFileSystem(),
-  ]) : _fileSystem = fileSystem;
-
-  /// Singleton instance of [PubspecReader] using the [LocalFileSystem].
-  static final PubspecReader instance = PubspecReader();
+    FileSystem? fileSystem,
+  ]) : _fileSystem = fileSystem ?? const LocalFileSystem();
 
   final FileSystem _fileSystem;
 
   /// Reads the `name` from the `pubspec.yaml`, or returns a previously read
   /// value.
-  late final String name = _read((yaml) => yaml.name, _nameKey);
+  late final String name = _read((yaml) => yaml[_nameKey] as String, _nameKey);
 
   /// Reads a value from the `pubspec.yaml` using the provided [accessor], or
   /// returns a previously read value.
@@ -41,17 +36,8 @@ class PubspecReader {
 
   /// Reads the `pubspec.yaml` and converts it to a [YamlMap], or returns a
   /// previously read value.
-  late final YamlMap _yaml = _readYaml();
-  YamlMap _readYaml() {
-    final pubspecFile = _fileSystem.directory(_packageDir).childFile(_pubspecFile);
-    return loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
-  }
+  late final YamlMap _yaml = loadYaml(_fileSystem.file(_pubspecFile).readAsStringSync()) as YamlMap;
 }
 
-extension on YamlMap {
-  String get name => this[_nameKey] as String;
-}
-
-const _nameKey = 'name';
-const _packageDir = './';
 const _pubspecFile = 'pubspec.yaml';
+const _nameKey = 'name';

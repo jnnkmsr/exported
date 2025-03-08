@@ -65,11 +65,13 @@ void main() {
     });
 
     group('.fromInput()', () {
+      const package = 'foo';
+
       void expectOutput(dynamic input, List<Export> expected) =>
-          expect(Export.fromInput(input), expected.asOptionList);
+          expect(Export.fromInput(input, package: package), expected.asOptionList);
 
       void expectThrows(dynamic input) =>
-          expect(() => Export.fromInput(input), throwsArgumentError);
+          expect(() => Export.fromInput(input, package: package), throwsArgumentError);
 
       test('Parses a list of Export maps', () {
         expectOutput([

@@ -2,23 +2,31 @@ import 'package:exported/src/model/export_uri.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:test/test.dart';
 
-import '../util/fake_pubspec_reader.dart';
-
 void main() {
   group('ExportUri', () {
     group('.fromInput()', () {
       const package = 'foo';
 
       void expectOutput(dynamic input, String expected) {
-        final pubspecReader = FakePubspecReader(name: package);
-        expect(ExportUri.fromInput(input, pubspecReader), expected);
-        expect(ExportUri.fromInput({keys.uri: input}, pubspecReader), expected);
+        expect(
+          ExportUri.fromInput(input, package: package),
+          expected,
+        );
+        expect(
+          ExportUri.fromInput({keys.uri: input}, package: package),
+          expected,
+        );
       }
 
       void expectThrows(dynamic input) {
-        final pubspecReader = FakePubspecReader(name: package);
-        expect(() => ExportUri.fromInput(input, pubspecReader), throwsArgumentError);
-        expect(() => ExportUri.fromInput({keys.uri: input}, pubspecReader), throwsArgumentError);
+        expect(
+          () => ExportUri.fromInput(input, package: package),
+          throwsArgumentError,
+        );
+        expect(
+          () => ExportUri.fromInput({keys.uri: input}, package: package),
+          throwsArgumentError,
+        );
       }
 
       test("Parses a valid 'dart:' URI", () {
