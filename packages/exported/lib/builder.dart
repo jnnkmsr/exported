@@ -17,8 +17,8 @@ Builder exportCacheBuilder(BuilderOptions _) => ExportCacheBuilder();
 /// Reads intermediate JSON containing elements annotated with [Exported] and
 /// generates the barrel files, taking into account the builder [options].
 ///
-/// Needs [exportCacheBuilder] to be run first to generate the intermediate JSON into
-/// the build cache.
+/// Needs [exportCacheBuilder] to be run first to generate the intermediate
+/// JSON into the build cache.
 ///
 /// Uses the [fileSystem] to read the package name from the `pubspec.yaml`,
 /// defaulting to [LocalFileSystem]. Provide a [MemoryFileSystem] in tests.
