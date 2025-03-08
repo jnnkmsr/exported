@@ -2,16 +2,16 @@ import 'dart:convert';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
+import 'package:exported/src/builder/export_cache.dart';
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/model/export_cache.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported_annotation/exported_annotation.dart';
 import 'package:source_gen/source_gen.dart';
 
 /// Collects elements annotated with [Exported] and stores them as JSON into
 /// the build cache.
-final class CacheBuilder extends LibraryBuilder {
-  CacheBuilder()
+final class ExportCacheBuilder extends LibraryBuilder {
+  ExportCacheBuilder()
       : super(
           _CacheGenerator(),
           generatedExtension: jsonExtension,
@@ -24,7 +24,7 @@ final class CacheBuilder extends LibraryBuilder {
   static const jsonExtension = '.exported.json';
 }
 
-/// [Generator] for [CacheBuilder], converting annotated elements into JSON.
+/// [Generator] for [ExportCacheBuilder], converting annotated elements into JSON.
 ///
 /// The JSON is a representation of [ExportCache], sorting and grouping exports
 /// by tag and URI.

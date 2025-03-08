@@ -1,4 +1,4 @@
-import 'package:exported/src/model/export_cache.dart';
+import 'package:exported/src/builder/export_cache.dart';
 import 'package:exported/src/model/export_filter.dart';
 import 'package:exported/src/model/export_uri.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;

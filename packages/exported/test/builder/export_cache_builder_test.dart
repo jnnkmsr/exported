@@ -4,14 +4,14 @@ import 'package:build/build.dart';
 import 'package:build_test/build_test.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:exported/builder.dart';
-import 'package:exported/src/builder/cache_builder.dart';
+import 'package:exported/src/builder/export_cache_builder.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/tag.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('CacheBuilder', () {
+  group('ExportCacheBuilder', () {
     Future<dynamic> expectOutput(
       Map<String, String> sources,
       Map<String, Map<String, Map<String, dynamic>>>? outputs,
@@ -274,7 +274,7 @@ const packageName = 'foo';
 String libraryUri(String library) => 'package:$packageName/src/$library.dart';
 String packageAsset(String path) => '$packageName|$path';
 String dartAsset(String library) => packageAsset('lib/src/$library.dart');
-String jsonAsset(String library) => packageAsset('lib/src/$library${CacheBuilder.jsonExtension}');
+String jsonAsset(String library) => packageAsset('lib/src/$library${ExportCacheBuilder.jsonExtension}');
 
 Future<dynamic> testCacheBuilder(
   Map<String, String> sources,
@@ -282,7 +282,7 @@ Future<dynamic> testCacheBuilder(
 ) async {
   final dartFormatter = DartFormatter(languageVersion: DartFormatter.latestLanguageVersion);
   return testBuilder(
-    cacheBuilder(BuilderOptions.empty),
+    exportCacheBuilder(BuilderOptions.empty),
     sources.map(
       (path, content) => MapEntry(
         dartAsset(path),

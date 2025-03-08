@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:exported/src/builder/cache_builder.dart';
-import 'package:exported/src/builder/exported_builder.dart';
+import 'package:exported/src/builder/barrel_file_builder.dart';
+import 'package:exported/src/builder/export_cache_builder.dart';
 import 'package:exported/src/model/barrel_file.dart';
 import 'package:exported/src/model/export.dart';
 import 'package:exported/src/model/export_uri.dart';
@@ -8,14 +8,14 @@ import 'package:exported/src/model/tag.dart';
 
 /// Stores [Export] instances grouped by [Tag].
 ///
-/// Created by [CacheBuilder] from annotated elements, and stored as JSON per
-/// library in the build cache. Read by [ExportedBuilder] and merged with the
+/// Created by [ExportCacheBuilder] from annotated elements, and stored as JSON per
+/// library in the build cache. Read by [BarrelFileBuilder] and merged with the
 /// [Export]s from the builder options to create a combined package cache, from
 /// which generated barrel files are filled with exports matching their tags.
 class ExportCache {
   /// Creates an [ExportCache] containing the given [exports].
   ///
-  /// Used by [CacheBuilder] to create a cache from annotated elements in a
+  /// Used by [ExportCacheBuilder] to create a cache from annotated elements in a
   /// single library.
   ExportCache(Iterable<Export> exports) : _exportsByTag = {} {
     add(exports);
@@ -23,7 +23,7 @@ class ExportCache {
 
   /// Creates a new [ExportCache] by merging multiple [caches].
   ///
-  /// Used by [ExportedBuilder] to create a combined package cache from all
+  /// Used by [BarrelFileBuilder] to create a combined package cache from all
   /// library caches stored in the build cache.
   ExportCache.merged(Iterable<ExportCache> caches) : _exportsByTag = {} {
     caches.forEach(merge);

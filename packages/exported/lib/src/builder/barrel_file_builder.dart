@@ -3,9 +3,9 @@ import 'dart:convert';
 
 import 'package:build/build.dart';
 import 'package:dart_style/dart_style.dart';
-import 'package:exported/src/builder/cache_builder.dart';
+import 'package:exported/src/builder/export_cache.dart';
+import 'package:exported/src/builder/export_cache_builder.dart';
 import 'package:exported/src/model/export.dart';
-import 'package:exported/src/model/export_cache.dart';
 import 'package:exported/src/model/exported_options.dart';
 import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:exported_annotation/exported_annotation.dart';
@@ -18,13 +18,13 @@ import 'package:source_gen/source_gen.dart';
 
 /// Reads intermediate JSON containing elements annotated with [Exported] and
 /// generates the barrel files, taking into account the builder [_options].
-class ExportedBuilder extends Builder {
-  /// Creates an [ExportedBuilder], parsing and validating builder [options]
+class BarrelFileBuilder extends Builder {
+  /// Creates an [BarrelFileBuilder], parsing and validating builder [options]
   /// into [ExportedOptions].
   ///
   /// Uses the [fileSystem] to read the package name from the `pubspec.yaml`,
   /// defaulting to [LocalFileSystem]. Provide a [MemoryFileSystem] in tests.
-  ExportedBuilder(
+  BarrelFileBuilder(
     BuilderOptions options, [
     FileSystem? fileSystem,
   ]) : _options = ExportedOptions.fromInput(
@@ -41,11 +41,11 @@ class ExportedBuilder extends Builder {
       };
 
   /// Reads all JSON [ExportCache] files written into the build cache by
-  /// [CacheBuilder] and merges them together with the exports from the builder
+  /// [ExportCacheBuilder] and merges them together with the exports from the builder
   /// [_options].
   Future<ExportCache> _readExportsFromJson(BuildStep buildStep) async {
     final cachesPerLibrary = await buildStep
-        .findAssets(Glob('**${CacheBuilder.jsonExtension}'))
+        .findAssets(Glob('**${ExportCacheBuilder.jsonExtension}'))
         .asyncMap(buildStep.readAsString)
         .map(_readExportCacheJson)
         .toList();
