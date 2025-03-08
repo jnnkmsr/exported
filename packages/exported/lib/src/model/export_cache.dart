@@ -50,9 +50,7 @@ class ExportCache {
     final exports = <ExportUri, Export>{};
     final matchingTags = file.tags == Tags.none
         ? _exportsByTag.keys
-        : file.tags.where(
-            (tag) => _exportsByTag.keys.any(tag.matches),
-          );
+        : _exportsByTag.keys.where((tag) => file.tags.any(tag.matches));
     for (final tag in matchingTags) {
       exports.merge(_exportsByTag[tag]);
     }
