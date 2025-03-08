@@ -1,4 +1,4 @@
-import 'package:exported/src/model/export_cache.dart';
+import 'package:exported/src/builder/export_cache.dart';
 import 'package:exported/src/model/export_filter.dart';
 import 'package:exported/src/model/export_uri.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
@@ -18,18 +18,7 @@ import 'package:meta/meta.dart';
 @immutable
 class Export implements Comparable<Export> {
   @visibleForTesting
-  Export({
-    required String uri,
-    Set<String>? show,
-    Set<String>? hide,
-    Set<String>? tags,
-  }) : this._(
-          uri.asExportUri,
-          show?.asShow ?? hide?.asHide ?? ExportFilter.none,
-          tags?.asTags ?? Tags.none,
-        );
-
-  const Export._(
+  const Export(
     this.uri, [
     this.filter = ExportFilter.none,
     this.tags = Tags.none,
@@ -49,7 +38,7 @@ class Export implements Comparable<Export> {
     required String uri,
     required String name,
     Set<String>? tags,
-  }) : this._(uri.asExportUri, ExportFilter.showSingle(name), Tags.fromInput(tags));
+  }) : this(uri.asExportUri, ExportFilter.showSingle(name), Tags.fromInput(tags));
 
   /// Creates an [Export] for an annotated library.
   ///
@@ -67,7 +56,7 @@ class Export implements Comparable<Export> {
     Set<String>? show,
     Set<String>? hide,
     Set<String>? tags,
-  }) : this._(
+  }) : this(
           uri.asExportUri,
           ExportFilter.fromInput(show: show, hide: hide),
           Tags.fromInput(tags),
@@ -88,24 +77,30 @@ class Export implements Comparable<Export> {
   ///
   /// See [ExportUri.fromInput] and [ExportFilter.fromInput] for input
   /// validation and sanitization of [uri] and [filter].
-  static OptionList<Export> fromInput(dynamic input) => OptionList.fromInput(
+  static OptionList<Export> fromInput(
+    dynamic input, {
+    required String package,
+  }) =>
+      OptionList.fromInput(
         input,
         (element) => fromInputMapOrString(
           element,
           parentKey: keys.exports,
           validKeys: const {keys.uri, keys.show, keys.hide, keys.tags},
-          fromMap: (export) => Export._(
-            ExportUri.fromInput(export),
+          fromMap: (export) => Export(
+            ExportUri.fromInput(export, package: package),
             ExportFilter.fromInput(options: export),
             Tags.fromInput(export),
           ),
-          fromString: (input) => Export._(ExportUri.fromInput(input)),
+          fromString: (input) => Export(
+            ExportUri.fromInput(input, package: package),
+          ),
         ),
       );
 
   /// Restores an [Export] from internal [json] without any validation. Does
   /// not restore [tags], which are not stored in the build cache.
-  Export.fromJson(Map json) : this._(ExportUri.fromJson(json), ExportFilter.fromJson(json));
+  Export.fromJson(Map json) : this(ExportUri.fromJson(json), ExportFilter.fromJson(json));
 
   /// Specifies the full `package:` or `dart:` URI of the exported library.
   final ExportUri uri;
@@ -126,11 +121,7 @@ class Export implements Comparable<Export> {
   ///
   /// See [ExportFilter.merge] for merging behavior.
   Export merge(Export other) =>
-      (uri == other.uri) ? Export._(uri, filter.merge(other.filter), tags) : this;
-
-  /// Converts this [Export] to JSON for storage in the build cache. Tags won't
-  /// be stored, as the [ExportCache] will already group exports by tags.
-  Map toJson() => {...uri.toJson(), ...filter.toJson()};
+      (uri == other.uri) ? Export(uri, filter.merge(other.filter), tags) : this;
 
   /// Converts this [Export] to a Dart `export` directive string.
   String toDart() {
@@ -143,6 +134,10 @@ class Export implements Comparable<Export> {
 
   @override
   int compareTo(Export other) => uri.compareTo(other.uri);
+
+  /// Converts this [Export] to JSON for storage in the build cache. Tags won't
+  /// be stored, as the [ExportCache] will already group exports by tags.
+  Map toJson() => {...uri.toJson(), ...filter.toJson()};
 
   @override
   bool operator ==(Object other) =>

@@ -55,7 +55,7 @@ extension type const OptionList<E extends Object>._(IList<E> _) implements IList
   ) =>
       switch (input) {
         null => const OptionList.empty(),
-        Iterable _ => input.map(elementFromInput).nonNulls.toSet().optionList,
+        Iterable _ => OptionList._(input.map(elementFromInput).nonNulls.toSet().toIList()),
         _ => OptionList.fromInput([input], elementFromInput),
       };
 }
@@ -78,7 +78,7 @@ extension type const StringOptionSet<E extends String>(ISet<E> _value) implement
   ) =>
       switch (input) {
         null => null,
-        Iterable _ => input.map(elementFromInput).nonNulls.stringOptionSet,
+        Iterable _ => input.map(elementFromInput).nonNulls.asStringOptionSet,
         _ => fromInput({input}, elementFromInput),
       };
 
@@ -90,7 +90,7 @@ extension type const StringOptionSet<E extends String>(ISet<E> _value) implement
     dynamic json,
     E Function(dynamic) elementFromJson,
   ) =>
-      (json as Iterable?)?.map(elementFromJson).stringOptionSet;
+      (json as Iterable?)?.map(elementFromJson).asStringOptionSet;
 
   @redeclare
   bool get isEmpty => false;
@@ -113,13 +113,14 @@ extension type const StringOptionSet<E extends String>(ISet<E> _value) implement
 
 extension OptionListIterableExtension<E extends Object> on Iterable<E> {
   /// Converts this [Iterable] into an [OptionList].
-  OptionList<E> get optionList => OptionList._(toIList());
+  @visibleForTesting
+  OptionList<E> get asOptionList => OptionList._(toIList());
 }
 
 extension StringOptionSetIterableExtension<E extends String> on Iterable<E> {
   /// Converts this [Iterable] into a [StringOptionSet] or `null` if the resultant
   /// set would be empty.
-  StringOptionSet<E>? get stringOptionSet {
+  StringOptionSet<E>? get asStringOptionSet {
     final value = toISet();
     return value.isEmpty ? null : StringOptionSet(value);
   }

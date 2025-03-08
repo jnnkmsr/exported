@@ -1,5 +1,4 @@
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
-import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:path/path.dart' as p;
 
 /// Represents the URI of a Dart `export` directive.
@@ -19,21 +18,20 @@ extension type const ExportUri._(String _) implements String {
   ///   if missing.
   /// - Ensures the path is a single library name for `dart:` URIs.
   /// - Converts a package or library to `'package:$package/$package.dart'`,
-  ///   reading `package` from `pubspec.yaml`.
-  /// - Converts a `lib/` path to `'package:$package/$path'`, reading `package`
-  ///   from `pubspec.yaml`.
+  ///   using the given [package] name.
+  /// - Converts a `lib/` path to `'package:$package/$path'`.
   ///
   /// Throws an [ArgumentError] if the input is null or blank, not a string, if
   /// map input does not contain a `uri` key with a non-empty string value, or
   /// the URI cannot be sanitized to a valid `package:` or `dart:` URI.
-  factory ExportUri.fromInput(dynamic input, [PubspecReader? pubspecReader]) {
+  factory ExportUri.fromInput(dynamic input, {required String package}) {
     try {
       final (scheme, path, extension) = _validateInput(input);
       _validatePath(path, extension);
 
       final uri = switch (scheme) {
         'dart' => _parseDartUri(path, extension),
-        'package' || null => _parsePackageUri(path, pubspecReader),
+        'package' || null => _parsePackageUri(path, package),
         final scheme => throw ArgumentError('Invalid scheme "$scheme"'),
       };
       return ExportUri._(uri);
@@ -81,13 +79,12 @@ extension type const ExportUri._(String _) implements String {
 
   /// Converts the [path] to a `package:` URI. Adds missing `.dart` extensions,
   /// converts package names to a `$package/$package.dart` path and transforms
-  /// `lib/` paths to package paths using the package name from [pubspecReader],
-  static String _parsePackageUri(String path, PubspecReader? pubspecReader) {
+  /// `lib/` paths to package paths using the given [package] name.
+  static String _parsePackageUri(String path, String package) {
     final segments = p.posix.split(path);
     if (segments.length == 1) {
       return 'package:$path/$path.dart';
     } else if (segments.first == 'lib') {
-      final package = (pubspecReader ?? PubspecReader.instance).name;
       return 'package:${p.posix.joinAll([package, ...segments.skip(1)])}.dart';
     }
     return 'package:$path.dart';

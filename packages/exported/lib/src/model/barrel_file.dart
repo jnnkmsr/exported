@@ -2,7 +2,6 @@ import 'package:exported/src/model/barrel_file_path.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/option_collections.dart';
 import 'package:exported/src/model/tag.dart';
-import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:meta/meta.dart';
 
 /// Represents a barrel file to be generated during the build process.
@@ -23,10 +22,10 @@ class BarrelFile {
 
   /// Creates the default [BarrelFile] for the targeted package.
   ///
-  /// The [path] will be `'$package.dart'`, reading `$package` from the
-  /// `pubspec.yaml` file, and [tags] will be [Tags.none].
-  BarrelFile.packageNamed([PubspecReader? pubspecReader])
-      : this._(BarrelFilePath.packageNamed(pubspecReader));
+  /// The [path] will be `'$package.dart'`, using the given [package] name, and
+  /// [tags] will be [Tags.none].
+  BarrelFile.packageNamed({required String package})
+      : this._(BarrelFilePath.packageNamed(package: package));
 
   /// Creates a list of [BarrelFile]s from the `barrel_files` builder options
   /// [input].
@@ -45,9 +44,9 @@ class BarrelFile {
   /// See [BarrelFilePath.fromInput] and [Tags.fromInput] for input validation
   /// and sanitization of [path] and [tags].
   static OptionList<BarrelFile> fromInput(
-    dynamic input, [
-    PubspecReader? pubspecReader,
-  ]) {
+    dynamic input, {
+    required String package,
+  }) {
     final files = OptionList.fromInput(
       input,
       (element) => fromInputMapOrString(
@@ -55,10 +54,12 @@ class BarrelFile {
         parentKey: keys.barrelFiles,
         validKeys: const {keys.path, keys.tags},
         fromMap: (Map input) => BarrelFile._(
-          BarrelFilePath.fromInput(input, pubspecReader),
+          BarrelFilePath.fromInput(input, package: package),
           Tags.fromInput(input),
         ),
-        fromString: (String input) => BarrelFile._(BarrelFilePath.fromInput(input, pubspecReader)),
+        fromString: (String input) => BarrelFile._(
+          BarrelFilePath.fromInput(input, package: package),
+        ),
       ),
     );
     final paths = <String>{};
@@ -67,7 +68,7 @@ class BarrelFile {
         throw ArgumentError.value(file.path, keys.barrelFiles, 'Duplicate barrel file path');
       }
     }
-    return files.isEmpty ? OptionList.single(BarrelFile.packageNamed(pubspecReader)) : files;
+    return files.isEmpty ? OptionList.single(BarrelFile.packageNamed(package: package)) : files;
   }
 
   const BarrelFile._(

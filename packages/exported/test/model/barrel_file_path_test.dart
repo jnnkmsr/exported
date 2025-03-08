@@ -2,15 +2,14 @@ import 'package:exported/src/model/barrel_file_path.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:test/test.dart';
 
-import '../util/fake_pubspec_reader.dart';
-
 void main() {
   group('BarrelFilePath', () {
+    const package = 'foo';
+
     group('.packageNamed()', () {
       test('Returns the default file name read from pubspec.yaml', () {
-        final pubspecReader = FakePubspecReader(name: 'foo');
         expect(
-          BarrelFilePath.packageNamed(pubspecReader),
+          BarrelFilePath.packageNamed(package: package),
           'foo.dart',
         );
       });
@@ -20,15 +19,25 @@ void main() {
       const package = 'foo';
 
       void expectOutput(dynamic input, String expected) {
-        final pubspecReader = FakePubspecReader(name: package);
-        expect(BarrelFilePath.fromInput(input, pubspecReader), expected);
-        expect(BarrelFilePath.fromInput({keys.path: input}, pubspecReader), expected);
+        expect(
+          BarrelFilePath.fromInput(input, package: package),
+          expected,
+        );
+        expect(
+          BarrelFilePath.fromInput({keys.path: input}, package: package),
+          expected,
+        );
       }
 
       void expectThrows(dynamic input) {
-        final pubspecReader = FakePubspecReader(name: package);
-        expect(() => BarrelFilePath.fromInput(input, pubspecReader), throwsArgumentError);
-        expect(() => BarrelFilePath.fromInput({keys.path: input}, pubspecReader), throwsArgumentError);
+        expect(
+          () => BarrelFilePath.fromInput(input, package: package),
+          throwsArgumentError,
+        );
+        expect(
+          () => BarrelFilePath.fromInput({keys.path: input}, package: package),
+          throwsArgumentError,
+        );
       }
 
       test('Parses a valid file name with extension', () {

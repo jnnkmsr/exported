@@ -3,17 +3,14 @@ import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/option_collections.dart';
 import 'package:test/test.dart';
 
-import '../util/fake_pubspec_reader.dart';
-
 void main() {
   group('BarrelFile', () {
     const package = 'foo';
-    final fakePubspecReader = FakePubspecReader(name: 'foo');
 
     group('.packageNamed()', () {
       test('Returns the default untagged file read from pubspec.yaml', () {
         expect(
-          BarrelFile.packageNamed(fakePubspecReader),
+          BarrelFile.packageNamed(package: package),
           BarrelFile(path: '$package.dart'),
         );
       });
@@ -21,11 +18,10 @@ void main() {
 
     group('.fromInput()', () {
       void expectOutput(dynamic input, List<BarrelFile> expected) =>
-          expect(BarrelFile.fromInput(input, fakePubspecReader), expected.optionList);
+          expect(BarrelFile.fromInput(input, package: package), expected.asOptionList);
 
-      void expectThrows(dynamic input) {
-        expect(() => BarrelFile.fromInput(input, fakePubspecReader), throwsArgumentError);
-      }
+      void expectThrows(dynamic input) =>
+          expect(() => BarrelFile.fromInput(input, package: package), throwsArgumentError);
 
       test('Parses a list of barrel-file maps', () {
         expectOutput([
@@ -137,9 +133,9 @@ void main() {
       });
 
       test('Throws for invalid input keys', () {
-        expectThrows({keys.uri: 'bar'});
+        expectThrows({keys.uri: 'foo'});
         expectThrows([
-          {keys.uri: 'bar'},
+          {keys.uri: 'foo'},
         ]);
       });
     });

@@ -1,14 +1,13 @@
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
-import 'package:exported/src/util/pubspec_reader.dart';
 import 'package:path/path.dart' as p;
 
 /// Represents the relative path of a barrel file within the target package's
 /// `lib/` directory.
 extension type const BarrelFilePath._(String _) implements String {
   /// Creates the default [BarrelFilePath] for the target package, that is
-  /// `'$package.dart'`, reading `package` from `pubspec.yaml`.
-  factory BarrelFilePath.packageNamed([PubspecReader? pubspecReader]) =>
-      BarrelFilePath._(_defaultFile(pubspecReader));
+  /// `'$package.dart'`, using the given [package] name.
+  factory BarrelFilePath.packageNamed({required String package}) =>
+      BarrelFilePath._('$package.dart');
 
   /// Creates a [BarrelFilePath] from a builder options input, which may be
   /// either a [String] or a [Map] containing a `path` key.
@@ -19,20 +18,20 @@ extension type const BarrelFilePath._(String _) implements String {
   /// - Ensures the file extension is `.dart` or adds it if missing.
   /// - Removes any leading `lib/` directory.
   /// - If the input is null, blank, or a directory, the default barrel file
-  ///   (`'$package.dart'`) is used, reading `package` from `pubspec.yaml`.
+  ///   (`'$package.dart'`) is used, using the given [package] name.
   ///
   /// Throws an [ArgumentError] if the [input] or [Map] value is not a [String]
   /// that can be sanitized to a valid relative barrel-file path.
-  factory BarrelFilePath.fromInput(dynamic input, [PubspecReader? pubspecReader]) {
+  factory BarrelFilePath.fromInput(dynamic input, {required String package}) {
     try {
       final path = _validateInput(input);
-      if (path == null) return BarrelFilePath._(_defaultFile(pubspecReader));
+      if (path == null) return BarrelFilePath._('$package.dart');
 
       final (file, dir) = _validatePath(path);
       return BarrelFilePath._(
         p.posix.joinAll([
           if (dir != null) dir,
-          if (file != null) file else _defaultFile(pubspecReader),
+          if (file != null) file else '$package.dart',
         ]),
       );
     } on ArgumentError catch (e) {
@@ -45,11 +44,6 @@ extension type const BarrelFilePath._(String _) implements String {
 
   /// Converts this [BarrelFilePath] to JSON for storage in the build cache.
   Map<String, dynamic> toJson() => {keys.path: this as String};
-
-  /// Returns the default file name, `'$package.dart'`, reading `package` from
-  /// the provided [pubspecReader] or the default [PubspecReader.instance].
-  static String _defaultFile(PubspecReader? pubspecReader) =>
-      '${(pubspecReader ?? PubspecReader.instance).name}.dart';
 
   /// Validates [input] is either a non-empty [String] or a [Map] containing a
   /// `path` key with a non-empty [String] value.

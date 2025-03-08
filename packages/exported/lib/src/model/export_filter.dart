@@ -125,7 +125,7 @@ sealed class ExportFilter {
 final class _Show extends ExportFilter {
   const _Show._(this._combinators) : super._();
 
-  factory _Show.element(String elementName) => _Show._({_Combinator(elementName)}.stringOptionSet!);
+  factory _Show.element(String elementName) => _Show._({_Combinator(elementName)}.asStringOptionSet!);
 
   static _Show? fromInput(dynamic input) {
     final combinators =
@@ -214,8 +214,8 @@ extension type const _Combinator(String _) implements String {
 
 extension ExportFilterIterableExtension on Iterable<String> {
   @visibleForTesting
-  ExportFilter get asShow => _Show._(map(_Combinator.new).stringOptionSet!);
+  ExportFilter get asShow => _Show._(map(_Combinator.new).asStringOptionSet!);
 
   @visibleForTesting
-  ExportFilter get asHide => _Hide._(map(_Combinator.new).stringOptionSet!);
+  ExportFilter get asHide => _Hide._(map(_Combinator.new).asStringOptionSet!);
 }

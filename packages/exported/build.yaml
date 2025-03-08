@@ -1,7 +1,7 @@
 builders:
   exported:
     import: package:exported/builder.dart
-    builder_factories: [ exportedBuilder ]
+    builder_factories: [ barrelFileBuilder ]
     build_extensions: { $package$: [ .stub ] }
     required_inputs: [ .exported.json ]
     applies_builders: [ :exported_cache ]
@@ -10,6 +10,6 @@ builders:
 
   exported_cache:
     import: package:exported/builder.dart
-    builder_factories: [ cacheBuilder ]
+    builder_factories: [ exportCacheBuilder ]
     build_extensions: { .dart: [ .exported.json ] }
     build_to: cache
