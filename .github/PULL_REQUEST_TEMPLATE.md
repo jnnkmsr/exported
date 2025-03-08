@@ -6,6 +6,7 @@
 - [ ] 🐛 Bug fix
 - [ ] 💥 Breaking Changes
 - [ ] 🧹 Refactoring
+- [ ] 🧪 Tests
 - [ ] 🏷️ Build/Release
 - [ ] 🚀 Deployment/CI
 - [ ] 📦 Dependencies
