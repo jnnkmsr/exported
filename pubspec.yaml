@@ -5,8 +5,8 @@ environment:
   sdk: ^3.6.1
 
 workspace:
+  - examples/exported
   - packages/exported
-  - packages/exported/example
   - packages/exported_annotation
   - tools/lints
 
