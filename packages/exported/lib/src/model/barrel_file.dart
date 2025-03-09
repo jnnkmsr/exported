@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Jannik Möser
+// Use of this source code is governed by the BSD 3-Clause License.
+// See the LICENSE file for full license information.
+
 import 'package:exported/src/model/barrel_file_path.dart';
 import 'package:exported/src/model/exported_option_keys.dart' as keys;
 import 'package:exported/src/model/option_collections.dart';

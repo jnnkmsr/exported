@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Copyright (c) 2025 Jannik Möser
+# Use of this source code is governed by the BSD 3-Clause License.
+# See the LICENSE file for full license information.
+
 # Skip this pre-commit hook on merge or rebase commits
 (git rev-parse -q --verify MERGE_HEAD || git rev-parse -q --verify REBASE_HEAD) && exit 0
 echo "Running pre-commit hook..."

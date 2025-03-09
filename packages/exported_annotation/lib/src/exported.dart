@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Jannik Möser
+// Use of this source code is governed by the BSD 3-Clause License.
+// See the LICENSE file for full license information.
+
 import 'package:meta/meta_meta.dart';
 
 /// Annotates a top-level dart element as an export that will be included in

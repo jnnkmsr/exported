@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Copyright (c) 2025 Jannik Möser
+# Use of this source code is governed by the BSD 3-Clause License.
+# See the LICENSE file for full license information.
+
 # ANSI color codes.
 RED="\033[1;31m"
 GREEN="\033[1;92m"
